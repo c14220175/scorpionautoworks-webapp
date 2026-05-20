@@ -1,0 +1,3626 @@
+[
+  {
+    "brand": "Chevrolet",
+    "models": [
+      {
+        "name": "Spark Generasi 1 & 2 (M150/M200)",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009],
+        "variants": [
+          "0.8 LS MT"
+        ]
+      },
+      {
+        "name": "Spark Generasi 3 (M300)",
+        "years": [2010, 2011, 2012, 2013, 2014, 2015, 2016],
+        "variants": [
+          "1.2 LS MT",
+          "1.2 LT MT"
+        ]
+      },
+      {
+        "name": "Spark Generasi 4 (M400)",
+        "years": [2017, 2018, 2019, 2020],
+        "variants": [
+          "1.4 LTZ AT",
+          "1.4 Premier AT"
+        ]
+      },
+      {
+        "name": "Aveo Generasi 1 (T200/T250)",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "1.5 LS MT",
+          "1.5 LT MT",
+          "1.5 LT AT"
+        ]
+      },
+      {
+        "name": "Aveo Generasi 2 (T300)",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "1.4 LS MT",
+          "1.4 LT MT",
+          "1.4 LT AT"
+        ]
+      },
+      {
+        "name": "Spin",
+        "years": [2013, 2014, 2015],
+        "variants": [
+          "1.2 LS MT (Bensin)",
+          "1.2 LT MT (Bensin)",
+          "1.5 LT MT (Bensin)",
+          "1.5 LTZ MT (Bensin)",
+          "1.5 LTZ AT (Bensin)",
+          "1.3 LT MT (Diesel)",
+          "1.3 LTZ MT (Diesel)",
+          "1.5 Activ AT (Bensin)"
+        ]
+      },
+      {
+        "name": "Trax",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "1.4 Turbo LT AT",
+          "1.4 Turbo LTZ AT",
+          "1.4 Turbo Premier AT"
+        ]
+      },
+      {
+        "name": "Captiva (C100 Pre-Facelift)",
+        "years": [2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "2.4 Bensin MT",
+          "2.4 Bensin AT",
+          "2.0 VCDi Diesel AT"
+        ]
+      },
+      {
+        "name": "Captiva (C140 Facelift)",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.4 Bensin AT (FWD)",
+          "2.0 VCDi Diesel AT (FWD)",
+          "2.0 VCDi Diesel AT (AWD)",
+          "2.0 VCDi SSV Edition AT"
+        ]
+      },
+      {
+        "name": "Trailblazer Generasi 2",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "2.5 LT Diesel MT (2012-2016)",
+          "2.8 LTZ Diesel AT (2012-2016)",
+          "2.5 LT Diesel AT (Facelift 2017-2020)",
+          "2.5 LTZ Diesel AT (Facelift 2017-2020)"
+        ]
+      },
+      {
+        "name": "Colorado Generasi 2",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "2.5 LT MT (Extended Cab / Double Cab)",
+          "2.8 LTZ AT (Double Cab)",
+          "2.5 High Country AT (Double Cab)"
+        ]
+      },
+      {
+        "name": "Camaro Generasi 5 & 6 (IU)",
+        "years": [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        "variants": [
+          "3.6 V6 RS AT",
+          "6.2 V8 SS AT"
+        ]
+      },
+      {
+        "name": "Corvette (IU)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "6.2 V8 Stingray AT (C6 / C7 / C8)",
+          "6.2 V8 Z06 AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Chrysler",
+    "models": [
+      {
+        "name": "Neon (Generasi 1 & 2)",
+        "years": [1996, 1997, 1998, 1999, 2000, 2001, 2002],
+        "variants": [
+          "2.0L LE MT",
+          "2.0L LE AT"
+        ]
+      },
+      {
+        "name": "Sebring (Generasi 2 - JR)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "2.7L V6 Sedan AT",
+          "2.7L V6 Convertible AT"
+        ]
+      },
+      {
+        "name": "Voyager / Grand Voyager Generasi 3 (GS)",
+        "years": [1996, 1997, 1998, 1999, 2000],
+        "variants": [
+          "2.4L SE AT",
+          "3.3L LE AT",
+          "3.3L LX AT"
+        ]
+      },
+      {
+        "name": "Voyager / Grand Voyager Generasi 4 (RG)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "2.4L SE AT",
+          "3.3L LX AT"
+        ]
+      },
+      {
+        "name": "Town & Country / Grand Voyager Generasi 5 (RT)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+        "variants": [
+          "3.8L V6 Touring AT",
+          "3.6L V6 Pentastar Limited AT"
+        ]
+      },
+      {
+        "name": "Pacifica",
+        "years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "3.6L V6 Touring L AT",
+          "3.6L V6 Limited AT",
+          "3.6L V6 Pinnacle AT",
+          "3.6L V6 Plug-in Hybrid (PHEV) AT"
+        ]
+      },
+      {
+        "name": "300C Generasi 1 (LX)",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010],
+        "variants": [
+          "3.5L V6 AT",
+          "5.7L V8 HEMI AT",
+          "6.1L V8 SRT-8 AT"
+        ]
+      },
+      {
+        "name": "300C Generasi 2 (LD)",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "3.6L V6 Pentastar AT",
+          "5.7L V8 HEMI AT",
+          "6.4L V8 SRT-8 AT"
+        ]
+      },
+      {
+        "name": "PT Cruiser",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "2.0L AT",
+          "2.4L AT",
+          "2.4L Touring AT",
+          "2.4L Limited AT"
+        ]
+      },
+      {
+        "name": "200 Generasi 2 (UF)",
+        "years": [2015, 2016, 2017],
+        "variants": [
+          "2.4L Tigershark Limited AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Daihatsu",
+    "models": [
+      {
+        "name": "Xenia Generasi ke-1",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "Xenia 1.0 Mi",
+          "Xenia 1.0 Li",
+          "Xenia 1.3 Xi"
+        ]
+      },
+      {
+        "name": "Xenia Generasi ke-2 Pre-Facelift",
+        "years": [2011, 2012, 2013, 2014],
+        "variants": [
+          "Xenia 1.0 D MT",
+          "Xenia 1.0 M MT",
+          "Xenia 1.3 X MT",
+          "Xenia 1.3 R AT",
+          "Xenia 1.3 R MT"
+        ]
+      },{
+        "name": "Xenia Generasi ke-2 Facelift 1000cc",
+        "years": [2015, 2016],
+        "variants": [
+          "Xenia 1.0 D MT",
+          "Xenia 1.0 M MT"
+        ]
+      },
+      {
+        "name": "Xenia Generasi ke-2 Facelift 1",
+        "years": [2015, 2016, 2017, 2018],
+        "variants": [
+          "Xenia 1.3 X MT",
+          "Xenia 1.3 R AT",
+          "Xenia 1.3 R MT"
+        ]
+      },
+      {
+        "name": "Xenia Generasi ke-2 Facelift 2",
+        "years": [2019, 2020, 2021, 2022],
+        "variants": [
+          "Xenia 1.0 D MT",
+          "Xenia 1.0 M MT",
+          "Xenia 1.3 X MT",
+          "Xenia 1.3 R AT",
+          "Xenia 1.3 R MT"
+        ]
+      },
+      {
+        "name": "Xenia Generasi ke-3",
+        "years": [2022, 2023, 2024, 2025],
+        "variants": [
+          "All New Xenia 1.3 M MT",
+          "All New Xenia 1.3 X MT",
+          "All New Xenia 1.3 X CVT",
+          "All New Xenia 1.3 R MT",
+          "All New Xenia 1.3 R CVT",
+          "All New Xenia 1.5 R MT",
+          "All New Xenia 1.5 R CVT",
+          "All New Xenia 1.5 R ASA CVT"
+        ]
+      },
+      {
+        "name": "Rocky",
+        "years": [2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "Rocky 1.0 R ASA CVT",
+          "Rocky 1.0 R CVT",
+          "Rocky 1.0 R MT",
+          "Rocky 1.2 X CVT",
+          "Rocky 1.2 X MT",
+          "Rocky 1.2 M CVT",
+          "Rocky 1.2 M MT"
+        ]
+      },
+      {
+        "name": "Luxio",
+        "years": [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "Luxio 1.5 D",
+          "Luxio 1.5 X MT",
+          "Luxio 1.5 X AT",
+          "Luxio 1.5 AK MT"
+        ]
+      },
+      {
+        "name": "Taruna (Terios Gen 1)",
+        "years": [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "Taruna CL",
+          "Taruna CX",
+          "Taruna CSX",
+          "Taruna CSR",
+          "Taruna CSX Limited",
+          "Taruna G Limited",
+          "Taruna FL",
+          "Taruna FX",
+          "Taruna FZ",
+          "Taruna FGZ"
+        ]
+      },
+      {
+        "name": "Terios Generasi 2",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "Terios TS",
+          "Terios TX",
+          "Terios TS Deluxe",
+          "Terios TS Extra",
+          "Terios TX Deluxe",
+          "Terios TX Elegant",
+          "Terios TX Adventure"
+        ]
+      },
+      {
+        "name": "Terios Generasi 3",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "All New Terios Ids X MT",
+          "All New Terios Ids X AT",
+          "All New Terios Ids R MT",
+          "All New Terios Ids R AT",
+          "All New Terios Ids Custom MT",
+          "All New Terios Ids Custom AT"
+        ]
+      },
+      {
+        "name": "Ayla Generasi ke-1",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "Ayla 1.0 D AT",
+          "Ayla 1.0 D MT",
+          "Ayla 1.0 D+ AT",
+          "Ayla 1.0 D+ MT",
+          "Ayla 1.0 M AT",
+          "Ayla 1.0 M MT",
+          "Ayla 1.0 M Sporty AT",
+          "Ayla 1.0 M Sporty MT",
+          "Ayla 1.0 X MT",
+          "Ayla 1.0 X AT",
+          "Ayla 1.0 X Elegant MT",
+          "Ayla 1.0 X Elegant AT",
+          "Ayla 1.0 X Deluxe MT",
+          "Ayla 1.0 X Deluxe AT",
+          "Ayla 1.0 X Airbag MT",
+          "Ayla 1.0 X Airbag AT",
+          "Ayla 1.2 X MT",
+          "Ayla 1.2 X AT",
+          "Ayla 1.2 R MT",
+          "Ayla 1.2 R AT",
+          "Ayla 1.2 R Deluxe MT",
+          "Ayla 1.2 R Deluxe AT"
+        ]
+      },
+      {
+        "name": "Ayla Generasi ke-2",
+        "years": [2023, 2024, 2025],
+        "variants": [
+          "All New Ayla 1.0 M MT (FMC 2023)",
+          "All New Ayla 1.0 X MT (FMC 2023)",
+          "All New Ayla 1.0 X CVT (FMC 2023)",
+          "All New Ayla 1.2 R MT (FMC 2023)",
+          "All New Ayla 1.2 R CVT (FMC 2023)"
+        ]
+      },
+      {
+        "name": "Sigra",
+        "years": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "New Sigra 1.0 D MT",
+          "New Sigra 1.0 M MT",
+          "New Sigra 1.2 X MT",
+          "New Sigra 1.2 X AT",
+          "New Sigra 1.2 R MT",
+          "New Sigra 1.2 R AT"
+        ]
+      },
+      {
+        "name": "Gran Max",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "Gran Max BV 1.3",
+          "Gran Max BV 1.5",
+          "Gran Max MB 1.3 Hl",
+          "Gran Max MB 1.3 Hl FF",
+          "Gran Max MB 1.5 Hl",
+          "Gran Max PU 1.3 STD",
+          "Gran Max PU 1.5 STD 2022",
+          "Gran Max PU 1.3 30WAY",
+          "Gran Max PU 1.3 Deckless",
+          "Gran Max PU 1.3 Gateless",
+          "Gran Max PU 1.5 STD 2022",
+          "Gran Max PU 1.5 3-WAY"
+        ]
+      },
+      {
+        "name": "Sirion Generasi 1",
+        "years": [2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "Sirion 1.3 M AT",
+          "Sirion 1.3 M MT",
+          "Sirion 1.3 D AT",
+          "Sirion 1.3 D MT"
+        ]
+      },
+      {
+        "name": "Sirion Generasi 2",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "Sirion 1.3 AT",
+          "Sirion 1.3 MT"
+        ]
+      },
+      {
+        "name": "Sirion Generasi 3",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "Sirion 1.3 X CVT",
+          "Sirion 1.3 R CVT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Dodge",
+    "models": [
+      {
+        "name": "Journey",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016],
+        "variants": [
+          "2.4L SXT AT",
+          "2.4L SXT Platinum AT",
+          "2.4L SXT Luxury AT"
+        ]
+      },
+      {
+        "name": "Durango Generasi 3 (WD)",
+        "years": [2013, 2014, 2015],
+        "variants": [
+          "3.6L V6 Pentastar AT"
+        ]
+      },
+      {
+        "name": "Charger Generasi 6 & 7 (LX/LD - IU)",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "3.6L V6 SXT AT",
+          "5.7L V8 R/T AT",
+          "6.4L V8 SRT8 / 392 AT",
+          "6.2L V8 Supercharged SRT Hellcat AT"
+        ]
+      },
+      {
+        "name": "Challenger Generasi 3 (LC/LA - IU)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "3.6L V6 SXT AT",
+          "5.7L V8 R/T AT",
+          "6.4L V8 SRT8 / 392 AT",
+          "6.2L V8 Supercharged SRT Hellcat AT",
+          "6.2L V8 Supercharged SRT Demon AT"
+        ]
+      },
+      {
+        "name": "Grand Caravan",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010],
+        "variants": [
+          "3.3L V6 AT",
+          "3.8L V6 AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Ford",
+    "models": [
+      {
+        "name": "Fiesta (Generasi 6)",
+        "years": [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "1.4L Style MT (2010-2013)",
+          "1.4L Trend MT (2010-2013)",
+          "1.4L Trend AT (2010-2013)",
+          "1.6L Sport AT (2010-2013)",
+          "1.5L Trend MT (2013-2017)",
+          "1.5L Trend AT (2013-2017)",
+          "1.5L Sport MT (2013-2017)",
+          "1.5L Sport AT (2013-2017)",
+          "1.0L EcoBoost AT (2014-2017)"
+        ]
+      },
+      {
+        "name": "Focus (Generasi 2)",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "1.8L Comfort Hatchback AT",
+          "1.8L Comfort Sedan AT",
+          "2.0L Sport Hatchback AT",
+          "2.0L Ghia Sedan AT"
+        ]
+      },
+      {
+        "name": "Focus (Generasi 3)",
+        "years": [2012, 2013, 2014, 2015, 2016],
+        "variants": [
+          "1.6L Trend Hatchback AT",
+          "1.6L Trend Sedan AT",
+          "2.0L Sport Hatchback AT",
+          "2.0L Titanium Sedan AT",
+          "1.5L EcoBoost Sport Hatchback AT (2015-2016)",
+          "1.5L EcoBoost Titanium Sedan AT (2015-2016)"
+        ]
+      },
+      {
+        "name": "Everest (Generasi 2 / U268)",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "2.5L XLT 4x2 MT",
+          "2.5L XLT 4x2 AT",
+          "2.5L XLT 4x4 MT",
+          "2.5L Limited 4x2 AT"
+        ]
+      },
+      {
+        "name": "Everest (Generasi 3 / U375)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "2.2L Trend 4x2 AT",
+          "2.2L Titanium 4x2 AT",
+          "3.2L Titanium 4x4 AT",
+          "2.0L Bi-Turbo Titanium 4x4 AT (2022)"
+        ]
+      },
+      {
+        "name": "Everest (Generasi 4 / Next-Gen)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0L Bi-Turbo Titanium 4x4 AT",
+          "2.0L XLT 4x4 AT"
+        ]
+      },
+      {
+        "name": "Ranger (Generasi 2 / PJ & PK)",
+        "years": [2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "2.5L Base MT",
+          "2.5L XLT MT",
+          "3.0L XLT AT"
+        ]
+      },
+      {
+        "name": "Ranger (Generasi 3 / T6)",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "2.2L Base MT",
+          "2.2L XLS MT",
+          "2.2L XLT MT",
+          "2.2L XLT AT",
+          "3.2L Wildtrak AT",
+          "2.0L Bi-Turbo Wildtrak AT",
+          "2.0L Bi-Turbo Raptor AT"
+        ]
+      },
+      {
+        "name": "Ranger (Generasi 4 / Next-Gen)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0L Base MT",
+          "2.0L XLT AT",
+          "2.0L Bi-Turbo Wildtrak AT",
+          "2.0L Bi-Turbo Raptor AT"
+        ]
+      },
+      {
+        "name": "Mustang (Generasi 6 / S550 - IU)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "2.3L EcoBoost AT",
+          "5.0L V8 GT AT"
+        ]
+      },
+      {
+        "name": "Mustang (Generasi 7 / S650 - IU)",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "2.3L EcoBoost AT",
+          "5.0L V8 GT AT",
+          "5.0L V8 Dark Horse AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Honda",
+    "models": [
+      {
+        "name": "Brio Generasi 1",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "1.3 E MT (2012-2013)",
+          "1.3 E AT (2012-2013)",
+          "1.2 S MT",
+          "1.2 S AT",
+          "1.2 E MT",
+          "1.2 E AT",
+          "Satya 1.2 A MT",
+          "Satya 1.2 S MT",
+          "Satya 1.2 E MT",
+          "1.2 RS MT (2016-2018)",
+          "1.2 RS CVT (2016-2018)"
+        ]
+      },
+      {
+        "name": "Brio Generasi 2",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "Satya 1.2 S MT",
+          "Satya 1.2 E MT",
+          "Satya 1.2 E CVT",
+          "1.2 RS MT",
+          "1.2 RS CVT",
+          "1.2 RS Urbanite MT",
+          "1.2 RS Urbanite CVT"
+        ]
+      },
+      {
+        "name": "Mobilio",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "1.5 S MT",
+          "1.5 E MT",
+          "1.5 E CVT",
+          "1.5 E Prestige CVT",
+          "1.5 RS MT",
+          "1.5 RS CVT"
+        ]
+      },
+      {
+        "name": "BR-V Generasi 1",
+        "years": [2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "1.5 S MT",
+          "1.5 E MT",
+          "1.5 E CVT",
+          "1.5 Prestige CVT"
+        ]
+      },
+      {
+        "name": "BR-V Generasi 2",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 S MT",
+          "1.5 E MT",
+          "1.5 E CVT",
+          "1.5 Prestige CVT",
+          "1.5 Prestige with Honda Sensing CVT"
+        ]
+      },
+      {
+        "name": "WR-V",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 E MT",
+          "1.5 E CVT",
+          "1.5 RS CVT",
+          "1.5 RS with Honda Sensing CVT"
+        ]
+      },
+      {
+        "name": "HR-V Generasi 2 (RU)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "1.5 A MT",
+          "1.5 S MT",
+          "1.5 S CVT",
+          "1.5 E CVT",
+          "1.5 E Special Edition CVT",
+          "1.8 Prestige CVT"
+        ]
+      },
+      {
+        "name": "HR-V Generasi 3 (RV)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 S CVT",
+          "1.5 E CVT",
+          "1.5 SE CVT",
+          "1.5 Turbo RS CVT"
+        ]
+      },
+      {
+        "name": "CR-V Generasi 3 (RE)",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.0 MT",
+          "2.0 AT",
+          "2.4 AT"
+        ]
+      },
+      {
+        "name": "CR-V Generasi 4 (RM)",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "2.0 MT",
+          "2.0 AT",
+          "2.4 AT",
+          "2.4 Prestige AT"
+        ]
+      },
+      {
+        "name": "CR-V Generasi 5 (RW)",
+        "years": [2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "2.0 CVT",
+          "1.5 Turbo CVT",
+          "1.5 Turbo Prestige CVT",
+          "1.5 Turbo Black Edition CVT"
+        ]
+      },
+      {
+        "name": "CR-V Generasi 6 (RS)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Turbo CVT",
+          "2.0 RS e:HEV CVT"
+        ]
+      },
+      {
+        "name": "Jazz Generasi 2 (GE8)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "1.5 S MT",
+          "1.5 S AT",
+          "1.5 RS MT",
+          "1.5 RS AT"
+        ]
+      },
+      {
+        "name": "Jazz Generasi 3 (GK5)",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "1.5 A MT",
+          "1.5 S MT",
+          "1.5 S CVT",
+          "1.5 E MT",
+          "1.5 E CVT",
+          "1.5 RS MT",
+          "1.5 RS CVT"
+        ]
+      },
+      {
+        "name": "City Generasi 6 (GM6)",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "1.5 S MT",
+          "1.5 S CVT",
+          "1.5 E MT",
+          "1.5 E CVT"
+        ]
+      },
+      {
+        "name": "City Generasi 7 Sedan & Hatchback",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "Sedan 1.5 E CVT",
+          "Hatchback 1.5 RS MT",
+          "Hatchback 1.5 RS CVT",
+          "Hatchback 1.5 RS with Honda Sensing CVT"
+        ]
+      },
+      {
+        "name": "Civic Generasi 8 (FD)",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "1.8 MT",
+          "1.8 AT",
+          "2.0 AT"
+        ]
+      },
+      {
+        "name": "Civic Generasi 9 (FB)",
+        "years": [2012, 2013, 2014, 2015],
+        "variants": [
+          "1.8 MT",
+          "1.8 AT",
+          "2.0 AT"
+        ]
+      },
+      {
+        "name": "Civic Generasi 10 (FC/FK)",
+        "years": [2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "Sedan 1.5 Turbo CVT",
+          "Sedan 1.5 Turbo Prestige CVT",
+          "Hatchback 1.5 Turbo E CVT",
+          "Hatchback 1.5 Turbo S CVT",
+          "Hatchback 1.5 Turbo RS CVT",
+          "Type R 2.0 MT (FK8)"
+        ]
+      },
+      {
+        "name": "Civic Generasi 11 (FE/FL)",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "Sedan 1.5 Turbo RS CVT",
+          "Type R 2.0 MT (FL5)"
+        ]
+      },
+      {
+        "name": "Accord Generasi 9 (CR2)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.4 VTi AT",
+          "2.4 VTi-L AT"
+        ]
+      },
+      {
+        "name": "Accord Generasi 10 (CV3)",
+        "years": [2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "1.5 Turbo CVT"
+        ]
+      },
+      {
+        "name": "Accord Generasi 11 (CY)",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "2.0 e:HEV RS CVT"
+        ]
+      },
+      {
+        "name": "Freed",
+        "years": [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+        "variants": [
+          "1.5 A AT",
+          "1.5 S AT",
+          "1.5 E AT (PSD)",
+          "1.5 E AT (PSD) Alpha"
+        ]
+      },
+      {
+        "name": "Stepwgn",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "2.0 e:HEV SPADA CVT",
+          "1.5 Turbo SPADA CVT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Hyundai",
+    "models": [
+      {
+        "name": "Bimantara Cakra / Accent Generasi 1 (X3)",
+        "years": [1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "Bimantara Cakra 1.5 MT (1996-1998)",
+          "Bimantara Cakra 1.5 AT (1996-1998)",
+          "Accent 1.5 GL MT (1998-2001)",
+          "Accent 1.5 GLS AT (1998-2001)",
+          "Excel II 1.5 MT (Taksi)"
+        ]
+      },
+      {
+        "name": "Accent Verna / Avega (Generasi 2 - LC)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "Verna 1.5 GLS MT (2001-2007)",
+          "Verna 1.5 GLS AT (2001-2007)",
+          "Excel III 1.5 MT (Taksi)",
+          "Avega 1.5 GL MT (2007-2012)",
+          "Avega 1.5 SG MT (2007-2012)",
+          "Avega 1.5 SG AT (2007-2012)"
+        ]
+      },
+      {
+        "name": "Grand Avega (Generasi 4 - RB)",
+        "years": [2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "1.4 GL MT",
+          "1.4 GL AT"
+        ]
+      },
+      {
+        "name": "Atos",
+        "years": [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "1.0 GL MT",
+          "1.0 GL AT",
+          "1.0 GLS MT",
+          "1.0 GLS AT"
+        ]
+      },
+      {
+        "name": "Getz",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009],
+        "variants": [
+          "1.3 Standard MT",
+          "1.3 Standard AT",
+          "1.3 GLS MT",
+          "1.3 GLS AT",
+          "1.4 GL MT (2007-2009)",
+          "1.4 GL AT (2007-2009)"
+        ]
+      },
+      {
+        "name": "Matrix (Lavita)",
+        "years": [2001, 2002, 2003, 2004, 2005],
+        "variants": [
+          "1.5 GL MT",
+          "1.5 GL AT"
+        ]
+      },
+      {
+        "name": "i10 Generasi 1",
+        "years": [2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "1.1 GL MT",
+          "1.1 GLS MT",
+          "1.1 GLS AT"
+        ]
+      },
+      {
+        "name": "Grand i10",
+        "years": [2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "1.25 GL MT",
+          "1.25 GLX MT",
+          "1.25 GLX AT",
+          "1.25 X MT",
+          "1.25 X AT"
+        ]
+      },
+      {
+        "name": "i20 Generasi 1",
+        "years": [2009, 2010, 2011, 2012],
+        "variants": [
+          "1.4 GL MT (Bensin)",
+          "1.4 GL AT (Bensin)",
+          "1.4 SG MT (Bensin)",
+          "1.4 SG AT (Bensin)",
+          "1.4 CRDi MT (Diesel)"
+        ]
+      },
+      {
+        "name": "i20 Generasi 2",
+        "years": [2016, 2017, 2018],
+        "variants": [
+          "1.4 GL MT",
+          "1.4 GL AT"
+        ]
+      },
+      {
+        "name": "i30 Generasi 1 (FD)",
+        "years": [2009, 2010, 2011, 2012],
+        "variants": [
+          "1.8 XG AT"
+        ]
+      },
+      {
+        "name": "Sonata Generasi 5 (NF)",
+        "years": [2005, 2006, 2007, 2008, 2009],
+        "variants": [
+          "2.4 AT"
+        ]
+      },
+      {
+        "name": "Sonata Generasi 6 (YF)",
+        "years": [2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "2.4 AT",
+          "2.0 MT (Taksi)"
+        ]
+      },
+      {
+        "name": "Trajet",
+        "years": [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "2.0 GL MT",
+          "2.0 GL AT",
+          "2.0 GLS MT",
+          "2.0 GLS AT",
+          "2.7 V6 AT (2000-2004)"
+        ]
+      },
+      {
+        "name": "H-1 / Starex Generasi 2",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "2.4 Bensin Elegance AT",
+          "2.4 Bensin XG AT",
+          "2.5 CRDi Diesel Elegance AT",
+          "2.5 CRDi Diesel XG AT",
+          "2.5 CRDi Diesel Royale AT",
+          "Starex Mover 2.5 CRDi MT"
+        ]
+      },
+      {
+        "name": "Santa Fe Generasi 1 (SM)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "2.4 Bensin MT",
+          "2.4 Bensin AT"
+        ]
+      },
+      {
+        "name": "Santa Fe Generasi 2 (CM)",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.7 V6 Bensin AT",
+          "2.2 CRDi Diesel AT"
+        ]
+      },
+      {
+        "name": "Santa Fe Generasi 3 (DM)",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.4 MPI Bensin AT",
+          "2.2 CRDi Diesel AT",
+          "2.2 CRDi Diesel Limited AT"
+        ]
+      },
+      {
+        "name": "Santa Fe Generasi 4 (TM)",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        "variants": [
+          "2.5 MPI Bensin Style AT",
+          "2.5 MPI Bensin Prime AT",
+          "2.5 MPI Bensin Signature AT",
+          "2.2 CRDi Diesel Style AT",
+          "2.2 CRDi Diesel Prime AT",
+          "2.2 CRDi Diesel Signature AT"
+        ]
+      },
+      {
+        "name": "Kona Generasi 1",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024],
+        "variants": [
+          "2.0 Bensin Signature AT (2019-2020)",
+          "EV Signature Single Speed (2020-2024)"
+        ]
+      },
+      {
+        "name": "Creta",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Active MT",
+          "1.5 Trend MT",
+          "1.5 Trend IVT",
+          "1.5 Style IVT",
+          "1.5 Prime IVT",
+          "1.5 Alpha IVT (2024-)"
+        ]
+      },
+      {
+        "name": "Stargazer",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Active MT",
+          "1.5 Active IVT",
+          "1.5 Trend MT (2022-2023)",
+          "1.5 Trend IVT (2022-2023)",
+          "1.5 Essential MT (2023-)",
+          "1.5 Essential IVT (2023-)",
+          "1.5 Style IVT",
+          "1.5 Prime IVT"
+        ]
+      },
+      {
+        "name": "Stargazer X",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Style IVT",
+          "1.5 Prime IVT"
+        ]
+      },
+      {
+        "name": "Staria",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.2 CRDi Signature 9-Seater AT",
+          "2.2 CRDi Signature 7-Seater AT"
+        ]
+      },
+      {
+        "name": "Palisade",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.2 CRDi Prime AT",
+          "2.2 CRDi Signature AT",
+          "2.2 CRDi Signature AWD AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Isuzu",
+    "models": [
+      {
+        "name": "Panther Generasi 1 (Kotak)",
+        "years": [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000],
+        "variants": [
+          "2.3 Standard (1991-1996)",
+          "2.3 Deluxe (1991-1996)",
+          "2.3 Grand Deluxe (1991-1996)",
+          "2.5 Royal (1996-2000)",
+          "2.5 Grand Royal (1996-2000)",
+          "2.5 Sporty (1996-2000)",
+          "2.5 Hi-Grade (1996-2000)",
+          "2.5 Hi-Sporty (1996-2000)",
+          "2.5 New Royale (1999-2000)"
+        ]
+      },
+      {
+        "name": "Panther Generasi 2 (Kapsul Pre-facelift)",
+        "years": [2000, 2001, 2002, 2003, 2004],
+        "variants": [
+          "2.5 LM",
+          "2.5 LV",
+          "2.5 LS",
+          "2.5 Touring"
+        ]
+      },
+      {
+        "name": "Panther Generasi 2 (Kapsul Facelift 1)",
+        "years": [2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "2.5 Smart",
+          "2.5 LV",
+          "2.5 LS",
+          "2.5 Touring",
+          "2.5 Grand Touring"
+        ]
+      },
+      {
+        "name": "Panther Generasi 2 (Kapsul Facelift 2)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "2.5 Smart",
+          "2.5 LV",
+          "2.5 LS",
+          "2.5 Grand Touring"
+        ]
+      },
+      {
+        "name": "MU-X Generasi 1",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "2.5 AT",
+          "2.5 Royale AT (2017-2021)",
+          "2.5 Premiere AT (2017-2021)",
+          "2.5 4x4 MT (2017-2021)",
+          "2.5 i-Series (2019-2021)",
+          "2.5 S-Series (2019-2021)",
+          "2.5 Z-Series (2019-2021)"
+        ]
+      },
+      {
+        "name": "MU-X Generasi 2",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.9 4x4 AT"
+        ]
+      },
+      {
+        "name": "D-Max Generasi 1",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "Single Cab",
+          "Double Cab",
+          "Rodeo"
+        ]
+      },
+      {
+        "name": "D-Max Generasi 2",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "Single Cab 2.5 MT",
+          "Double Cab 2.5 MT",
+          "Rodeo 2.5 MT / AT",
+          "V-Cross 2.5 MT"
+        ]
+      },
+      {
+        "name": "D-Max Generasi 3",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.9 SC MT",
+          "1.9 DC MT",
+          "1.9 Rodeo MT"
+        ]
+      },
+      {
+        "name": "Traga",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.5 Pick Up (FD / Flat Deck)",
+          "2.5 Box Aluminium",
+          "2.5 Blind Van (2021-2026)",
+          "2.5 Microbus / Bus (2024-2026)"
+        ]
+      },
+      {
+        "name": "Elf (N-Series 4 Roda)",
+        "years": [1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "NHR 55",
+          "NKR 55",
+          "NLR 55",
+          "NLR 71"
+        ]
+      },
+      {
+        "name": "Elf (N-Series 6 Roda)",
+        "years": [1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "NKR 66",
+          "NKR 71",
+          "NMR 71",
+          "NMR 81",
+          "NPS 81 (4x4)"
+        ]
+      },
+      {
+        "name": "Elf Microbus",
+        "years": [1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "NHR 55 Microbus",
+          "NKR 55 Microbus",
+          "NLR 55 B",
+          "NLR 55 B L",
+          "NLR 71 B L",
+          "NQR 71",
+          "NQR 81"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Jeep",
+    "models": [
+      {
+        "name": "Wrangler (TJ)",
+        "years": [1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "4.0L Sport MT",
+          "4.0L Sport AT",
+          "4.0L Sahara MT",
+          "4.0L Sahara AT"
+        ]
+      },
+      {
+        "name": "Wrangler (JK)",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "3.8L V6 Sport AT (2007-2011)",
+          "3.8L V6 Sahara AT (2007-2011)",
+          "3.8L V6 Rubicon AT (2007-2011)",
+          "3.6L V6 Pentastar Sport AT (2012-2014)",
+          "3.6L V6 Pentastar Sahara AT (2012-2014)",
+          "3.6L V6 Pentastar Rubicon AT (2012-2014)",
+          "3.0L V6 Sport AT (2015-2018)",
+          "3.0L V6 Sahara AT (2015-2018)",
+          "3.0L V6 Rubicon AT (2015-2018)",
+          "2.8L CRD Diesel Rubicon AT"
+        ]
+      },
+      {
+        "name": "Wrangler (JL)",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0L Turbo Sport AT",
+          "2.0L Turbo Sahara AT",
+          "2.0L Turbo Rubicon 2-Door AT",
+          "2.0L Turbo Rubicon 4-Door (Unlimited) AT"
+        ]
+      },
+      {
+        "name": "Gladiator (JT)",
+        "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "3.6L V6 Pentastar Rubicon AT"
+        ]
+      },
+      {
+        "name": "Grand Cherokee (WJ)",
+        "years": [1999, 2000, 2001, 2002, 2003, 2004],
+        "variants": [
+          "4.0L Laredo AT",
+          "4.7L V8 Limited AT"
+        ]
+      },
+      {
+        "name": "Grand Cherokee (WK)",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010],
+        "variants": [
+          "3.7L V6 Laredo AT",
+          "4.7L V8 Limited AT",
+          "5.7L V8 HEMI Overland AT"
+        ]
+      },
+      {
+        "name": "Grand Cherokee (WK2)",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "3.6L V6 Pentastar Limited AT",
+          "3.6L V6 Pentastar Overland AT",
+          "3.6L V6 Pentastar Summit AT",
+          "6.4L V8 HEMI SRT AT"
+        ]
+      },
+      {
+        "name": "Grand Cherokee (WL)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0L Turbo Night Eagle AT",
+          "2.0L Turbo Limited AT",
+          "2.0L Turbo Overland AT"
+        ]
+      },
+      {
+        "name": "Renegade (BU)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "1.4L Turbo Longitude AT",
+          "1.4L Turbo Limited AT",
+          "1.4L Turbo Trailhawk AT"
+        ]
+      },
+      {
+        "name": "Wagoneer / Grand Wagoneer (WS)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "3.0L Hurricane Twin Turbo Series II AT",
+          "3.0L Hurricane Twin Turbo Series III AT",
+          "3.0L Hurricane Twin Turbo Obsidian AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Kia",
+    "models": [
+      {
+        "name": "Sephia / Timor (S515)",
+        "years": [1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003],
+        "variants": [
+          "1.5 SOHC MT (Timor S515)",
+          "1.5 DOHC MT (Timor S515i)",
+          "1.5 DOHC AT (Timor S515i)",
+          "1.5 DOHC MT (Kia Sephia)",
+          "1.5 DOHC AT (Kia Sephia)"
+        ]
+      },
+      {
+        "name": "Visto (Atos Prime)",
+        "years": [2000, 2001, 2002, 2003, 2004],
+        "variants": [
+          "1.0 MT",
+          "1.0 AT",
+          "1.0 Zip Drive MT",
+          "1.0 Zip Drive AT"
+        ]
+      },
+      {
+        "name": "Picanto Generasi 1 (SA)",
+        "years": [2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "1.1 MT",
+          "1.1 AT",
+          "1.1 Cosmo MT (2010-2011)",
+          "1.1 Cosmo AT (2010-2011)"
+        ]
+      },
+      {
+        "name": "Picanto Generasi 2 (TA)",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "1.2 SE MT",
+          "1.2 SE AT",
+          "1.2 Platinum AT"
+        ]
+      },
+      {
+        "name": "Picanto Generasi 3 (JA)",
+        "years": [2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "1.2 EX MT",
+          "1.2 EX AT",
+          "1.2 GT Line MT",
+          "1.2 GT Line AT"
+        ]
+      },
+      {
+        "name": "Rio Generasi 1 (DC)",
+        "years": [2000, 2001, 2002, 2003, 2004, 2005],
+        "variants": [
+          "1.5 MT",
+          "1.5 AT",
+          "1.5 SF MT",
+          "1.5 SF AT"
+        ]
+      },
+      {
+        "name": "Rio Generasi 2 (JB / Pride)",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "1.4 MT",
+          "1.4 AT"
+        ]
+      },
+      {
+        "name": "Rio Generasi 3 (UB)",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "1.4 MT",
+          "1.4 AT",
+          "1.4 Platinum AT"
+        ]
+      },
+      {
+        "name": "Rio Generasi 4 (YB)",
+        "years": [2017, 2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "1.4 MT",
+          "1.4 AT"
+        ]
+      },
+      {
+        "name": "Cerato / Forte",
+        "years": [2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "1.6 AT",
+          "1.5 MT (Taksi Cerato)"
+        ]
+      },
+      {
+        "name": "Carens Generasi 1 & 2 (RS)",
+        "years": [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "1.8 MT (Carens I)",
+          "1.8 AT (Carens I)",
+          "1.8 MT (Carens II)",
+          "1.8 AT (Carens II)"
+        ]
+      },
+      {
+        "name": "Carens Generasi 3 (RP)",
+        "years": [2013, 2014, 2015, 2016],
+        "variants": [
+          "2.0 MT",
+          "2.0 AT"
+        ]
+      },
+      {
+        "name": "Carens Generasi 4 (KY)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 MPI MT (7-Seater)",
+          "1.5 MPI IVT (7-Seater)",
+          "1.4 T-GDI DCT (6-Seater)"
+        ]
+      },
+      {
+        "name": "Sportage Generasi 1 (NB-7)",
+        "years": [2000, 2001, 2002, 2003, 2004, 2005],
+        "variants": [
+          "2.0 MT 4x4",
+          "2.0 AT 4x2"
+        ]
+      },
+      {
+        "name": "Sportage Generasi 2 (JE/KM)",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010],
+        "variants": [
+          "2.0 MT",
+          "2.0 AT"
+        ]
+      },
+      {
+        "name": "Sportage Generasi 3 (SL)",
+        "years": [2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "2.0 LX MT",
+          "2.0 LX AT",
+          "2.0 EX AT",
+          "2.0 Platinum AT"
+        ]
+      },
+      {
+        "name": "Sportage Generasi 4 (QL)",
+        "years": [2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "2.0 AT",
+          "2.0 GT Line AT"
+        ]
+      },
+      {
+        "name": "Sorento Generasi 1 (BL)",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009],
+        "variants": [
+          "2.5 CRDi Diesel AT"
+        ]
+      },
+      {
+        "name": "Sorento Generasi 2 (XM)",
+        "years": [2013, 2014, 2015],
+        "variants": [
+          "2.4 MPI Bensin AT",
+          "2.2 CRDi Diesel AT"
+        ]
+      },
+      {
+        "name": "Sorento Generasi 4 (MQ4)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.6 HEV (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "Carnival & Sedona Generasi 1",
+        "years": [2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "2.5 V6 Bensin AT (Carnival)",
+          "2.9 CRDi Diesel AT (Carnival)",
+          "2.5 V6 Bensin AT (Sedona)"
+        ]
+      },
+      {
+        "name": "Grand Sedona Generasi 3 (YP)",
+        "years": [2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "3.3 V6 Bensin AT",
+          "2.2 CRDi Diesel AT"
+        ]
+      },
+      {
+        "name": "Grand Carnival Generasi 4 (KA4)",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.2 CRDi Premiere AT (11-Seater)",
+          "2.2 CRDi Dynamic AT (11-Seater)"
+        ]
+      },
+      {
+        "name": "Sonet",
+        "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Standard MT",
+          "1.5 Active MT",
+          "1.5 Smart MT (5-Seater / 7-Seater)",
+          "1.5 Smart IVT (5-Seater / 7-Seater)",
+          "1.5 Dynamic IVT (5-Seater / 7-Seater)",
+          "1.5 Premiere IVT (5-Seater / 7-Seater)"
+        ]
+      },
+      {
+        "name": "Seltos",
+        "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.4 T-GDI E DCT",
+          "1.4 T-GDI EX DCT",
+          "1.4 T-GDI EX+ DCT",
+          "1.4 T-GDI GT Line DCT",
+          "1.5 CRDi Diesel AT",
+          "1.5 MPI Premiere IVT (Facelift 2024)",
+          "1.5 T-GDI Premiere DCT (Facelift 2024)"
+        ]
+      },
+      {
+        "name": "Niro",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "Niro EV (Electric Vehicle)"
+        ]
+      },
+      {
+        "name": "Stinger (CBU Import)",
+        "years": [2018, 2019, 2020],
+        "variants": [
+          "3.3 V6 GT AWD AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Lexus",
+    "models": [
+      {
+        "name": "IS Generasi 2 (XE20)",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "IS 300 AT"
+        ]
+      },
+      {
+        "name": "IS Generasi 3 (XE30)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "IS 250 AT",
+          "IS 200t AT (2015-2017)",
+          "IS 300 AT (2017-)",
+          "IS 300h (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "RX Generasi 2 (XU30)",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "RX 300 AT"
+        ]
+      },
+      {
+        "name": "RX Generasi 3 (AL10)",
+        "years": [2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "RX 270 AT",
+          "RX 350 AT",
+          "RX 450h (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "RX Generasi 4 (AL20)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "RX 200t Luxury AT",
+          "RX 200t F Sport AT",
+          "RX 300 Luxury AT (2018-2022)",
+          "RX 300 F Sport AT (2018-2022)",
+          "RX 350 F Sport AT",
+          "RX 450h (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "RX Generasi 5 (ALA10/ALH10)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "RX 350 Luxury AT",
+          "RX 350h Luxury (Hybrid) AT",
+          "RX 450h+ Luxury (PHEV) AT",
+          "RX 500h F Sport+ (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "LS Generasi 4 (XF40)",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "LS 460 AT",
+          "LS 460L AT",
+          "LS 600hL (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "LS Generasi 5 (XF50)",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "LS 500 Executive AT",
+          "LS 500h Executive (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "ES Generasi 6 (XV60)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "ES 250 AT",
+          "ES 300h (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "ES Generasi 7 (XZ10)",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "ES 250 AT",
+          "ES 300h (Hybrid) AT",
+          "ES 300h Ultra Luxury (Hybrid) AT"
+        ]
+      },
+      {
+        "name": "GS Generasi 3 (S190)",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "GS 300 AT"
+        ]
+      },
+      {
+        "name": "GS Generasi 4 (L10)",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "GS 250 AT",
+          "GS 200t AT (2016-2017)",
+          "GS 300 AT (2018-2020)",
+          "GS 350 F Sport AT",
+          "GS F 5.0L V8 AT"
+        ]
+      },
+      {
+        "name": "LX Generasi 2 (J100)",
+        "years": [1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "LX 470 4.7L V8 AT"
+        ]
+      },
+      {
+        "name": "LX Generasi 3 (J200)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "LX 570 5.7L V8 AT",
+          "LX 570 Sport 5.7L V8 AT"
+        ]
+      },
+      {
+        "name": "LX Generasi 4 (J310)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "LX 600 VIP AT",
+          "LX 600 VIP Kuro AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Mazda",
+    "models": [
+      {
+        "name": "RX-7 Generasi 3 (FD)",
+        "years": [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002],
+        "variants": [
+          "1.3L Twin-Turbo Rotary MT",
+          "1.3L Twin-Turbo Rotary AT"
+        ]
+      },
+      {
+        "name": "RX-8 (FE)",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "1.3L Renesis Rotary MT",
+          "1.3L Renesis Rotary AT",
+          "1.3L Spirit R AT"
+        ]
+      },
+      {
+        "name": "323 Familia & Lantis (BH/BA)",
+        "years": [1995, 1996, 1997, 1998, 1999, 2000],
+        "variants": [
+          "1.8 Lantis MT",
+          "1.6 Familia MT"
+        ]
+      },
+      {
+        "name": "Mazda2 Generasi 1 (DE)",
+        "years": [2009, 2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "1.5 S MT",
+          "1.5 S AT",
+          "1.5 R MT",
+          "1.5 R AT",
+          "1.5 RZ AT",
+          "1.5 Sedan R AT (2010-2014)",
+          "1.5 Sedan V AT (2010-2014)"
+        ]
+      },
+      {
+        "name": "Mazda2 Generasi 2 (DJ)",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 V MT (2014-2016)",
+          "1.5 V AT (2014-2016)",
+          "1.5 R MT",
+          "1.5 R AT",
+          "1.5 GT AT",
+          "1.5 Sedan GT AT (2022-)"
+        ]
+      },
+      {
+        "name": "Mazda3 Generasi 1 (BK)",
+        "years": [2005, 2006, 2007, 2008, 2009],
+        "variants": [
+          "1.6 Hatchback AT",
+          "2.0 Hatchback AT"
+        ]
+      },
+      {
+        "name": "Mazda3 Generasi 2 (BL)",
+        "years": [2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "1.6 Hatchback AT",
+          "2.0 Hatchback AT"
+        ]
+      },
+      {
+        "name": "Mazda3 Generasi 3 (BM/BN)",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019],
+        "variants": [
+          "2.0 Hatchback AT",
+          "2.0 Speed Hatchback AT"
+        ]
+      },
+      {
+        "name": "Mazda3 Generasi 4 (BP)",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0 Hatchback AT",
+          "2.0 Sedan AT"
+        ]
+      },
+      {
+        "name": "Mazda6 Generasi 1 (GG)",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "2.3 Sedan AT"
+        ]
+      },
+      {
+        "name": "Mazda6 Generasi 2 (GH)",
+        "years": [2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.5 Sedan AT"
+        ]
+      },
+      {
+        "name": "Mazda6 Generasi 3 (GJ/GL)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "2.5 Sedan AT",
+          "2.5 Estate / Wagon AT",
+          "2.5 Elite Sedan AT",
+          "2.5 Elite Estate AT",
+          "2.5 20th Anniversary Edition AT"
+        ]
+      },
+      {
+        "name": "MX-5 / Miata Generasi 3 (NC)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "2.0 AT"
+        ]
+      },
+      {
+        "name": "MX-5 / Miata Generasi 4 (ND)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0 Soft Top MT",
+          "2.0 Soft Top AT",
+          "2.0 RF (Retractable Fastback) MT",
+          "2.0 RF (Retractable Fastback) AT"
+        ]
+      },
+      {
+        "name": "CX-3",
+        "years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0 Touring AT",
+          "2.0 Grand Touring AT",
+          "1.5 Sport AT",
+          "2.0 Pro AT"
+        ]
+      },
+      {
+        "name": "CX-30",
+        "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0 Touring AT",
+          "2.0 GT AT"
+        ]
+      },
+      {
+        "name": "CX-5 Generasi 1 (KE)",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "2.0 Sport AT",
+          "2.0 Touring AT",
+          "2.5 Touring AT",
+          "2.5 Grand Touring AT"
+        ]
+      },
+      {
+        "name": "CX-5 Generasi 2 (KF)",
+        "years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.5 Touring AT",
+          "2.5 GT AT",
+          "2.5 Elite AT",
+          "2.5 Kuro Edition AT"
+        ]
+      },
+      {
+        "name": "CX-7",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.3 Turbo R AT",
+          "2.3 Turbo GT AT"
+        ]
+      },
+      {
+        "name": "CX-8",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "2.5 Touring AT",
+          "2.5 Elite AT"
+        ]
+      },
+      {
+        "name": "CX-9 Generasi 1 (TB)",
+        "years": [2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "3.7 V6 AWD AT"
+        ]
+      },
+      {
+        "name": "CX-9 Generasi 2 (TC)",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "2.5 Turbo 2WD AT",
+          "2.5 Turbo AWD AT",
+          "2.5 Turbo Kuro Edition AT"
+        ]
+      },
+      {
+        "name": "CX-50 (IU / Global)",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "2.5 NA AWD AT",
+          "2.5 Turbo AWD AT"
+        ]
+      },
+      {
+        "name": "CX-60",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "3.3T e-Skyactiv G Elite MHEV AWD AT",
+          "3.3T e-Skyactiv G Kuro MHEV AWD AT"
+        ]
+      },
+      {
+        "name": "CX-90",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "3.3T e-Skyactiv G MHEV AWD AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Mitsubishi",
+    "models": [
+      {
+        "name": "Xpander (Pre-facelift & Facelift 1)",
+        "years": [2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "1.5 GLX MT",
+          "1.5 GLS MT",
+          "1.5 GLS AT",
+          "1.5 Exceed MT",
+          "1.5 Exceed AT",
+          "1.5 Sport MT",
+          "1.5 Sport AT",
+          "1.5 Ultimate AT"
+        ]
+      },
+      {
+        "name": "Xpander (Facelift 2)",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 GLS MT",
+          "1.5 GLS CVT",
+          "1.5 Exceed MT",
+          "1.5 Exceed CVT",
+          "1.5 Sport MT",
+          "1.5 Sport CVT",
+          "1.5 Ultimate CVT"
+        ]
+      },
+      {
+        "name": "Xpander Cross (Pre-facelift)",
+        "years": [2019, 2020, 2021, 2022],
+        "variants": [
+          "1.5 MT",
+          "1.5 AT",
+          "1.5 Premium Package AT"
+        ]
+      },
+      {
+        "name": "Xpander Cross (Facelift)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 MT",
+          "1.5 Premium CVT"
+        ]
+      },
+      {
+        "name": "Pajero Sport Generasi 2",
+        "years": [2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "2.5 Exceed 4x2 AT",
+          "2.5 Exceed 4x4 MT",
+          "2.5 GLX 4x4 MT",
+          "2.5 GLS 4x2 MT",
+          "2.5 Dakar 4x2 AT (2011-2015)",
+          "2.5 Dakar 4x4 AT (2011-2015)",
+          "3.0 V6 4x2 AT (2014-2015)"
+        ]
+      },
+      {
+        "name": "Pajero Sport Generasi 3 (Pre-facelift)",
+        "years": [2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "2.5 Exceed 4x2 MT",
+          "2.5 Exceed 4x2 AT",
+          "2.5 GLX 4x4 MT",
+          "2.4 Dakar 4x2 AT",
+          "2.4 Dakar Ultimate 4x2 AT",
+          "2.4 Dakar 4x4 AT"
+        ]
+      },
+      {
+        "name": "Pajero Sport Generasi 3 (Facelift 1 & 2)",
+        "years": [2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.5 Exceed 4x2 MT",
+          "2.5 Exceed 4x2 AT",
+          "2.5 GLX 4x4 MT",
+          "2.4 Dakar 4x2 AT",
+          "2.4 Dakar Ultimate 4x2 AT",
+          "2.4 Dakar Ultimate 4x4 AT"
+        ]
+      },
+      {
+        "name": "Galant Generasi 7 (Lele)",
+        "years": [1993, 1994, 1995, 1996, 1997],
+        "variants": [
+          "2.0 VR MT",
+          "2.0 V6 MT",
+          "2.0 V6 AT"
+        ]
+      },
+      {
+        "name": "Galant Generasi 8 (Hiu)",
+        "years": [1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005],
+        "variants": [
+          "2.5 V6 MT",
+          "2.5 V6 AT",
+          "2.5 ST AT"
+        ]
+      },
+      {
+        "name": "Delica",
+        "years": [2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.0 AT",
+          "2.0 Royal AT"
+        ]
+      },
+      {
+        "name": "Pajero Generasi 4",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "3.8 V6 Super Exceed AT"
+        ]
+      },
+      {
+        "name": "L200 Strada",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "2.5 GLS Double Cabin MT",
+          "2.5 LFX Double Cabin MT"
+        ]
+      },
+      {
+        "name": "Strada Triton",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "2.5 GLX Single Cabin MT",
+          "2.5 HDX Double Cabin MT",
+          "2.5 GLS Double Cabin MT",
+          "2.5 Exceed Double Cabin MT",
+          "2.5 Exceed Double Cabin AT"
+        ]
+      },
+      {
+        "name": "Triton Generasi 5",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "2.5 HDX Single Cabin MT",
+          "2.5 GLX Single Cabin MT",
+          "2.5 HDX Double Cabin MT",
+          "2.5 GLS Double Cabin MT",
+          "2.4 Exceed Double Cabin MT",
+          "2.4 Ultimate Double Cabin AT"
+        ]
+      },
+      {
+        "name": "Triton Generasi 6",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "2.4 GLX Single Cabin MT",
+          "2.4 HDX Single Cabin MT",
+          "2.4 HDX Double Cabin MT",
+          "2.4 GLS Double Cabin MT",
+          "2.4 Exceed Double Cabin MT",
+          "2.4 Ultimate Double Cabin AT"
+        ]
+      },
+      {
+        "name": "Mirage",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "1.2 GLX MT",
+          "1.2 GLS AT",
+          "1.2 Exceed AT",
+          "1.2 Sport AT (2015)"
+        ]
+      },
+      {
+        "name": "Lancer Generasi 6 (CB/CD)",
+        "years": [1993, 1994, 1995, 1996],
+        "variants": [
+          "1.6 GLXi MT",
+          "1.8 GTi MT"
+        ]
+      },
+      {
+        "name": "Lancer Generasi 7 (CK/CJ)",
+        "years": [1997, 1998, 1999, 2000, 2001, 2002],
+        "variants": [
+          "1.6 GLXi MT",
+          "1.6 GLXi AT",
+          "1.6 SEi AT"
+        ]
+      },
+      {
+        "name": "Lancer Generasi 8 (Cedia)",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "1.8 GLXi MT",
+          "1.8 GLXi AT",
+          "1.8 SEi AT"
+        ]
+      },
+      {
+        "name": "Lancer Generasi 9 (EX)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "2.0 GT AT",
+          "2.0 GLS AT"
+        ]
+      },
+      {
+        "name": "Lancer Evolution",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "Evolution VIII 2.0 GSR MT (2003-2005)",
+          "Evolution IX 2.0 GSR MT (2005-2007)",
+          "Evolution X 2.0 GSR TC-SST (2008-2015)"
+        ]
+      },
+      {
+        "name": "Colt T120SS",
+        "years": [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019],
+        "variants": [
+          "1.5 Pick Up Standard",
+          "1.5 Pick Up 3-Way",
+          "1.5 Pick Up Flat Deck"
+        ]
+      },
+      {
+        "name": "Colt L300",
+        "years": [1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.5 Diesel Pick Up Standard",
+          "2.5 Diesel Pick Up Flat Deck",
+          "2.5 Diesel Cab Chassis",
+          "2.5 Diesel Minibus"
+        ]
+      },
+      {
+        "name": "Xforce",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Exceed CVT",
+          "1.5 Ultimate CVT",
+          "1.5 Ultimate with Diamond Sense CVT",
+          "1.5 55th Anniversary Edition CVT (2026)"
+        ]
+      },
+      {
+        "name": "Destinator",
+        "years": [2025, 2026],
+        "variants": [
+          "1.5 Turbo GLS CVT",
+          "1.5 Turbo Exceed CVT",
+          "1.5 Turbo Ultimate CVT",
+          "1.5 Turbo Ultimate Premium Pack CVT",
+          "1.5 Turbo 55th Anniversary Edition CVT (2026)"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Nissan",
+    "models": [
+      {
+        "name": "Sunny / Sentra (B13)",
+        "years": [1990, 1991, 1992, 1993, 1994, 1995, 1996],
+        "variants": [
+          "1.3 MT (Sunny - Armada Taksi)",
+          "1.6 SGX MT (Sentra Genesis)",
+          "1.6 SGX AT (Sentra Genesis)"
+        ]
+      },
+      {
+        "name": "Sentra (B14)",
+        "years": [1995, 1996, 1997, 1998, 1999, 2000],
+        "variants": [
+          "1.6 Super Saloon MT",
+          "1.6 Super Saloon AT"
+        ]
+      },
+      {
+        "name": "March / Micra (K13)",
+        "years": [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
+        "variants": [
+          "1.2 Mid MT",
+          "1.2 Mid AT",
+          "1.2 High AT",
+          "1.2 XS AT",
+          "1.5 MT (2014-2020)",
+          "1.5 AT (2014-2020)"
+        ]
+      },
+      {
+        "name": "Grand Livina (L10 & L11)",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "1.5 SV MT",
+          "1.5 SV AT",
+          "1.5 XV MT",
+          "1.5 XV AT",
+          "1.5 Ultimate AT",
+          "1.8 XV MT",
+          "1.8 XV AT",
+          "1.8 Ultimate AT",
+          "1.5 X-Gear MT (2013-2018)",
+          "1.5 X-Gear AT (2013-2018)",
+          "1.8 X-Gear MT (2013-2018)",
+          "1.8 X-Gear AT (2013-2018)"
+        ]
+      },
+      {
+        "name": "Livina Hatchback (L10)",
+        "years": [2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "1.5 XR MT",
+          "1.5 XR AT",
+          "1.5 X-Gear MT",
+          "1.5 X-Gear AT"
+        ]
+      },
+      {
+        "name": "Livina Generasi 2 (ND)",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 E MT",
+          "1.5 EL MT",
+          "1.5 EL AT",
+          "1.5 VE AT",
+          "1.5 VL AT"
+        ]
+      },
+      {
+        "name": "Serena Generasi 1 (C23)",
+        "years": [1996, 1997, 1998, 1999],
+        "variants": [
+          "2.0 SGL AT"
+        ]
+      },
+      {
+        "name": "Serena Generasi 2 (C24)",
+        "years": [2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.0 Comfort Touring (CT) AT",
+          "2.0 Highway Star (HWS) AT",
+          "2.0 Autech AT"
+        ]
+      },
+      {
+        "name": "Serena Generasi 3 (C26)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.0 X AT",
+          "2.0 Highway Star (HWS) AT",
+          "2.0 Autech AT"
+        ]
+      },
+      {
+        "name": "Serena Generasi 4 (C27)",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024],
+        "variants": [
+          "2.0 X AT",
+          "2.0 Highway Star (HWS) AT"
+        ]
+      },
+      {
+        "name": "Serena Generasi 5 (C28)",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "1.4 e-Power Highway Star CVT"
+        ]
+      },
+      {
+        "name": "X-Trail Generasi 1 (T30)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "2.0 MT",
+          "2.0 AT",
+          "2.5 St AT",
+          "2.5 Xt AT"
+        ]
+      },
+      {
+        "name": "X-Trail Generasi 2 (T31)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "2.0 MT",
+          "2.0 CVT",
+          "2.5 St CVT",
+          "2.5 Xt CVT"
+        ]
+      },
+      {
+        "name": "X-Trail Generasi 3 (T32)",
+        "years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "2.0 MT",
+          "2.0 CVT",
+          "2.5 CVT",
+          "2.0 Hybrid CVT (2015-2018)",
+          "2.5 VL CVT (Facelift 2019-2021)"
+        ]
+      },
+      {
+        "name": "Terra",
+        "years": [2018, 2019, 2020, 2021, 2023, 2024, 2025],
+        "variants": [
+          "2.5 E MT (2018-2021)",
+          "2.5 E AT (2018-2021)",
+          "2.5 VL AT (2018-2021)",
+          "2.5 VL 4x4 AT",
+          "2.5 VL 4x4 AT (Facelift 2023-)"
+        ]
+      },
+      {
+        "name": "Teana Generasi 1 (J31)",
+        "years": [2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "2.3 V6 JM AT"
+        ]
+      },
+      {
+        "name": "Teana Generasi 2 (J32)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "2.5 V6 XV CVT"
+        ]
+      },
+      {
+        "name": "Teana Generasi 3 (L33)",
+        "years": [2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.5 XV CVT"
+        ]
+      },
+      {
+        "name": "Frontier & Navara (D22 & D40)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "3.2 Frontier MT (D22)",
+          "2.5 Navara MT (D40)",
+          "2.5 Navara AT (D40)",
+          "2.5 Navara Sports Version AT (D40)"
+        ]
+      },
+      {
+        "name": "Navara (D23 / NP300)",
+        "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "2.5 SL MT",
+          "2.5 VL MT",
+          "2.5 VL AT"
+        ]
+      },
+      {
+        "name": "Patrol (Y60 & Y61)",
+        "years": [1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004],
+        "variants": [
+          "4.2L Diesel MT (Y60 Safari)",
+          "3.0L Turbo Diesel SGL AT (Y61)",
+          "4.8L V8 Bensin AT (Y61)"
+        ]
+      },
+      {
+        "name": "Skyline & Skyline GT-R (IU)",
+        "years": [1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002],
+        "variants": [
+          "R32 GT-R 2.6L Twin-Turbo MT",
+          "R33 GT-R 2.6L Twin-Turbo MT",
+          "R34 2.5L GT-T MT / AT",
+          "R34 GT-R 2.6L Twin-Turbo MT"
+        ]
+      },
+      {
+        "name": "GT-R (R35)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
+        "variants": [
+          "3.8L V6 Twin-Turbo Premium AT",
+          "3.8L V6 Twin-Turbo Black Edition AT",
+          "3.8L V6 Twin-Turbo Nismo AT"
+        ]
+      },
+      {
+        "name": "Silvia (IU)",
+        "years": [1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002],
+        "variants": [
+          "S13 2.0L MT/AT",
+          "S14 2.0L MT/AT",
+          "S15 2.0L Spec-S MT/AT",
+          "S15 2.0L Spec-R MT"
+        ]
+      },
+      {
+        "name": "Stagea (IU)",
+        "years": [1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "2.5L Turbo RS-Four MT/AT (WC34)",
+          "2.6L Twin-Turbo 260RS Autech MT (WC34)",
+          "2.5L Turbo AR-X Four AT (M35)"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Subaru",
+    "models": [
+      {
+        "name": "Impreza Generasi 2 (GD/GG)",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "1.5R MT",
+          "1.6 TS MT",
+          "1.6 TS AT",
+          "2.0 WRX MT",
+          "2.0 WRX STI MT"
+        ]
+      },
+      {
+        "name": "Impreza Generasi 3 (GE/GH/GR/GV)",
+        "years": [2008, 2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "1.5R MT",
+          "1.5R AT",
+          "2.0R AT",
+          "2.5 WRX MT",
+          "2.5 WRX STI MT"
+        ]
+      },
+      {
+        "name": "Impreza Generasi 4 (GJ/GP)",
+        "years": [2012, 2013, 2014, 2015],
+        "variants": [
+          "2.0i CVT",
+          "2.0i-S CVT"
+        ]
+      },
+      {
+        "name": "XV Generasi 1 (GP)",
+        "years": [2012, 2013, 2014, 2015],
+        "variants": [
+          "2.0i CVT",
+          "2.0i Premium CVT"
+        ]
+      },
+      {
+        "name": "XV Generasi 2 (GT)",
+        "years": [2022, 2023],
+        "variants": [
+          "2.0i-S EyeSight CVT"
+        ]
+      },
+      {
+        "name": "Crosstrek (Generasi 3)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0i-S EyeSight CVT"
+        ]
+      },
+      {
+        "name": "Forester Generasi 2 (SG)",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "2.0X MT",
+          "2.0X AT",
+          "2.5XT AT"
+        ]
+      },
+      {
+        "name": "Forester Generasi 3 (SH)",
+        "years": [2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.0X MT",
+          "2.0X AT",
+          "2.5XT AT"
+        ]
+      },
+      {
+        "name": "Forester Generasi 4 (SJ)",
+        "years": [2013, 2014, 2015],
+        "variants": [
+          "2.0i-L CVT",
+          "2.0XT CVT"
+        ]
+      },
+      {
+        "name": "Forester Generasi 5 (SK)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0i-L CVT",
+          "2.0i-S EyeSight CVT"
+        ]
+      },
+      {
+        "name": "Legacy Generasi 4 (BL/BP)",
+        "years": [2004, 2005, 2006, 2007, 2008, 2009],
+        "variants": [
+          "2.0i AT",
+          "2.0GT AT"
+        ]
+      },
+      {
+        "name": "Legacy Generasi 5 (BM/BR)",
+        "years": [2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "2.0i CVT",
+          "2.5GT AT"
+        ]
+      },
+      {
+        "name": "Outback Generasi 4 (BR)",
+        "years": [2010, 2011, 2012, 2013, 2014],
+        "variants": [
+          "2.5i CVT"
+        ]
+      },
+      {
+        "name": "Outback Generasi 6 (BT)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "2.5i Touring EyeSight CVT"
+        ]
+      },
+      {
+        "name": "WRX Generasi 1 (VA)",
+        "years": [2014, 2015],
+        "variants": [
+          "2.0 CVT",
+          "2.5 STI MT"
+        ]
+      },
+      {
+        "name": "WRX Generasi 2 (VB / VN Wagon)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "2.4 Sedan MT",
+          "2.4 Sedan tS EyeSight SPT (CVT)",
+          "2.4 Wagon GT-S EyeSight SPT (CVT)",
+          "2.4 Wagon tS EyeSight SPT (CVT)"
+        ]
+      },
+      {
+        "name": "BRZ Generasi 1 (ZC6)",
+        "years": [2012, 2013, 2014, 2015],
+        "variants": [
+          "2.0 MT",
+          "2.0 AT"
+        ]
+      },
+      {
+        "name": "BRZ Generasi 2 (ZD8)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.4 MT",
+          "2.4 MT EyeSight (2024-)",
+          "2.4 AT EyeSight"
+        ]
+      },
+      {
+        "name": "Tribeca (B9 / WX)",
+        "years": [2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "3.0R AT",
+          "3.6R AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Suzuki",
+    "models": [
+      {
+        "name": "Forsa & Amenity / Eleny (Cultus Gen 1 & 2)",
+        "years": [1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993],
+        "variants": [
+          "Forsa 1.0 GL MT (1985-1990)",
+          "Amenity 1.3 GL Hatchback MT (1990-1993)",
+          "Eleny 1.3 GL Hatchback MT (1992-1993)"
+        ]
+      },
+      {
+        "name": "Esteem (Cultus Gen 2 Sedan)",
+        "years": [1991, 1992, 1993, 1994, 1995, 1996],
+        "variants": [
+          "1.3 MT",
+          "1.6 GT MT"
+        ]
+      },
+      {
+        "name": "Baleno Generasi 1 (SY Sedan)",
+        "years": [1996, 1997, 1998, 1999, 2000, 2001, 2002],
+        "variants": [
+          "1.6 MT (1996-1999)",
+          "1.5 MT (2000-2002)"
+        ]
+      },
+      {
+        "name": "Baleno Next-G & Neo Baleno",
+        "years": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010],
+        "variants": [
+          "Next-G 1.5 MT (2003-2007)",
+          "Next-G 1.5 AT (2003-2007)",
+          "Neo Baleno 1.5 MT (2008-2010)",
+          "Neo Baleno 1.5 AT (2008-2010)"
+        ]
+      },
+      {
+        "name": "Baleno Hatchback (WB)",
+        "years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.4 MT (2017-2022)",
+          "1.4 AT (2017-2022)",
+          "1.5 MT (2022-)",
+          "1.5 AT (2022-)"
+        ]
+      },
+      {
+        "name": "Aerio",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "1.5 MT",
+          "1.5 AT"
+        ]
+      },
+      {
+        "name": "Swift Generasi 2",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "1.5 GL MT",
+          "1.5 GL AT",
+          "1.5 GLX MT",
+          "1.5 GLX AT",
+          "1.5 GT MT",
+          "1.5 GT AT",
+          "1.5 GT2 MT",
+          "1.5 GT2 AT",
+          "1.5 GT3 MT",
+          "1.5 GT3 AT"
+        ]
+      },
+      {
+        "name": "Swift Generasi 3",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017],
+        "variants": [
+          "1.4 GL MT",
+          "1.4 GL AT",
+          "1.4 GX MT",
+          "1.4 GX AT",
+          "1.4 GS MT",
+          "1.4 GS AT",
+          "1.6 Sport MT"
+        ]
+      },
+      {
+        "name": "Celerio",
+        "years": [2015, 2016, 2017],
+        "variants": [
+          "1.0 MT",
+          "1.0 CVT"
+        ]
+      },
+      {
+        "name": "Karimun Kotak (Generasi 1)",
+        "years": [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "1.0 DX MT",
+          "1.0 GX MT"
+        ]
+      },
+      {
+        "name": "Karimun Estilo (Generasi 2)",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "1.1 VXi MT (2007-2009)",
+          "1.0 VXi MT New Karimun Estilo (2009-2012)"
+        ]
+      },
+      {
+        "name": "Karimun Wagon R (LCGC)",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+        "variants": [
+          "1.0 GA MT",
+          "1.0 GL MT",
+          "1.0 GL AGS",
+          "1.0 GX MT",
+          "1.0 GS MT",
+          "1.0 GS AGS",
+          "1.0 Dilago MT",
+          "1.0 Blind Van MT"
+        ]
+      },
+      {
+        "name": "Carry ST100 & Futura",
+        "years": [1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019],
+        "variants": [
+          "ST100 1.0 Pick Up / Minibus (1983-2006)",
+          "Futura 1.3 Pick Up / Minibus (1991-1997)",
+          "Futura 1.6 Pick Up / Minibus (1997-2000)",
+          "Futura 1.5 Pick Up / Minibus (2000-2019)"
+        ]
+      },
+      {
+        "name": "New Carry",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Flat Deck",
+          "1.5 Flat Deck AC/PS",
+          "1.5 Wide Deck",
+          "1.5 Wide Deck AC/PS"
+        ]
+      },
+      {
+        "name": "Jimny & Katana (Generasi 2)",
+        "years": [1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "Jimny Trepes / Super Jimny 1.0 4x4 MT",
+          "Katana 1.0 DX 4x2 MT",
+          "Katana 1.0 GX 4x2 MT"
+        ]
+      },
+      {
+        "name": "Jimny Generasi 3 (JB43 & Caribian)",
+        "years": [2004, 2005, 2006, 2017],
+        "variants": [
+          "1.3 Caribian Pick Up 4x4 MT (2004-2006)",
+          "1.3 4x4 AT (2017)"
+        ]
+      },
+      {
+        "name": "Jimny Generasi 4 (JB74 & JC74)",
+        "years": [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 3-Door MT",
+          "1.5 3-Door AT",
+          "1.5 5-Door MT (2024-)",
+          "1.5 5-Door AT (2024-)"
+        ]
+      },
+      {
+        "name": "Vitara, Escudo & Sidekick (Generasi 1)",
+        "years": [1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001],
+        "variants": [
+          "Vitara 1.6 4x4 MT (1992-1994)",
+          "Escudo 1.6 JLX 4x2 MT (1993-2001)",
+          "Escudo 1.6 Nomade 4x2 MT / AT",
+          "Sidekick 1.6 4x2 MT (1995-2001)"
+        ]
+      },
+      {
+        "name": "Escudo & XL-7 (Generasi 2)",
+        "years": [2001, 2002, 2003, 2004, 2005, 2006],
+        "variants": [
+          "Escudo 1.6 MT",
+          "Escudo 2.0 MT",
+          "Escudo 2.0 AT",
+          "Grand Escudo XL-7 2.5 V6 MT (2003-2006)",
+          "Grand Escudo XL-7 2.5 V6 AT (2003-2006)"
+        ]
+      },
+      {
+        "name": "Grand Vitara (Generasi 3)",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "2.0 JX MT",
+          "2.0 JLX MT",
+          "2.0 JLX AT",
+          "2.4 MT",
+          "2.4 AT"
+        ]
+      },
+      {
+        "name": "Grand Vitara (Generasi 4)",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 GL Smart Hybrid AT",
+          "1.5 GX Smart Hybrid AT"
+        ]
+      },
+      {
+        "name": "Ertiga Generasi 1",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018],
+        "variants": [
+          "1.4 GA MT",
+          "1.4 GL MT",
+          "1.4 GL AT",
+          "1.4 GX MT",
+          "1.4 GX AT",
+          "1.4 Dreza MT",
+          "1.4 Dreza AT"
+        ]
+      },
+      {
+        "name": "Ertiga Generasi 2",
+        "years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 GA MT",
+          "1.5 GL MT",
+          "1.5 GL AT",
+          "1.5 GX MT",
+          "1.5 GX AT",
+          "1.5 Suzuki Sport MT",
+          "1.5 Suzuki Sport AT",
+          "1.5 Smart Hybrid GX MT",
+          "1.5 Smart Hybrid GX AT",
+          "1.5 Smart Hybrid SS MT",
+          "1.5 Smart Hybrid SS AT"
+        ]
+      },
+      {
+        "name": "XL7",
+        "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "1.5 Zeta MT",
+          "1.5 Zeta AT",
+          "1.5 Beta MT",
+          "1.5 Beta AT",
+          "1.5 Alpha MT",
+          "1.5 Alpha AT",
+          "1.5 Smart Hybrid Beta MT",
+          "1.5 Smart Hybrid Beta AT",
+          "1.5 Smart Hybrid Alpha MT",
+          "1.5 Smart Hybrid Alpha AT"
+        ]
+      },
+      {
+        "name": "Fronx",
+        "years": [2024, 2025, 2026],
+        "variants": [
+          "1.2 GL MT",
+          "1.2 GL AT",
+          "1.5 GLX AT"
+        ]
+      }
+    ]
+  },
+  {
+    "brand": "Toyota",
+    "models": [
+      {
+        "name": "Avanza Generasi 1",
+        "years": [2003, 2004, 2005],
+        "variants": [
+          "1.3 E MT", 
+          "1.3 G MT",
+          "1.3 S AT (2004)"
+        ]
+      },
+      {
+        "name": "Avanza Generasi 1 Facelift",
+        "years": [2006, 2007, 2008, 2009, 2010, 2011],
+        "variants": [
+          "1.3 E MT", 
+          "1.3 E AT (2009-2011)",
+          "1.3 G MT",
+          "1.3 G AT (2009-2011)",
+          "1.5 S MT (2006-2011)",
+          "1.5 S AT (2006-2011)"
+        ]
+      },
+      {
+        "name": "Avanza Generasi 2",
+        "years": [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019],
+        "variants": [
+          "1.3 E MT", 
+          "1.3 E AT",
+          "1.3 G MT",
+          "1.3 G AT",
+          "1.5 G MT",
+          "1.5 G AT",
+          "1.5 Veloz MT",
+          "1.5 Veloz AT"
+        ]
+      },
+      {
+        "name": "Avanza Generasi 2 (Facelift)",
+        "years": [2020, 2021, 2022, 2023],
+        "variants": [
+          "1.3 E MT", 
+          "1.3 E AT",
+          "1.3 G MT",
+          "1.3 G AT",
+          "1.5 G MT",
+          "1.5 G AT",
+          "1.5 Veloz MT",
+          "1.5 Veloz AT",
+          "1.3 GR Limited MT",
+          "1.3 GR Limited AT",
+          "1.5 GR Limited MT",
+          "1.5 GR Limited AT"
+        ]
+      },
+      {
+        "name": "Avanza Generasi 3",
+        "years": [2021, 2022, 2023],
+        "variants": [
+          "1.3 E MT", 
+          "1.3 E CVT",
+          "1.5 G MT",
+          "1.5 G CVT",
+          "1.5 G TSS MT",
+          "1.5 G TSS CVT"
+        ]
+      },
+      {
+        "name": "Veloz",
+        "years": [2021, 2022, 2023],
+        "variants": [
+          "1.3 E MT", 
+          "1.3 E CVT",
+          "1.5 G MT",
+          "1.5 G CVT",
+          "1.5 G TSS MT",
+          "1.5 G TSS CVT"
+        ]
+      },
+      {
+        "name": "Kijang Innova Gen 1 (Pre-facelift)",
+        "years": [2004, 2005, 2006, 2007, 2008],
+        "variants": [
+          "2.0 E AT", 
+          "2.0 E MT",
+          "2.5 E AT",
+          "2.5 E MT",   
+          "2.0 G AT", 
+          "2.0 G MT",
+          "2.5 G AT",
+          "2.5 G MT", 
+          "2.0 V AT", 
+          "2.0 V MT",
+          "2.5 V AT",
+          "2.5 V MT",
+          "2.7 V AT",
+          "2.7 V MT"
+        ]
+      },
+      {
+        "name": "Kijang Innova Gen 1 (Facelift)",
+        "years": [2008, 2009, 2010, 2011, 2012],
+        "variants": [
+          "2.0 J AT", 
+          "2.0 J MT",
+          "2.0 E AT", 
+          "2.0 E MT",
+          "2.5 E AT",
+          "2.5 E MT",   
+          "2.0 G AT", 
+          "2.0 G MT",
+          "2.5 G AT",
+          "2.5 G MT",
+          "2.0 G Luxury AT", 
+          "2.0 G Luxury MT",
+          "2.5 G Luxury AT",
+          "2.5 G Luxury MT",
+          "2.0 V AT", 
+          "2.0 V MT",
+          "2.5 V AT",
+          "2.5 V MT",
+          "2.0 V Luxury AT", 
+          "2.0 V Luxury MT",
+          "2.5 V Luxury AT",
+          "2.5 V Luxury MT"
+        ]
+      },
+      {
+        "name": "Kijang Innova Gen 1 (Facelift Barong)",
+        "years": [2013, 2014, 2015],
+        "variants": [
+          "2.0 J AT", 
+          "2.0 J MT",
+          "2.0 E AT", 
+          "2.0 E MT",
+          "2.5 E AT",
+          "2.5 E MT",   
+          "2.0 G AT", 
+          "2.0 G MT",
+          "2.5 G AT",
+          "2.5 G MT",
+          "2.0 G Luxury AT", 
+          "2.0 G Luxury MT",
+          "2.5 G Luxury AT",
+          "2.5 G Luxury MT",
+          "2.0 V AT", 
+          "2.0 V MT",
+          "2.5 V AT",
+          "2.5 V MT",
+          "2.0 V Luxury AT", 
+          "2.0 V Luxury MT",
+          "2.5 V Luxury AT",
+          "2.5 V Luxury MT"
+        ]
+      },
+      {
+        "name": "Kijang Innova Reborn (Pre-facelift)",
+        "years": [2015, 2016, 2017, 2018, 2019],
+        "variants": [
+          "2.0 G AT", 
+          "2.0 G MT",
+          "2.4 G AT",
+          "2.4 G MT",
+          "2.0 V AT", 
+          "2.0 V MT",
+          "2.4 V AT",
+          "2.4 V MT",
+          "2.0 Q AT", 
+          "2.0 Q MT",
+          "2.4 Q AT (2015-2016)",
+          "2.4 Q MT (2015-2016)",
+          "2.0 Venturer AT (2017-2019)", 
+          "2.0 Venturer MT (2017-2019)",
+          "2.4 Venturer AT (2017-2019)",
+          "2.4 Venturer MT (2017-2019)"
+        ]
+      },
+      {
+        "name": "Kijang Innova Reborn (Facelift)",
+        "years": [2020, 2021, 2022],
+        "variants": [
+          "2.0 G AT", 
+          "2.0 G MT",
+          "2.4 G AT",
+          "2.4 G MT",
+          "2.0 G Luxury AT", 
+          "2.0 G Luxury MT",
+          "2.4 G Luxury AT",
+          "2.4 G Luxury MT",
+          "2.0 V AT", 
+          "2.0 V MT",
+          "2.4 V AT",
+          "2.4 V MT",
+          "2.0 V Luxury AT", 
+          "2.0 V Luxury MT",
+          "2.4 V Luxury AT",
+          "2.4 V Luxury MT",
+          "2.0 Venturer AT", 
+          "2.0 Venturer MT",
+          "2.4 Venturer AT",
+          "2.4 Venturer MT",
+          "2.4 TRD Sportivo G AT (2020)",
+          "2.4 TRD Sportivo G MT (2020)",
+          "2.4 TRD Sportivo V AT (2020)",
+          "2.4 TRD Sportivo V MT (2020)"
+        ]
+      },
+      {
+        "name": "Kijang Innova Reborn (2022-)",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.0 G AT (2023-2025)", 
+          "2.0 G MT (2022-2025)",
+          "2.4 G AT (2023- )",
+          "2.4 G MT"
+        ]
+      },
+      {
+       "name": "Kijang Innova Zenix",
+       "years": [2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "2.0 G CVT",
+         "2.0 V CVT",
+         "2.0 G Hybrid CVT",
+         "2.0 V Hybrid CVT",
+         "2.0 V Hybrid Modellista CVT",
+         "2.0 Q Hybrid TSS CVT",
+         "2.0 Q Hybrid Modellista TSS CVT"
+       ]
+      },
+      {
+        "name": "Agya Generasi 1",
+        "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+        "variants": [
+          "1.0 E MT (2012-2020)", 
+          "1.0 G MT (2012-2021)",
+          "1.0 G AT (2012-2021)",
+          "1.0 TRD S AT (2012-2017)",
+          "1.0 TRD S MT (2012-2017)",
+          "1.2 G AT (2017-2023)",
+          "1.2 G MT (2017-2023)",
+          "1.2 TRD S AT(2017-2021)",
+          "1.2 TRD S MT (2017-2021)",
+          "1.2 GR Sport MT (2021-2023)",
+          "1.2 GR Sport AT (2021-2023)"
+        ]
+      },
+      {
+        "name": "Agya Generasi 2",
+        "years": [2023, 2024, 2025, 2026],
+        "variants": [
+          "1.2 E MT",
+          "1.2 E CVT", 
+          "1.2 G MT",
+          "1.2 G CVT",
+          "1.2 GR Sport MT",
+          "1.2 GR Sport CVT"
+        ]
+       },
+       {
+         "name": "Alphard Generasi 1 (AH10)",
+         "years": [2002, 2003, 2004, 2005, 2006, 2007, 2008],
+         "variants": [
+          "2.4 AS",
+          "2.4 G",
+          "3.0 V6 MZ",
+          "3.0 V6 MZ G"
+        ]
+       },
+       {
+         "name": "Alphard Generasi 2 (AH20)",
+         "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+         "variants": [
+           "2.4 X AT",
+           "2.4 G AT",
+           "3.5 Q AT"
+         ]
+       },
+       {
+         "name": "Vellfire Generasi 1 (AH20)",
+         "years": [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+         "variants": [
+           "2.4 X AT",
+           "2.4 Z AT",
+           "2.4 ZG AT",
+           "2.4 V AT"
+         ]
+       },
+      {
+       "name": "Alphard Generasi 3 (AH30)",
+       "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+       "variants": [
+         "2.5 X AT",
+         "2.5 G AT",
+         "3.5 Q AT"
+       ]
+      },
+      {
+       "name": "Vellfire Generasi 2 (AH30)",
+       "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+       "variants": [
+         "2.5 G AT",
+         "2.5 ZG AT (IU)"
+       ]
+      },
+      {
+       "name": "Alphard Generasi 4 (AH40)",
+       "years": [2023, 2024, 2025, 2026],
+       "variants": [
+         "2.5 X CVT",
+         "2.5 G CVT",
+         "2.5 Hybrid (HEV) e-CVT"
+       ]
+      },
+      {
+       "name": "Vellfire Generasi 3 (AH40)",
+       "years": [2023, 2024, 2025, 2026],
+       "variants": [
+         "2.5 Hybrid VIP (HEV) e-CVT"
+       ]
+      },
+      {
+        "name": "Fortuner Generasi 1",
+        "years": [2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+        "variants": [
+          "2.7 G (4x2)",
+          "2.7 G Luxury (4x2)",
+          "2.7 V (4x4)",
+          "2.5 G MT (2007-2015)",
+          "2.5 G AT (2009-2015)",
+          "2.5 G TRD Sportivo (2009-2015)",
+          "2.5 G VNT (2012-2015)",
+          "2.5 G TRD Sportivo VNT (2009-2015)",
+          "2.5 G 4x4 AT (2014-2015)"
+        ]
+      },
+      {
+        "name": "Fortuner Generasi ke-2",
+        "years": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "2.4 G 4x2 MT",
+          "2.4 G 4x2 AT",
+          "2.4 G 4x4 AT (2016-2022)",
+          "2.4 VRZ 4x2 AT (2016-2022)",
+          "2.4 VRZ 4x4 AT (2016-2022)",
+          "2.7 SRZ 4x2 AT (2016-2021, 2024-)",
+          "2.4 VRZ TRD Sportivo 4x2 AT (2017-2021)",
+          "2.7 SRZ TRD Sportivo 4x2 AT (2017-2021)",
+          "2.4 VRZ GR Sport 4x2 AT (2021-2022)",
+          "2.7 SRZ GR Sport 4x2 AT (2021-)",
+          "2.8 VRZ 4x2 AT (2022-)",
+          "2.8 VRZ GR Sport 4x2 AT (2022-)",
+          "2.8 VRZ GR Sport 4x4 AT (2022-)",
+          "2.8 VRZ 4x4 AT (2024-)"
+        ]
+      },
+      {
+       "name": "GR Yaris",
+       "years": [2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "1.6T MT",
+         "1.6T AT (2024-)"
+       ] 
+     },
+      {
+       "name": "Hilux Generasi ke-7",
+       "years": [2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+       "variants": [
+         "2.0 Single Cabin Bensin MT",
+         "2.5 Single Cabin Diesel MT",
+         "2.5 Double Cabin E MT",
+         "2.5 Double Cabin G MT",
+         "3.0 Double Cabin V AT (2008-2012)",
+         "2.5 Double Cabin V AT (2012-2015)"
+       ]
+      },
+      {
+       "name": "Hilux Generasi ke-8",
+       "years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "2.0 Single Cabin Bensin MT",
+         "2.4 Single Cabin Diesel MT",
+         "2.4 Extra Cabin E MT",
+         "2.4 Double Cabin E MT",
+         "2.4 Double Cabin G MT",
+         "2.4 Double Cabin V AT",
+         "2.8 Double Cabin GR Sport AT"
+        ]
+      },
+      {
+       "name": "Hilux Rangga",
+       "years": [2023, 2024, 2025, 2026],
+       "variants": [
+         "2.0 Bensin Cab-Chassis Standard MT",
+         "2.0 Bensin Pick Up Standard MT (1-Way)",
+         "2.0 Bensin Pick Up Standard MT (3-Way)",
+         "2.0 Bensin Pick Up High MT",
+         "2.4 Diesel Cab-Chassis Standard MT",
+         "2.4 Diesel Pick Up Standard MT (1-Way)",
+         "2.4 Diesel Pick Up Standard MT (3-Way)",
+         "2.4 Diesel Pick Up High MT",
+         "2.4 Diesel Cab-Chassis High AT",
+         "2.4 Diesel Pick Up High AT"
+        ]
+      },
+      {
+       "name": "Raize",
+       "years": [2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "1.2 E MT",
+         "1.2 E CVT",
+         "1.2 G MT",
+         "1.2 G CVT",
+         "1.0 Turbo G MT",
+         "1.0 Turbo G CVT",
+         "1.0 Turbo GR Sport CVT",
+         "1.0 Turbo GR Sport TSS CVT"
+        ]
+      },
+      {
+       "name": "Rush Generasi 1 (Basis Terios Gen 2)",
+       "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017],
+       "variants": [
+         "1.5 G MT",
+         "1.5 G AT",
+         "1.5 S MT (2006-2013)",
+         "1.5 S AT (2006-2013)",
+         "1.5 TRD Sportivo MT (2013-2017)",
+         "1.5 TRD Sportivo AT (2013-2017)"
+        ]
+      },
+     {
+       "name": "Rush Generasi 2 (Basis Terios Gen 3)",
+       
+       "years": [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "1.5 G MT",
+         "1.5 G AT",
+         "1.5 TRD Sportivo MT (2017-2021)",
+         "1.5 TRD Sportivo AT (2017-2021)",
+         "1.5 GR Sport MT (2021-2026)",
+         "1.5 GR Sport AT (2021-2026)"
+        ]
+     },
+     {
+       "name": "Calya",
+       "years": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+       "variants": [
+         "1.2 E MT", 
+         "1.2 E AT (2016-2019)",
+         "1.2 G MT",
+         "1.2 G AT"
+        ]
+      },
+      {
+       "name": "Camry Generasi 1 (XV20)",
+       "years": [1998, 1999, 2000, 2001, 2002],
+       "variants": [
+         "2.2 GLX MT",
+         "2.2 GLX AT",
+         "2.2 CSX AT",
+         "3.0 V6 AT"
+       ]
+      },
+      {
+       "name": "Camry Generasi 2 (XV30)",
+       "years": [2002, 2003, 2004, 2005, 2006],
+       "variants": [
+         "2.4 G MT",
+         "2.4 G AT",
+         "3.0 V AT"
+       ]
+      },
+      {
+       "name": "Camry Generasi 3 (XV40)",
+       "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012],
+       "variants": [
+         "2.4 G AT",
+         "2.4 V AT",
+         "3.5 Q AT"
+       ]
+      },
+      {
+       "name": "Camry Generasi 4 (XV50)",
+       "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018],
+       "variants": [
+         "2.5 G AT",
+         "2.5 V AT",
+         "2.5 Hybrid AT"
+       ]
+      },
+      {
+       "name": "Camry Generasi 5 (XV70)",
+       "years": [2019, 2020, 2021, 2022, 2023, 2024],
+       "variants": [
+         "2.5 G AT (2019-2021)",
+         "2.5 V AT",
+         "2.5 Hybrid AT"
+       ]
+      },
+      {
+       "name": "Camry Generasi 6 (XV80)",
+       "years": [2024, 2025, 2026],
+       "variants": [
+         "2.5 Hybrid (HEV)"
+       ]
+      },
+      {
+       "name": "Corolla Altis Generasi 1 (E120)",
+       "years": [2001, 2002, 2003, 2004, 2005, 2006, 2007],
+       "variants": [
+         "1.8 J MT",
+         "1.8 G MT",
+         "1.8 G AT"
+       ]
+      },
+      {
+       "name": "Corolla Altis Generasi 2 (E140)",
+       "years": [2008, 2009, 2010, 2011, 2012, 2013],
+       "variants": [
+         "1.8 J MT",
+         "1.8 G MT",
+         "1.8 G AT",
+         "1.8 V AT",
+         "2.0 V AT (2009-2013)"
+       ]
+      },
+      {
+       "name": "Corolla Altis Generasi 3 (E170)",
+       "years": [2014, 2015, 2016, 2017, 2018, 2019],
+       "variants": [
+         "1.8 G MT",
+         "1.8 V CVT"
+       ]
+      },
+      {
+       "name": "Corolla Altis Generasi 4 (E210)",
+       "years": [2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "1.8 G CVT (2019-2021)",
+         "1.8 V CVT",
+         "1.8 Hybrid e-CVT"
+       ]
+      },
+      {
+       "name": "Corolla Cross",
+       "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "1.8 CVT (2020-2021)",
+         "1.8 Hybrid e-CVT",
+         "1.8 Hybrid GR Sport e-CVT (2023-)"
+       ]
+      },
+      {
+       "name": "Hilux Rangga",
+       "years": [2024, 2025, 2026],
+       "variants": [
+         "2.0 Bensin Cab-Chassis Standard MT",
+         "2.0 Bensin Pick Up Standard MT (1-Way)",
+         "2.0 Bensin Pick Up Standard MT (3-Way)",
+         "2.0 Bensin Pick Up High MT",
+         "2.4 Diesel Cab-Chassis Standard MT",
+         "2.4 Diesel Pick Up Standard MT (1-Way)",
+         "2.4 Diesel Pick Up Standard MT (3-Way)",
+         "2.4 Diesel Pick Up High MT",
+         "2.4 Diesel Cab-Chassis High AT",
+         "2.4 Diesel Pick Up High AT"
+        ]
+      },
+      {
+       "name": "86 (ZN6)",
+       "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
+       "variants": [
+         "2.0 MT",
+         "2.0 AT",
+         "2.0 AT TRD",
+         "2.0 AT TRD Aero"
+       ]
+      },
+      {
+       "name": "GR86 (ZN8)",
+       "years": [2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "2.4 MT",
+         "2.4 AT"
+       ]
+      },
+      {
+       "name": "GR Corolla",
+       "years": [2023, 2024, 2025, 2026],
+       "variants": [
+         "1.6T MT"
+       ]
+      },
+      {
+        "name": "Supra",
+        "years": [2020, 2021, 2022, 2023, 2024, 2025],
+        "variants": [
+          "Supra 3.0L", 
+          "Supra 2.0L"
+        ]
+      },
+      {
+        "name": "Vios Generasi 1",
+        "years": [2002, 2003, 2004, 2005, 2006, 2007],
+        "variants": [
+          "Vios 1.5 E MT", 
+          "Vios 1.5 G AT",
+          "Vios 1.5 G MT"
+        ]
+      },
+      {
+        "name": "Vios Generasi 2",
+        "years": [2007, 2008, 2009, 2010, 2011, 2012, 2013],
+        "variants": [
+          "Vios 1.5 E MT", 
+          "Vios 1.5 G AT",
+          "Vios 1.5 G MT"
+        ]
+      },
+      {
+        "name": "Vios Generasi 3",
+        "years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
+        "variants": [
+          "Vios 1.5 E MT",
+          "Vios 1.5 E AT", 
+          "Vios 1.5 G AT",
+          "Vios 1.5 G MT",
+          "Vios 1.5 TRD Sportivo MT (2014-2018)",
+          "Vios 1.5 TRD Sportivo AT (2014-2018)",
+          "Vios 1.5 G CVT (2018-2022)"
+        ]
+      },
+      {
+        "name": "Vios Generasi 4",
+        "years": [2022, 2023, 2024, 2025, 2026],
+        "variants": [
+          "Vios 1.5 E MT (2022-2023)",
+          "Vios 1.5 G CVT",
+          "Vios 1.5 G CVT TSS",
+          "Vios 1.5 HEV (2026)"
+        ]
+      },
+      {
+       "name": "NAV1 (R70)",
+       "years": [2012, 2013, 2014, 2015, 2016, 2017],
+       "variants": [
+         "2.0 G AT",
+         "2.0 V AT",
+         "2.0 V Limited AT (2014-2017)"
+       ]
+     },
+     {
+       "name": "Voxy Generasi 3 (R80)",
+       "years": [2017, 2018, 2019, 2020, 2021, 2022],
+       "variants": [
+         "2.0 CVT"
+       ]
+     },
+     {
+       "name": "Voxy Generasi 4 (R90)",
+       "years": [2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "2.0 CVT"
+       ]
+      },
+      {
+       "name": "Yaris Generasi 1 (XP90)",
+       "years": [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+       "variants": [
+         "1.5 J MT",
+         "1.5 J AT",
+         "1.5 E MT",
+         "1.5 E AT",
+         "1.5 S AT",
+         "1.5 S Limited AT",
+         "1.5 TRD Sportivo MT",
+         "1.5 TRD Sportivo AT"
+       ] 
+      },
+      {
+       "name": "Yaris Generasi 2 (XP150 Pre-Facelift)",
+       "years": [2014, 2015, 2016, 2017, 2018],
+       "variants": [
+         "1.5 E MT",
+         "1.5 E AT (2014-2016)",
+         "1.5 E CVT (2016-2018)",
+         "1.5 G MT",
+         "1.5 G AT (2014-2016)",
+         "1.5 G CVT (2016-2018)",
+         "1.5 TRD Sportivo MT",
+         "1.5 TRD Sportivo AT (2014-2016)",
+         "1.5 TRD Sportivo CVT (2016-2018)",
+         "1.5 TRD Sportivo Heykers MT (2016-2018)",
+         "1.5 TRD Sportivo Heykers CVT (2016-2018)"
+       ]
+      },
+      {
+       "name": "Yaris Generasi 2 (XP150 Facelift 1)",
+       "years": [2018, 2019, 2020],
+       "variants": [
+         "1.5 E MT",
+         "1.5 E CVT",
+         "1.5 G MT",
+         "1.5 G CVT",
+         "1.5 TRD Sportivo MT",
+         "1.5 TRD Sportivo CVT"
+       ]
+      },
+      {
+       "name": "Yaris Generasi 2 (XP150 Facelift 2)",
+       "years": [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+       "variants": [
+         "1.5 G MT",
+         "1.5 G CVT",
+         "1.5 TRD Sportivo MT (2020-2021)",
+         "1.5 TRD Sportivo CVT (2020-2021)",
+         "1.5 GR Sport MT (2021-)",
+         "1.5 GR Sport CVT (2021-)"
+       ]
+      },
+      {
+       "name": "Yaris Cross (AC200)",
+       "years": [2023, 2024, 2025, 2026],
+       "variants": [
+         "1.5 G MT",
+         "1.5 G CVT",
+         "1.5 S CVT",
+         "1.5 S CVT with GR Parts Aero Package",
+         "1.5 S HV CVT",
+         "1.5 S HV CVT with GR Parts Aero Package"
+        ]
+      }
+    
+    ]
+  }
+]

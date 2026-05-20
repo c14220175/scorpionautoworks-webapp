@@ -1,0 +1,1167 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { 
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, 
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction 
+} from "@/components/ui/alert-dialog";
+import { Search, Trash2, Printer, X } from "lucide-react";
+
+export default function OngoingPage() {
+  const supabase = createClient();
+  const [reservations, setReservations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  
+  // State Dialog Utama
+  const [selectedRes, setSelectedRes] = useState<any | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+
+  // State Pop-up Beruntun
+  const [showKendalaPopup, setShowKendalaPopup] = useState(false);
+  const [showKendalaFormPopup, setShowKendalaFormPopup] = useState(false);
+  const [showKirimEmailPopup, setShowKirimEmailPopup] = useState(false);
+  const [showEscalatePopup, setShowEscalatePopup] = useState(false);
+  const [showSetujuEscalatePopup, setShowSetujuEscalatePopup] = useState(false);
+
+  // Form State
+  const [kendalaType, setKendalaType] = useState<"Reparasi" | "Servis" | "">("");
+  const [kendalaDesc, setKendalaDesc] = useState("");
+  const [kendalaImageFile, setKendalaImageFile] = useState<File | null>(null);
+  const [checkupEmailLoading, setCheckupEmailLoading] = useState(false);
+  const [hasEscalateButton, setHasEscalateButton] = useState(false);
+  const [escalateChoice, setEscalateChoice] = useState<"Reparasi" | "Servis" | "">("");
+
+  // ================= INVOICE STATES =================
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
+  
+  // Tambah Part Modal
+  const [showAddPartModal, setShowAddPartModal] = useState(false);
+  
+  // Part Customer Modal
+  const [showPartCustModal, setShowPartCustModal] = useState(false);
+  const [partCustName, setPartCustName] = useState("");
+  const [partCustItemType, setPartCustItemType] = useState("");
+  
+  // Part Inventory Modal
+  const [showPartInvModal, setShowPartInvModal] = useState(false);
+  const [inventoryList, setInventoryList] = useState<any[]>([]);
+  const [invSearch, setInvSearch] = useState("");
+  const [selectedInvItem, setSelectedInvItem] = useState<any | null>(null);
+  const [showInvQtyModal, setShowInvQtyModal] = useState(false);
+  const [invQty, setInvQty] = useState<number | "">("");
+  const [loadingInventory, setLoadingInventory] = useState(false);
+
+  // Tambah Jasa Modal
+  const [showAddJasaModal, setShowAddJasaModal] = useState(false);
+  const [jasaName, setJasaName] = useState("");
+  const [jasaPrice, setJasaPrice] = useState<number | "">("");
+  // ===================================================
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("status", "in_progress")
+        .order("booking_date", { ascending: false });
+
+      if (error) throw error;
+      if (data) setReservations(data);
+    } catch (error: any) {
+      toast.error("Gagal mengambil data: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isCheckup =
+    selectedRes?.service_type?.toLowerCase().includes("pengecekan") ||
+    selectedRes?.service_type?.toLowerCase().includes("checkup");
+
+  const phases = isCheckup
+    ? ["Pengecekan awal", "Pengecekan selesai"]
+    : ["Melepas komponen lama (Menunggu Sparepart)", "Memasang komponen baru", "Pengecekan terakhir"];
+
+  const isLastPhase = currentPhaseIndex === phases.length - 1;
+
+  // Cek apakah fase saat ini adalah "Memasang komponen baru"
+  const isMelepasPhase = !isCheckup && currentPhaseIndex === 0;
+  const isMerasangPhase = !isCheckup && currentPhaseIndex === 1;
+  const showInvoiceItemsReadOnly = !isCheckup && currentPhaseIndex > 1 && invoiceItems.length > 0;
+
+  const handleOpenDetail = (res: any) => {
+    setSelectedRes(res);
+    setCurrentPhaseIndex(res.current_phase || 0);
+    setHasEscalateButton(false);
+    setKendalaType("");
+    setKendalaDesc("");
+    setKendalaImageFile(null);
+    setEscalateChoice("");
+
+    // Load existing invoice items from database
+    if (res.invoice_data && res.invoice_data.items) {
+      setInvoiceItems(res.invoice_data.items);
+    } else {
+      setInvoiceItems([]);
+    }
+
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setTimeout(() => setSelectedRes(null), 300);
+  };
+
+  const handleLanjutProgress = async () => {
+    if (!isLastPhase) {
+      const nextPhase = currentPhaseIndex + 1;
+
+      // Untuk General Checkup: tampilkan popup kendala DULU sebelum menyimpan fase ke database
+      if (isCheckup && nextPhase === 1) {
+        setShowKendalaPopup(true);
+        return; // Jangan advance fase dulu — tunggu jawaban kendala
+      }
+
+      // Untuk servis non-checkup: langsung advance fase seperti biasa
+      setCurrentPhaseIndex(nextPhase);
+
+      // Simpan fase ke database agar tidak reset saat dialog ditutup
+      try {
+        await supabase.from("bookings").update({ current_phase: nextPhase, updated_at: new Date().toISOString() }).eq("id", selectedRes.id);
+        
+        // Update local state agar tidak reset saat dialog ditutup/dibuka ulang
+        setSelectedRes({ ...selectedRes, current_phase: nextPhase });
+        setReservations(prev => prev.map(r => r.id === selectedRes.id ? { ...r, current_phase: nextPhase } : r));
+
+        // Send email notification for phase change
+        if (selectedRes.customer_email) {
+          const phaseText = phases[nextPhase];
+          fetch('/api/send-service-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerName: selectedRes.customer_name,
+              customerEmail: selectedRes.customer_email,
+              vehicleInfo: selectedRes.vehicle_info,
+              vehicleYear: selectedRes.vehicle_year || '-',
+              serviceType: selectedRes.service_type,
+              currentPhase: phaseText,
+              isCompleted: false,
+            }),
+          }).catch(err => console.error("Gagal mengirim email notifikasi fase:", err));
+        }
+      } catch (err: any) {
+        console.error("Gagal menyimpan fase:", err.message);
+      }
+    }
+  };
+
+  // Helper: advance checkup phase to "Pengecekan selesai" after kendala answer
+  const advanceCheckupPhase = async () => {
+    const nextPhase = 1; // "Pengecekan selesai"
+    setCurrentPhaseIndex(nextPhase);
+    try {
+      await supabase.from("bookings").update({ current_phase: nextPhase, updated_at: new Date().toISOString() }).eq("id", selectedRes.id);
+    } catch (err: any) {
+      console.error("Gagal menyimpan fase checkup:", err.message);
+    }
+  };
+
+  const handleEscalateConfirm = async () => {
+    setActionLoading(true);
+    try {
+      const newServiceType = escalateChoice === "Reparasi" ? "Repair / Perbaikan Komponen" : "Servis Rutin";
+      const { error } = await supabase.from("bookings").update({ service_type: newServiceType, current_phase: 0, updated_at: new Date().toISOString() }).eq("id", selectedRes.id);
+      if (error) throw error;
+
+      setSelectedRes({ ...selectedRes, service_type: newServiceType });
+      setCurrentPhaseIndex(0);
+      setHasEscalateButton(false);
+      setShowSetujuEscalatePopup(false);
+      fetchBookings();
+      toast.success("Eskalasi berhasil. Jenis servis telah diperbarui.");
+    } catch (error: any) {
+      toast.error("Gagal mengupdate jenis servis: " + error.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ================= INVOICE FUNCTIONS =================
+
+  // Helper: harga jasa bongkar/pasang berdasarkan jenis item
+  const getJasaBongkarPasangPrice = (itemType: string): number => {
+    switch (itemType) {
+      case "Understeel (Suspension)": return 200000;
+      case "Engine Component": return 150000;
+      case "Understeel (Brakes)": return 350000;
+      default: return 0;
+    }
+  };
+
+  // Simpan invoice items ke database secara incremental
+  const saveInvoiceToDb = async (items: any[]) => {
+    if (!selectedRes) return;
+    const total = items.reduce((acc: number, curr: any) => acc + (curr.price * curr.qty), 0);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ invoice_data: { items, total } })
+        .eq("id", selectedRes.id);
+      if (error) {
+        console.error("Gagal menyimpan invoice ke DB:", error.message);
+      }
+    } catch (err: any) {
+      console.error("Gagal menyimpan invoice:", err.message);
+    }
+  };
+
+  // Buka invoice read-only (tanpa reset items)
+  const openInvoice = () => {
+    setIsDetailOpen(false);
+    setShowInvoiceModal(true);
+  };
+
+  const submitPartCustomer = () => {
+    if (!partCustName.trim()) { toast.error("Nama part tidak boleh kosong"); return; }
+    if (!partCustItemType) { toast.error("Pilih jenis item terlebih dahulu"); return; }
+    const newItem = {
+      id: Date.now(),
+      name: partCustName,
+      item_type: partCustItemType,
+      type: "Part-Customer",
+      qty: 1,
+      price: 0
+    };
+    const itemsWithPart = [...invoiceItems, newItem];
+
+    // Auto-add jasa bongkar/pasang berdasarkan jenis item
+    const jasaPrice = getJasaBongkarPasangPrice(partCustItemType);
+    let newItems = itemsWithPart;
+    if (jasaPrice > 0) {
+      const jasaItem = {
+        id: Date.now() + 1,
+        name: `Jasa Bongkar/Pasang (${partCustItemType})`,
+        type: "Jasa",
+        qty: 1,
+        price: jasaPrice
+      };
+      newItems = [...itemsWithPart, jasaItem];
+    }
+
+    setInvoiceItems(newItems);
+    saveInvoiceToDb(newItems);
+    setPartCustName("");
+    setPartCustItemType("");
+    setShowPartCustModal(false);
+  };
+
+  // Fetch inventory dari database
+  const fetchInventory = async () => {
+    setShowAddPartModal(false);
+    setShowPartInvModal(true); 
+    setLoadingInventory(true); 
+    
+    try {
+      const { data, error } = await supabase.from("inventory").select("*").gt("stock_count", 0);
+      if (error) throw error;
+      setInventoryList(data || []);
+    } catch (err: any) {
+      console.error("Supabase Error:", err.message || JSON.stringify(err));
+      toast.error(`Gagal memuat data: ${err.message || 'Tabel inventory tidak ditemukan'}`);
+      setInventoryList([]);
+    } finally {
+      setLoadingInventory(false);
+    }
+  };
+
+  const submitPartInventoryQty = async () => {
+    if (!invQty || invQty <= 0) { toast.error("Jumlah tidak valid"); return; }
+    if (invQty > selectedInvItem.stock_count) {
+      toast.error(`Barang pilihan sudah maks stok! (Maks: ${selectedInvItem.stock_count})`);
+      return;
+    }
+
+    // Langsung kurangi stok di database saat part ditambahkan ke invoice
+    const qtyNum = Number(invQty);
+    try {
+      const newStock = selectedInvItem.stock_count - qtyNum;
+      if (newStock <= 0) {
+        // Stok habis, hapus dari inventory
+        const { error } = await supabase.from("inventory").delete().eq("id", selectedInvItem.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("inventory").update({ stock_count: newStock }).eq("id", selectedInvItem.id);
+        if (error) throw error;
+      }
+    } catch (err: any) {
+      toast.error("Gagal mengurangi stok: " + err.message);
+      return;
+    }
+
+    const newItem = {
+      id: Date.now(),
+      inv_id: selectedInvItem.id, 
+      name: selectedInvItem.name,
+      type: "Part-Inventory",
+      qty: qtyNum,
+      price: selectedInvItem.price,
+      item_type: selectedInvItem.item_type || null,
+      category: selectedInvItem.category || null,
+      vendor: selectedInvItem.vendor || null
+    };
+    const itemsWithPart = [...invoiceItems, newItem];
+
+    // Auto-add jasa bongkar/pasang berdasarkan jenis item dari inventory
+    const itemType = selectedInvItem.item_type || "";
+    const jasaPrice = getJasaBongkarPasangPrice(itemType);
+    let newItems = itemsWithPart;
+    if (jasaPrice > 0) {
+      const jasaItem = {
+        id: Date.now() + 1,
+        name: `Jasa Bongkar/Pasang (${itemType})`,
+        type: "Jasa",
+        qty: 1,
+        price: jasaPrice
+      };
+      newItems = [...itemsWithPart, jasaItem];
+    }
+
+    setInvoiceItems(newItems);
+    saveInvoiceToDb(newItems);
+
+    setInvQty("");
+    setSelectedInvItem(null);
+    setShowInvQtyModal(false);
+  };
+
+  const submitJasa = () => {
+    if (!jasaName.trim() || !jasaPrice || jasaPrice < 0) {
+      toast.error("Nama jasa dan harga harus diisi dengan benar"); return;
+    }
+    const newItem = {
+      id: Date.now(),
+      name: jasaName,
+      type: "Jasa",
+      qty: 1,
+      price: Number(jasaPrice)
+    };
+    const newItems = [...invoiceItems, newItem];
+    setInvoiceItems(newItems);
+    saveInvoiceToDb(newItems);
+    setJasaName("");
+    setJasaPrice("");
+    setShowAddJasaModal(false);
+  };
+
+  // Hapus Item (+ simpan ke DB, kembalikan stok jika Part-Inventory)
+  const removeItem = async (id: number) => {
+    const itemToRemove = invoiceItems.find(item => item.id === id);
+
+    // Kembalikan stok jika item yang dihapus adalah Part-Inventory
+    if (itemToRemove && itemToRemove.type === "Part-Inventory" && itemToRemove.inv_id) {
+      try {
+        const { data: invData } = await supabase.from("inventory").select("*").eq("id", itemToRemove.inv_id).single();
+        if (invData) {
+          // Item masih ada di inventory, tambahkan stok kembali
+          const restoredStock = invData.stock_count + itemToRemove.qty;
+          await supabase.from("inventory").update({ stock_count: restoredStock }).eq("id", itemToRemove.inv_id);
+        } else {
+          // Item sudah dihapus dari inventory (stok habis), re-insert
+          // Ambil data dari selectedInvItem cache atau dari invoice item
+          await supabase.from("inventory").insert([{
+            id: itemToRemove.inv_id,
+            name: itemToRemove.name,
+            stock_count: itemToRemove.qty,
+            price: itemToRemove.price,
+            item_type: itemToRemove.item_type || null,
+            category: itemToRemove.category || null,
+            vendor: itemToRemove.vendor || null
+          }]);
+        }
+      } catch (err: any) {
+        console.error("Gagal mengembalikan stok:", err.message);
+      }
+    }
+
+    const newItems = invoiceItems.filter(item => item.id !== id);
+    setInvoiceItems(newItems);
+    saveInvoiceToDb(newItems);
+  };
+
+  // Final Submit Selesai Servis + Invoice
+  const executeFinishInvoice = async () => {
+    if (!selectedRes) return;
+    setActionLoading(true);
+    
+    try {
+      // Stok sudah dikurangi saat part ditambahkan ke invoice, jadi langsung simpan
+
+      // Simpan invoice dan selesaikan booking
+      const currentTime = new Date().toISOString();
+      const totalBayar = invoiceItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+
+      const { error } = await supabase
+        .from("bookings")
+        .update({ 
+          status: "completed",
+          completed_at: currentTime,
+          invoice_data: { items: invoiceItems, total: totalBayar },
+          tracking_code: null // Set null agar kode bisa dipakai kembali
+        })
+        .eq("id", selectedRes.id);
+        
+      if (error) {
+        console.error("Error saving invoice_data:", error);
+        const { error: fallbackError } = await supabase
+          .from("bookings")
+          .update({ status: "completed", completed_at: currentTime })
+          .eq("id", selectedRes.id);
+          
+        if (fallbackError) throw fallbackError;
+        toast.warning("Servis selesai, tetapi struk invoice tidak tersimpan karena kolom belum dibuat di Database.");
+      } else {
+        toast.success("Servis & Invoice Selesai! Data dipindahkan ke Riwayat.");
+      }
+      
+      // Send email notification for service completion
+      if (selectedRes.customer_email) {
+        try {
+          await fetch('/api/send-service-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerName: selectedRes.customer_name,
+              customerEmail: selectedRes.customer_email,
+              vehicleInfo: selectedRes.vehicle_info,
+              vehicleYear: selectedRes.vehicle_year || '-',
+              serviceType: selectedRes.service_type,
+              currentPhase: phases[currentPhaseIndex],
+              isCompleted: true,
+              invoiceItems: invoiceItems,
+              totalBayar: totalBayar
+            }),
+          });
+        } catch (emailErr) {
+          console.error("Gagal mengirim email invoice:", emailErr);
+        }
+      }
+      
+      setShowInvoiceModal(false);
+      setSelectedRes(null);
+      fetchBookings();
+    } catch (error: any) {
+      toast.error("Gagal menyelesaikan servis: " + error.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Filter pencarian inventory
+  const filteredInventory = inventoryList.filter(inv => 
+    (inv.name || "").toLowerCase().includes(invSearch.toLowerCase())
+  );
+
+  // Hitung total sementara
+  const runningTotal = invoiceItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center gap-4">
+        <h1 className="text-2xl font-bold text-slate-100">Sedang Dikerjakan (Ongoing)</h1>
+        <Button variant="outline" onClick={fetchBookings} className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white">
+          Refresh Data
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-20 text-slate-500 animate-pulse">Memuat data...</div>
+      ) : reservations.length === 0 ? (
+        <Card className="bg-slate-900 border-slate-800"><CardContent className="text-center py-20 text-slate-500">Tidak ada kendaraan yang sedang dikerjakan.</CardContent></Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reservations.map((res) => (
+            <Card key={res.id} onClick={() => handleOpenDetail(res)} className="bg-slate-900 border border-emerald-900/50 hover:border-emerald-500/50 cursor-pointer transition-all group shadow-lg">
+              <CardContent className="p-5 flex flex-col gap-2">
+                <div className="flex justify-between w-full">
+                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 animate-pulse">
+                    In Progress
+                  </Badge>
+                </div>
+                <div className="mt-2">
+                  <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
+                  <p className="text-emerald-500 text-xs mb-1 font-medium">{res.service_type}</p>
+                  <p className="text-slate-400 text-sm mt-1">{res.vehicle_info}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* MODAL UTAMA: Detail Pengerjaan */}
+      <Dialog open={isDetailOpen} onOpenChange={(open) => { if(!open) handleCloseDetail(); }}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-emerald-500 text-xl border-b border-slate-700 pb-3">Detail Pengerjaan</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+             <div className="text-sm text-slate-300 space-y-3">
+               <p><strong>Pelanggan:</strong> {selectedRes?.customer_name}</p>
+               <p><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
+               <p><strong>Jenis Layanan:</strong> {selectedRes?.service_type}</p>
+               <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                  <p><strong>Fase Pengerjaan:</strong> <span className="text-emerald-400 font-bold ml-1">{phases[currentPhaseIndex]}</span></p>
+               </div>
+
+                {/* ====== Checkup Description (if exists) ====== */}
+                {selectedRes?.checkup_description && (
+                  <div className="bg-yellow-900/20 p-3 rounded-lg border border-yellow-700/50 mt-2">
+                    <p className="text-sm font-bold text-yellow-500 mb-1">🔍 Kendala Ditemukan:</p>
+                    <p className="text-sm text-slate-300 whitespace-pre-wrap">{selectedRes.checkup_description}</p>
+                    {selectedRes.checkup_image_url && (
+                      <img src={selectedRes.checkup_image_url} alt="Foto kendala" className="mt-2 rounded-lg max-w-full max-h-48 object-cover border border-slate-700" />
+                    )}
+                  </div>
+                )}
+
+                {/* ====== Customer Checkup Response ====== */}
+                {selectedRes?.checkup_description && !selectedRes?.customer_checkup_response && (
+                  <div className="bg-amber-900/20 p-3 rounded-lg border border-amber-700/50 mt-2">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                      </span>
+                      <p className="text-sm font-bold text-amber-400">Menunggu Respon Pelanggan...</p>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">Email kendala telah dikirim. Menunggu pelanggan memilih apakah akan melanjutkan perbaikan atau tidak.</p>
+                  </div>
+                )}
+
+                {selectedRes?.customer_checkup_response && (
+                  <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-700 mt-2">
+                    <p className="text-sm font-bold text-blue-400">Respon Pelanggan:</p>
+                    <p className="text-lg text-white font-bold">{selectedRes.customer_checkup_response}</p>
+                    <p className="text-xs text-blue-300 mt-2">
+                      {selectedRes.customer_checkup_response === 'Lanjut Reparasi'
+                        ? "Gunakan tombol 'Escalate' untuk mengubah layanan."
+                        : "Silahkan klik 'Selesaikan Servis' untuk membuat invoice."}
+                    </p>
+                  </div>
+                )}
+
+               {/* ====== SECTION: Barang & Jasa (tampil saat fase "Memasang komponen baru" atau setelahnya) ====== */}
+               {(isMerasangPhase || showInvoiceItemsReadOnly) && (
+                 <div className="mt-4 pt-4 border-t border-slate-800">
+                   <div className="flex items-center justify-between mb-3">
+                     <h4 className="text-sm font-semibold text-yellow-500 flex items-center gap-2">
+                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                       Barang & Jasa
+                     </h4>
+                   </div>
+
+                   {/* Tombol tambah - hanya tampil saat fase "Memasang komponen baru" */}
+                   {isMerasangPhase && (
+                     <div className="flex gap-2 mb-3">
+                       <Button size="sm" onClick={() => setShowAddPartModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
+                         + Tambah Part
+                       </Button>
+                       <Button size="sm" onClick={() => setShowAddJasaModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8">
+                         + Tambah Jasa
+                       </Button>
+                     </div>
+                   )}
+
+                   {/* Tabel ringkasan item */}
+                   {invoiceItems.length > 0 ? (
+                     <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
+                       <table className="w-full text-xs text-left text-slate-300">
+                         <thead className="text-[10px] text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+                           <tr>
+                             <th className="px-2 py-2 text-center">No</th>
+                             <th className="px-2 py-2">Nama</th>
+                             <th className="px-2 py-2">Jenis</th>
+                             <th className="px-2 py-2 text-center">Qty</th>
+                             <th className="px-2 py-2 text-right">Harga</th>
+                             {isMerasangPhase && <th className="px-2 py-2 text-center w-10"></th>}
+                           </tr>
+                         </thead>
+                         <tbody>
+                           {invoiceItems.map((item, index) => (
+                             <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
+                               <td className="px-2 py-2 text-center">{index + 1}</td>
+                               <td className="px-2 py-2 font-medium text-slate-200">{item.name}</td>
+                               <td className="px-2 py-2">
+                                 <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">{item.type}</span>
+                               </td>
+                               <td className="px-2 py-2 text-center">{item.qty}</td>
+                               <td className="px-2 py-2 text-right">Rp {(item.price * item.qty).toLocaleString("id-ID")}</td>
+                               {isMerasangPhase && (
+                                 <td className="px-2 py-2 text-center">
+                                   <button onClick={() => removeItem(item.id)} className="text-rose-400 hover:text-rose-300 transition-colors p-1">
+                                     <Trash2 className="h-3.5 w-3.5" />
+                                   </button>
+                                 </td>
+                               )}
+                             </tr>
+                           ))}
+                         </tbody>
+                       </table>
+                     </div>
+                   ) : (
+                     <div className="text-center py-4 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
+                       Belum ada barang atau jasa ditambahkan
+                     </div>
+                   )}
+
+                   {/* Total sementara */}
+                   {invoiceItems.length > 0 && (
+                     <div className="flex justify-end mt-2">
+                       <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
+                         <span className="text-slate-400">Total: </span>
+                         <span className="text-emerald-400 font-bold">Rp {runningTotal.toLocaleString("id-ID")}</span>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               )}
+
+               <p className="mt-4 pt-2 border-t border-slate-800 text-slate-400">{selectedRes?.problem_description}</p>
+             </div>
+          </div>
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 border-t border-slate-800 pt-4 mt-2">
+            <div>
+              {(hasEscalateButton || selectedRes?.checkup_description || selectedRes?.customer_checkup_response === 'Lanjut Reparasi') && (
+                <Button variant="destructive" onClick={() => setShowEscalatePopup(true)} className="bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20">
+                  Escalate
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={handleCloseDetail} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
+                Tutup
+              </Button>
+              
+              {!isLastPhase && (
+                <Button onClick={handleLanjutProgress} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+                  Lanjut progress
+                </Button>
+              )}
+
+              <Button 
+                onClick={openInvoice} 
+                disabled={!(isLastPhase || (isCheckup && selectedRes?.customer_checkup_response === 'Selesai / Tanpa Perbaikan')) || actionLoading} 
+                className={(isLastPhase || (isCheckup && selectedRes?.customer_checkup_response === 'Selesai / Tanpa Perbaikan')) ? "bg-blue-600 hover:bg-blue-500 text-white" : "bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed"}
+              >
+                Selesaikan Servis
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL INVOICE (READ-ONLY SUMMARY) ================= */}
+      <AlertDialog open={showInvoiceModal}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-bold text-white text-center pb-2 border-b border-slate-800">
+              Invoice
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+          
+          <div className="py-4 space-y-6">
+            {/* Info Pelanggan */}
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300">
+              <div>
+                <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedRes?.customer_name}</p>
+                <p className="mb-1"><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
+                <p><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedRes?.service_type}</span></p>
+              </div>
+              <div className="sm:text-right">
+                <p className="text-xs text-slate-500">ID Reservasi</p>
+                <p className="text-slate-300 font-bold">{selectedRes?.id}</p>
+              </div>
+            </div>
+
+            {/* Tabel Item Invoice (Read-Only) */}
+            <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
+              <table className="w-full text-sm text-left text-slate-300">
+                <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+                  <tr>
+                    <th className="px-4 py-3 text-center">No.</th>
+                    <th className="px-4 py-3">Nama</th>
+                    <th className="px-4 py-3">Jenis</th>
+                    <th className="px-4 py-3 text-center">Jumlah</th>
+                    <th className="px-4 py-3 text-right">Harga Satuan</th>
+                    <th className="px-4 py-3 text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceItems.length === 0 ? (
+                    <tr><td colSpan={6} className="text-center py-6 text-slate-500">Tidak ada item dalam invoice</td></tr>
+                  ) : (
+                    invoiceItems.map((item, index) => (
+                      <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
+                        <td className="px-4 py-3 text-center">{index + 1}</td>
+                        <td className="px-4 py-3 font-medium text-slate-200">{item.name}</td>
+                        <td className="px-4 py-3"><Badge className="bg-slate-700 text-slate-300">{item.type}</Badge></td>
+                        <td className="px-4 py-3 text-center">{item.qty}</td>
+                        <td className="px-4 py-3 text-right">Rp {item.price.toLocaleString("id-ID")}</td>
+                        <td className="px-4 py-3 text-right text-slate-200 font-medium">
+                          Rp {(item.price * item.qty).toLocaleString("id-ID")}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Total Keseluruhan */}
+            <div className="flex justify-end items-center">
+              <div className="bg-slate-800 px-6 py-3 rounded-lg border border-slate-700 flex gap-4 items-center">
+                <span className="text-slate-400 font-medium">Total Keseluruhan:</span>
+                <span className="text-2xl text-emerald-400 font-bold">
+                  Rp {runningTotal.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter className="sm:justify-between w-full flex-col sm:flex-row gap-4 mt-4">
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => window.print()} className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white flex gap-2">
+                <Printer className="w-4 h-4" />
+                Print
+              </Button>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowInvoiceModal(false)} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
+                Batal
+              </Button>
+              <Button onClick={executeFinishInvoice} disabled={actionLoading} className="bg-blue-600 hover:bg-blue-500 text-white">
+                {actionLoading ? "Memproses..." : "Selesai"}
+              </Button>
+            </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ================= MODAL TAMBAH PART ================= */}
+      <Dialog open={showAddPartModal} onOpenChange={setShowAddPartModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-slate-200">Pilih Sumber Part</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 py-4">
+            <Button variant="outline" onClick={() => { setShowAddPartModal(false); setShowPartCustModal(true); }} className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white justify-start h-12">
+              Part dari customer
+            </Button>
+            <Button variant="outline" onClick={fetchInventory} className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white justify-start h-12">
+              Part dari inventory bengkel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Part Customer */}
+      <Dialog open={showPartCustModal} onOpenChange={setShowPartCustModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-emerald-500">Part dari Customer</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Nama Part</label>
+              <input type="text" value={partCustName} onChange={(e) => setPartCustName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Contoh: Oli Mesin Motul..." />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Jenis Item</label>
+              <select value={partCustItemType} onChange={(e) => setPartCustItemType(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none">
+                <option value="">-- Pilih Jenis Item --</option>
+                <option value="Engine Component">Engine Component</option>
+                <option value="Understeel (Suspension)">Understeel (Suspension)</option>
+                <option value="Understeel (Brakes)">Understeel (Brakes)</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={submitPartCustomer} className="w-full bg-emerald-600 hover:bg-emerald-500">Lanjut</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Part Inventory */}
+      <Dialog open={showPartInvModal} onOpenChange={setShowPartInvModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-emerald-500">Pilih Part dari Inventory</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <input type="text" value={invSearch} onChange={(e) => setInvSearch(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Cari nama part..." />
+            </div>
+            
+            <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
+              {loadingInventory ? (
+                <p className="text-slate-500 text-center py-4 animate-pulse">Memuat data inventory...</p>
+              ) : filteredInventory.length === 0 ? (
+                <p className="text-slate-500 text-center py-4">Part tidak ditemukan atau stok habis.</p>
+              ) : (
+                filteredInventory.map((item) => (
+                  <div key={item.id} onClick={() => { setSelectedInvItem(item); setShowPartInvModal(false); setShowInvQtyModal(true); }} className="flex justify-between items-center bg-slate-950 border border-slate-800 p-3 rounded-lg cursor-pointer hover:border-emerald-500 group">
+                    <div>
+                      <p className="text-slate-200 font-medium group-hover:text-emerald-400">{item.name}</p>
+                      <p className="text-xs text-slate-500">Sisa Stok: <span className="text-slate-300 font-bold">{item.stock_count}</span></p>
+                    </div>
+                    <p className="text-slate-300 text-sm">Rp {item.price?.toLocaleString("id-ID") || 0}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Jumlah Inventory */}
+      <Dialog open={showInvQtyModal} onOpenChange={setShowInvQtyModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-emerald-500">Masukkan Jumlah Part</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-slate-300 text-sm mb-4">Part: <strong className="text-emerald-400">{selectedInvItem?.name}</strong> (Maks: {selectedInvItem?.stock_count})</p>
+            <label className="block text-sm text-slate-400 mb-2">Jumlah</label>
+            <input type="number" min="1" max={selectedInvItem?.stock_count} value={invQty} onChange={(e) => setInvQty(Number(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Ketik jumlah..." />
+          </div>
+          <DialogFooter>
+            <Button onClick={submitPartInventoryQty} className="w-full bg-emerald-600 hover:bg-emerald-500">Lanjut</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL TAMBAH JASA ================= */}
+      <Dialog open={showAddJasaModal} onOpenChange={setShowAddJasaModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-emerald-500">Tambah Jasa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Nama Jasa</label>
+              <input type="text" value={jasaName} onChange={(e) => setJasaName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Contoh: Ongkos Ganti Oli..." />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Harga Jasa (Rp)</label>
+              <input type="number" min="0" value={jasaPrice} onChange={(e) => setJasaPrice(Number(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Contoh: 50000" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={submitJasa} className="w-full bg-emerald-600 hover:bg-emerald-500">Lanjut</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+      {/* EXISTING POP-UPS (Kendala & Escalate) */}
+      <AlertDialog open={showKendalaPopup}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 text-center sm:max-w-sm">
+          {/* Tombol X untuk menutup tanpa memajukan fase */}
+          <button
+            onClick={() => {
+              setShowKendalaPopup(false);
+              // Fase tetap di "Pengecekan awal" — tidak ada perubahan
+            }}
+            style={{ position: 'absolute', right: '16px', top: '16px', zIndex: 50 }}
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none text-slate-400 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl text-white text-center">Apa ada kendala?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center flex-row gap-4 pt-4">
+            <Button variant="outline" disabled={checkupEmailLoading} onClick={async () => {
+              // No issues found — advance phase THEN send "Mobil siap diambil" email
+              setCheckupEmailLoading(true);
+              try {
+                // Advance ke "Pengecekan selesai" sekarang
+                await advanceCheckupPhase();
+
+                if (selectedRes?.customer_email) {
+                  await fetch('/api/send-service-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      customerName: selectedRes.customer_name,
+                      customerEmail: selectedRes.customer_email,
+                      vehicleInfo: selectedRes.vehicle_info,
+                      vehicleYear: selectedRes.vehicle_year || '-',
+                      serviceType: selectedRes.service_type,
+                      currentPhase: 'Pengecekan selesai',
+                      isCompleted: false,
+                      isCheckupResult: true,
+                      hasIssues: false,
+                      trackingCode: selectedRes.tracking_code || null,
+                    }),
+                  });
+                }
+                toast.success("Email 'Mobil siap diambil' terkirim ke pelanggan.");
+              } catch (err) {
+                console.error(err);
+                toast.error("Gagal mengirim email.");
+              } finally {
+                setCheckupEmailLoading(false);
+                setShowKendalaPopup(false);
+              }
+            }} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white border-slate-700">
+              {checkupEmailLoading ? "Mengirim..." : "Tidak"}
+            </Button>
+            <Button variant="destructive" onClick={() => { setShowKendalaPopup(false); setShowKendalaFormPopup(true); }} className="flex-1 bg-rose-600 hover:bg-rose-500 text-white">
+              Ya
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 2. Pop-up Form Kendala (Mandatory) */}
+      <AlertDialog open={showKendalaFormPopup}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+          {/* Tombol X untuk menutup tanpa memajukan fase */}
+          <button
+            onClick={() => {
+              setShowKendalaFormPopup(false);
+              setKendalaType("");
+              setKendalaDesc("");
+              setKendalaImageFile(null);
+              // Fase tetap di "Pengecekan awal"
+            }}
+            style={{ position: 'absolute', right: '16px', top: '16px', zIndex: 50 }}
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none text-slate-400 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg text-emerald-500">Laporan Kendala</AlertDialogTitle>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                <input type="radio" name="kendalaType" value="Reparasi" checked={kendalaType === "Reparasi"} onChange={(e) => setKendalaType(e.target.value as any)} className="accent-emerald-500 w-4 h-4" /> Reparasi
+              </label>
+              <label className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                <input type="radio" name="kendalaType" value="Servis" checked={kendalaType === "Servis"} onChange={(e) => setKendalaType(e.target.value as any)} className="accent-emerald-500 w-4 h-4" /> Servis
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-1">Upload Foto (Opsional)</label>
+              <input type="file" accept="image/*" onChange={(e) => setKendalaImageFile(e.target.files?.[0] || null)} className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700" />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-1">Deskripsi Kendala</label>
+              <textarea rows={3} value={kendalaDesc} onChange={(e) => setKendalaDesc(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-emerald-500 resize-none" placeholder="Jelaskan detail kendala..." />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <Button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white" onClick={() => {
+              if (!kendalaType || !kendalaDesc.trim()) { toast.error("Mohon pilih opsi dan isi deskripsi."); return; }
+              setShowKendalaFormPopup(false);
+              setShowKirimEmailPopup(true);
+            }}>
+              Submit
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 3. Pop-up Kirim Email Notifikasi (Mandatory) */}
+      <AlertDialog open={showKirimEmailPopup}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 text-center sm:max-w-sm">
+          {/* Tombol X untuk menutup tanpa memajukan fase */}
+          <button
+            onClick={() => {
+              setShowKirimEmailPopup(false);
+              // Fase tetap di "Pengecekan awal"
+            }}
+            style={{ position: 'absolute', right: '16px', top: '16px', zIndex: 50 }}
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none text-slate-400 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg text-white text-center">Konfirmasi Laporan</AlertDialogTitle>
+            <AlertDialogDescription className="text-center pt-2">
+              Anda merekomendasikan: <strong className="text-emerald-400">{kendalaType}</strong><br/><br/>Email notifikasi akan dikirim ke pelanggan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <Button disabled={checkupEmailLoading} className="w-full bg-blue-600 hover:bg-blue-500 text-white" onClick={async () => {
+              setCheckupEmailLoading(true);
+              try {
+                let imageUrl: string | null = null;
+
+                // Upload image to Supabase Storage if present
+                if (kendalaImageFile) {
+                  const fileExt = kendalaImageFile.name.split('.').pop();
+                  const fileName = `${selectedRes.id}_${Date.now()}.${fileExt}`;
+                  const { error: uploadError } = await supabase.storage
+                    .from('checkup-images')
+                    .upload(fileName, kendalaImageFile);
+                  
+                  if (uploadError) {
+                    console.error("Upload error:", uploadError);
+                    toast.error("Gagal upload foto, tapi email tetap dikirim.");
+                  } else {
+                    const { data: urlData } = supabase.storage
+                      .from('checkup-images')
+                      .getPublicUrl(fileName);
+                    imageUrl = urlData.publicUrl;
+                  }
+                }
+
+                // Save to database
+                await supabase.from("bookings").update({
+                  checkup_description: kendalaDesc,
+                  checkup_image_url: imageUrl,
+                  updated_at: new Date().toISOString(),
+                }).eq("id", selectedRes.id);
+
+                // Send email with checkup results
+                if (selectedRes.customer_email) {
+                  await fetch('/api/send-service-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      customerName: selectedRes.customer_name,
+                      customerEmail: selectedRes.customer_email,
+                      vehicleInfo: selectedRes.vehicle_info,
+                      vehicleYear: selectedRes.vehicle_year || '-',
+                      serviceType: selectedRes.service_type,
+                      currentPhase: 'Pengecekan selesai (Menunggu Respon)',
+                      isCompleted: false,
+                      isCheckupResult: true,
+                      hasIssues: true,
+                      checkupDesc: kendalaDesc,
+                      checkupImage: imageUrl,
+                      bookingId: selectedRes.id,
+                      trackingCode: selectedRes.tracking_code || null,
+                    }),
+                  });
+                }
+
+                // Update local state
+                // Advance ke "Pengecekan selesai" sekarang setelah kendala dilaporkan
+                await advanceCheckupPhase();
+
+                setSelectedRes({ ...selectedRes, checkup_description: kendalaDesc, checkup_image_url: imageUrl });
+                setShowKirimEmailPopup(false);
+                setHasEscalateButton(true);
+                fetchBookings();
+                toast.success("Email kendala terkirim ke pelanggan!");
+              } catch (err: any) {
+                console.error(err);
+                toast.error("Gagal mengirim: " + (err.message || "Unknown error"));
+              } finally {
+                setCheckupEmailLoading(false);
+              }
+            }}>
+              {checkupEmailLoading ? "Mengirim..." : "Kirim"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 4. Pop-up Escalate Form (Mandatory) */}
+      <AlertDialog open={showEscalatePopup}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
+          {/* Tombol X untuk menutup */}
+          <button
+            onClick={() => {
+              setShowEscalatePopup(false);
+              setEscalateChoice("");
+            }}
+            style={{ position: 'absolute', right: '16px', top: '16px', zIndex: 50 }}
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none text-slate-400 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg text-rose-500">Eskalasi Layanan</AlertDialogTitle>
+            <AlertDialogDescription>Pilih jenis layanan lanjutan untuk kendaraan ini:</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex flex-col gap-3 py-4">
+            <label className="flex items-center gap-3 text-slate-300 cursor-pointer bg-slate-950 p-3 rounded-lg border border-slate-800 hover:border-slate-600">
+              <input type="radio" name="escalateChoice" value="Reparasi" checked={escalateChoice === "Reparasi"} onChange={(e) => setEscalateChoice(e.target.value as any)} className="accent-rose-500 w-4 h-4" /> Repair / Perbaikan Komponen
+            </label>
+            <label className="flex items-center gap-3 text-slate-300 cursor-pointer bg-slate-950 p-3 rounded-lg border border-slate-800 hover:border-slate-600">
+              <input type="radio" name="escalateChoice" value="Servis" checked={escalateChoice === "Servis"} onChange={(e) => setEscalateChoice(e.target.value as any)} className="accent-rose-500 w-4 h-4" /> Servis Rutin
+            </label>
+          </div>
+          <AlertDialogFooter>
+            <Button className="w-full bg-rose-600 hover:bg-rose-500 text-white" onClick={() => {
+              if (!escalateChoice) { toast.error("Mohon pilih jenis eskalasi."); return; }
+              setShowEscalatePopup(false);
+              setShowSetujuEscalatePopup(true);
+            }}>
+              Submit
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 5. Pop-up Final Persetujuan Escalate (Mandatory) */}
+      <AlertDialog open={showSetujuEscalatePopup}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 text-center sm:max-w-sm">
+          {/* Tombol X untuk menutup */}
+          <button
+            onClick={() => {
+              setShowSetujuEscalatePopup(false);
+            }}
+            style={{ position: 'absolute', right: '16px', top: '16px', zIndex: 50 }}
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none text-slate-400 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+            <span className="sr-only">Close</span>
+          </button>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg text-white text-center">Konfirmasi Perubahan</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">Jenis layanan akan diubah menjadi:</AlertDialogDescription>
+            <div className="font-bold text-emerald-400 bg-slate-950 py-3 mt-4 rounded border border-slate-800">
+              {escalateChoice === "Reparasi" ? "Repair / Perbaikan Komponen" : "Servis Rutin"}
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center mt-2">
+            <Button onClick={handleEscalateConfirm} disabled={actionLoading} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white">
+              {actionLoading ? "Memproses..." : "Setuju"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
