@@ -222,6 +222,7 @@ export default function HistoryPage() {
                 <div>
                   <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedBooking.customer_name}</p>
                   <p className="mb-1 text-slate-400"><strong>Email:</strong> {selectedBooking.customer_email || '-'}</p>
+                  <p className="mb-1 text-slate-400"><strong>Telepon:</strong> {selectedBooking.customer_phone || '-'}</p>
                   <p className="mb-1"><strong>Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
                   <p><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedBooking.service_type}</span></p>
                 </div>

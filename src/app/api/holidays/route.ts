@@ -15,7 +15,9 @@ export async function GET(request: Request) {
     });
     
     if (!res.ok) {
-      throw new Error(`API returned status: ${res.status}`);
+      // API belum punya data untuk tahun ini (misal tahun depan), return array kosong
+      console.warn(`Holiday API returned status ${res.status} for year ${year}, returning empty array`);
+      return NextResponse.json([]);
     }
 
     const data = await res.json();

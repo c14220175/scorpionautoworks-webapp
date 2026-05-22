@@ -343,6 +343,13 @@ export default function AdminDashboard() {
                   <div className="font-semibold text-slate-200">{selectedRes.customer_name || '-'}</div>
                   <div className="text-slate-500 text-xs mt-2 mb-1">Email</div>
                   <div className="font-semibold text-slate-200">{selectedRes.customer_email || '-'}</div>
+                  <div className="text-slate-500 text-xs mt-2 mb-1">Nomor Telepon</div>
+                  <div className="font-semibold text-slate-200 flex items-center gap-2">
+                    <svg className="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    {selectedRes.customer_phone ? (
+                      <a href={`tel:${selectedRes.customer_phone}`} className="hover:text-yellow-500 transition-colors">{selectedRes.customer_phone}</a>
+                    ) : '-'}
+                  </div>
                 </div>
                 <div><div className="text-slate-500 text-xs mb-1">ID Reservasi</div><div className="font-semibold text-slate-200">{selectedRes.id}</div></div>
                 <div><div className="text-slate-500 text-xs mb-1">Waktu Masuk</div><div className="font-semibold text-yellow-500 text-base">{formatWIB(selectedRes.booking_date)}</div></div>

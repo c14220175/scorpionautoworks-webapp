@@ -58,6 +58,37 @@ export default function BookingPage() {
             newHolidaysMap[h.date] = h.description;
           });
         }
+
+        // Fetch hari tutup custom dari admin (Supabase)
+        try {
+          const { data: closedDays, error } = await supabase
+            .from('closed_days')
+            .select('closed_date, reason');
+
+          if (!error && closedDays) {
+            closedDays.forEach((cd: any) => {
+              newHolidaysMap[cd.closed_date] = cd.reason || 'Bengkel Tutup';
+            });
+          }
+        } catch (closedErr) {
+          console.error("Gagal memuat data hari tutup dari database:", closedErr);
+        }
+
+        // Fetch holiday overrides dari admin (tanggal libur yang di-override agar tetap buka)
+        try {
+          const { data: overrides, error } = await supabase
+            .from('holiday_overrides')
+            .select('override_date');
+
+          if (!error && overrides) {
+            overrides.forEach((o: any) => {
+              // Hapus tanggal ini dari map hari libur karena admin override (tetap buka)
+              delete newHolidaysMap[o.override_date];
+            });
+          }
+        } catch (overrideErr) {
+          console.error("Gagal memuat data override hari libur:", overrideErr);
+        }
         
         setHolidaysMap(newHolidaysMap);
       } catch (err) {
@@ -76,6 +107,7 @@ export default function BookingPage() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    phoneNumber: '',
     brand: '',
     model: '',
     trim: '',
@@ -322,6 +354,7 @@ export default function BookingPage() {
       const { error: bookingError } = await supabase.from('bookings').insert({
         customer_name: formData.fullName, 
         customer_email: formData.email,
+        customer_phone: formData.phoneNumber,
         service_type: formData.serviceType,
         vehicle_year: parseInt(formData.year),
         vehicle_info: namaMobil,
@@ -352,7 +385,7 @@ export default function BookingPage() {
 
       alert('✅ Booking Berhasil Dibuat! Email konfirmasi telah dikirim.')
       
-      setFormData({ fullName: '', email: '', description: '', year: '', model: '', trim: '', brand: '', manualCarName: '', serviceType: '', reservationTime: '' })
+      setFormData({ fullName: '', email: '', phoneNumber: '', description: '', year: '', model: '', trim: '', brand: '', manualCarName: '', serviceType: '', reservationTime: '' })
       setSelectedDate('')
       setPhotoFile(null)
       setIsManualInput(false)
@@ -475,6 +508,25 @@ export default function BookingPage() {
                     Tidak ada riwayat booking dengan email ini. Silakan isi data secara manual.
                   </p>
                 )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-400">Nomor Telepon</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                  </div>
+                  <input 
+                    type="tel" 
+                    required 
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-500" 
+                    value={formData.phoneNumber} 
+                    onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} 
+                    placeholder="Contoh: 08123456789"
+                  />
+                </div>
               </div>
             </div>
 

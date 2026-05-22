@@ -50,6 +50,12 @@ export default function OngoingPage() {
   // Part Customer Modal
   const [showPartCustModal, setShowPartCustModal] = useState(false);
   const [partCustName, setPartCustName] = useState("");
+
+  // Part Inden (DP 50%) Modal
+  const [showPartIndenModal, setShowPartIndenModal] = useState(false);
+  const [indenName, setIndenName] = useState("");
+  const [indenItemType, setIndenItemType] = useState("");
+  const [indenPriceTotal, setIndenPriceTotal] = useState<number | "">("")
   const [partCustItemType, setPartCustItemType] = useState("");
   
   // Part Inventory Modal
@@ -370,6 +376,46 @@ export default function OngoingPage() {
     setShowAddJasaModal(false);
   };
 
+  // Submit Part Inden (DP 50%)
+  const submitPartInden = () => {
+    if (!indenName.trim()) { toast.error("Nama part tidak boleh kosong"); return; }
+    if (!indenItemType) { toast.error("Pilih jenis item terlebih dahulu"); return; }
+    if (!indenPriceTotal || indenPriceTotal <= 0) { toast.error("Estimasi harga total harus lebih dari 0"); return; }
+
+    const dpPrice = Math.round(Number(indenPriceTotal) / 2);
+    const newItem = {
+      id: Date.now(),
+      name: `${indenName} (DP 50%)`,
+      item_type: indenItemType,
+      type: "Part-Inden",
+      qty: 1,
+      price: dpPrice,
+      full_price: Number(indenPriceTotal)
+    };
+    const itemsWithPart = [...invoiceItems, newItem];
+
+    // Auto-add jasa bongkar/pasang berdasarkan jenis item
+    const jasaPrice = getJasaBongkarPasangPrice(indenItemType);
+    let newItems = itemsWithPart;
+    if (jasaPrice > 0) {
+      const jasaItem = {
+        id: Date.now() + 1,
+        name: `Jasa Bongkar/Pasang (${indenItemType})`,
+        type: "Jasa",
+        qty: 1,
+        price: jasaPrice
+      };
+      newItems = [...itemsWithPart, jasaItem];
+    }
+
+    setInvoiceItems(newItems);
+    saveInvoiceToDb(newItems);
+    setIndenName("");
+    setIndenItemType("");
+    setIndenPriceTotal("");
+    setShowPartIndenModal(false);
+  };
+
   // Hapus Item (+ simpan ke DB, kembalikan stok jika Part-Inventory)
   const removeItem = async (id: number) => {
     const itemToRemove = invoiceItems.find(item => item.id === id);
@@ -525,6 +571,15 @@ export default function OngoingPage() {
           <div className="space-y-4 py-2">
              <div className="text-sm text-slate-300 space-y-3">
                <p><strong>Pelanggan:</strong> {selectedRes?.customer_name}</p>
+               <p className="flex items-center gap-2">
+                 <strong>Telepon:</strong> 
+                 {selectedRes?.customer_phone ? (
+                   <a href={`tel:${selectedRes.customer_phone}`} className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1.5">
+                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                     {selectedRes.customer_phone}
+                   </a>
+                 ) : <span className="text-slate-500">-</span>}
+               </p>
                <p><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
                <p><strong>Jenis Layanan:</strong> {selectedRes?.service_type}</p>
                <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
@@ -569,7 +624,7 @@ export default function OngoingPage() {
                 )}
 
                {/* ====== SECTION: Barang & Jasa (tampil saat fase "Memasang komponen baru" atau setelahnya) ====== */}
-               {(isMerasangPhase || showInvoiceItemsReadOnly) && (
+               {(isMelepasPhase || isMerasangPhase || showInvoiceItemsReadOnly) && (
                  <div className="mt-4 pt-4 border-t border-slate-800">
                    <div className="flex items-center justify-between mb-3">
                      <h4 className="text-sm font-semibold text-yellow-500 flex items-center gap-2">
@@ -579,7 +634,7 @@ export default function OngoingPage() {
                    </div>
 
                    {/* Tombol tambah - hanya tampil saat fase "Memasang komponen baru" */}
-                   {isMerasangPhase && (
+                   {(isMelepasPhase || isMerasangPhase) && (
                      <div className="flex gap-2 mb-3">
                        <Button size="sm" onClick={() => setShowAddPartModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
                          + Tambah Part
@@ -601,7 +656,7 @@ export default function OngoingPage() {
                              <th className="px-2 py-2">Jenis</th>
                              <th className="px-2 py-2 text-center">Qty</th>
                              <th className="px-2 py-2 text-right">Harga</th>
-                             {isMerasangPhase && <th className="px-2 py-2 text-center w-10"></th>}
+                             {(isMelepasPhase || isMerasangPhase) && <th className="px-2 py-2 text-center w-10"></th>}
                            </tr>
                          </thead>
                          <tbody>
@@ -614,7 +669,7 @@ export default function OngoingPage() {
                                </td>
                                <td className="px-2 py-2 text-center">{item.qty}</td>
                                <td className="px-2 py-2 text-right">Rp {(item.price * item.qty).toLocaleString("id-ID")}</td>
-                               {isMerasangPhase && (
+                               {(isMelepasPhase || isMerasangPhase) && (
                                  <td className="px-2 py-2 text-center">
                                    <button onClick={() => removeItem(item.id)} className="text-rose-400 hover:text-rose-300 transition-colors p-1">
                                      <Trash2 className="h-3.5 w-3.5" />
@@ -693,6 +748,7 @@ export default function OngoingPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300">
               <div>
                 <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedRes?.customer_name}</p>
+                <p className="mb-1"><strong>Telepon:</strong> {selectedRes?.customer_phone || '-'}</p>
                 <p className="mb-1"><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
                 <p><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedRes?.service_type}</span></p>
               </div>
@@ -779,6 +835,10 @@ export default function OngoingPage() {
             </Button>
             <Button variant="outline" onClick={fetchInventory} className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white justify-start h-12">
               Part dari inventory bengkel
+            </Button>
+            <Button variant="outline" onClick={() => { setShowAddPartModal(false); setShowPartIndenModal(true); }} className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-white justify-start h-12">
+              <svg className="w-4 h-4 mr-2 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Part Pre-order / Inden (DP 50%)
             </Button>
           </div>
         </DialogContent>
@@ -879,6 +939,55 @@ export default function OngoingPage() {
           </div>
           <DialogFooter>
             <Button onClick={submitJasa} className="w-full bg-emerald-600 hover:bg-emerald-500">Lanjut</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL PART INDEN (DP 50%) ================= */}
+      <Dialog open={showPartIndenModal} onOpenChange={setShowPartIndenModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-emerald-500 flex items-center gap-2">
+              <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Part Pre-order / Inden (DP 50%)
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Nama Part</label>
+              <input type="text" value={indenName} onChange={(e) => setIndenName(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Contoh: Shock Absorber Bilstein..." />
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Jenis Item</label>
+              <select value={indenItemType} onChange={(e) => setIndenItemType(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none">
+                <option value="">-- Pilih Jenis Item --</option>
+                <option value="Engine Component">Engine Component</option>
+                <option value="Understeel (Suspension)">Understeel (Suspension)</option>
+                <option value="Understeel (Brakes)">Understeel (Brakes)</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Estimasi Harga Total (Rp)</label>
+              <input type="number" min="0" value={indenPriceTotal} onChange={(e) => setIndenPriceTotal(Number(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Contoh: 1000000" />
+            </div>
+
+            {/* Visual Feedback: Kalkulasi DP */}
+            {indenPriceTotal && Number(indenPriceTotal) > 0 && (
+              <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Estimasi Total:</span>
+                  <span className="text-slate-200 font-medium">Rp {Number(indenPriceTotal).toLocaleString("id-ID")}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-emerald-400 font-semibold">DP (50%) yang ditagihkan:</span>
+                  <span className="text-emerald-400 font-bold text-base">Rp {Math.round(Number(indenPriceTotal) / 2).toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={submitPartInden} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Tambahkan ke Invoice</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
