@@ -22,7 +22,8 @@ export async function POST(request: Request) {
       hasIssues,
       checkupDesc,
       checkupImage,
-      bookingId
+      bookingId,
+      isCancelled
     } = body;
 
     console.log('[send-service-email] Request body:', JSON.stringify(body, null, 2));
@@ -36,6 +37,9 @@ export async function POST(request: Request) {
     }
     if (isCheckupResult && !hasIssues) {
       emailSubject = `Pengecekan Selesai - Mobil Siap Diambil - ${customerName}`;
+    }
+    if (isCancelled) {
+      emailSubject = `Pembatalan Servis - ${customerName}`;
     }
 
     let invoiceHtml = '';
@@ -164,7 +168,9 @@ export async function POST(request: Request) {
 
     // Determine the main message
     let mainMessage = '';
-    if (isCheckupResult && !hasIssues) {
+    if (isCancelled) {
+      mainMessage = `Layanan servis untuk kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah dibatalkan karena penolakan estimasi harga atau atas permintaan Anda. Silakan hubungi admin untuk pengambilan kendaraan.`;
+    } else if (isCheckupResult && !hasIssues) {
       mainMessage = `Pengecekan kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah selesai dan tidak ditemukan kendala. Kendaraan Anda siap untuk diambil.`;
     } else if (isCheckupResult && hasIssues) {
       mainMessage = `Pengecekan kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah selesai. Namun, ditemukan beberapa kendala yang perlu Anda ketahui.`;
@@ -176,7 +182,9 @@ export async function POST(request: Request) {
 
     // Completion message
     let completionMessage = '';
-    if (isCompleted) {
+    if (isCancelled) {
+      completionMessage = `<p style="color: #ef4444 !important; -webkit-text-fill-color: #ef4444 !important; font-size: 16px; font-weight: bold; text-align: center; margin: 32px 0 16px 0;">❌ Layanan Servis Dibatalkan.</p>`;
+    } else if (isCompleted) {
       completionMessage = `<p style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-size: 16px; font-weight: bold; text-align: center; margin: 32px 0 16px 0;">✅ Mobil sudah selesai.</p>`;
     } else if (isCheckupResult && !hasIssues) {
       completionMessage = `<p style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-size: 16px; font-weight: bold; text-align: center; margin: 32px 0 16px 0;">✅ Mobil siap diambil — tidak ditemukan kendala.</p>`;

@@ -263,7 +263,24 @@ export default function OngoingPage() {
 
       if (error) throw error;
 
-      toast.success("Layanan berhasil dibatalkan.");
+      // Send cancellation email
+      if (selectedRes.customer_email) {
+        await fetch('/api/send-service-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerName: selectedRes.customer_name,
+            customerEmail: selectedRes.customer_email,
+            vehicleInfo: selectedRes.vehicle_info,
+            vehicleYear: selectedRes.vehicle_year || '-',
+            serviceType: selectedRes.service_type,
+            currentPhase: phases[currentPhaseIndex] || "-",
+            isCancelled: true,
+          }),
+        });
+      }
+
+      toast.success("Layanan berhasil dibatalkan dan email pembatalan telah dikirim.");
       setIsDetailOpen(false);
       setSelectedRes(null);
       fetchBookings();
