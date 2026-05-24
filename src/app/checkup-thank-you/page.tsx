@@ -9,6 +9,8 @@ function ThankYouContent() {
   const searchParams = useSearchParams();
   const choice = searchParams.get("choice");
   const already = searchParams.get("already");
+  const type = searchParams.get("type"); // 'estimation' or null
+  const rejected = searchParams.get("rejected");
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center justify-center p-6">
@@ -44,14 +46,27 @@ function ThankYouContent() {
             </h1>
             <p className="text-slate-400">
               Respon Anda telah berhasil dicatat.
-              {choice === "yes" ? (
-                <span className="block mt-2 text-emerald-400 font-semibold">
-                  Tim kami akan segera memproses perbaikan kendaraan Anda.
-                </span>
+              
+              {type === "estimation" ? (
+                rejected === "true" ? (
+                  <span className="block mt-2 text-rose-400 font-semibold">
+                    Penolakan estimasi telah kami terima. Tim kami akan segera menindaklanjuti.
+                  </span>
+                ) : choice === "yes" ? (
+                  <span className="block mt-2 text-emerald-400 font-semibold">
+                    Estimasi biaya disetujui. Tim kami akan segera melanjutkan pengerjaan kendaraan Anda.
+                  </span>
+                ) : null
               ) : (
-                <span className="block mt-2 text-blue-400 font-semibold">
-                  Kendaraan Anda akan segera disiapkan untuk pengambilan.
-                </span>
+                choice === "yes" ? (
+                  <span className="block mt-2 text-emerald-400 font-semibold">
+                    Tim kami akan segera memproses perbaikan kendaraan Anda.
+                  </span>
+                ) : (
+                  <span className="block mt-2 text-blue-400 font-semibold">
+                    Kendaraan Anda akan segera disiapkan untuk pengambilan.
+                  </span>
+                )
               )}
             </p>
           </>

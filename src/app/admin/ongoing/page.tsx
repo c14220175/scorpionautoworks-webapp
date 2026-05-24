@@ -71,6 +71,23 @@ export default function OngoingPage() {
   const [showAddJasaModal, setShowAddJasaModal] = useState(false);
   const [jasaName, setJasaName] = useState("");
   const [jasaPrice, setJasaPrice] = useState<number | "">("");
+
+  // Jasa Kompleksitas Modal
+  const [showKompleksitasModal, setShowKompleksitasModal] = useState(false);
+  const [kompleksitasPrice, setKompleksitasPrice] = useState<number | "">(0);
+  const [pendingInvoiceItems, setPendingInvoiceItems] = useState<any[]>([]);
+  const [pendingJasaItem, setPendingJasaItem] = useState<any | null>(null);
+  
+  // ================= ESTIMATION STATES =================
+  const [estimationStatus, setEstimationStatus] = useState<string | null>(null);
+  const [estimationRejectReason, setEstimationRejectReason] = useState<string | null>(null);
+  const [estimationEmailLoading, setEstimationEmailLoading] = useState(false);
+  
+  // Modal Form Estimasi
+  const [showEstimasiFormModal, setShowEstimasiFormModal] = useState(false);
+  const [estimasiPart, setEstimasiPart] = useState<number | "">("");
+  const [estimasiJasa, setEstimasiJasa] = useState<number | "">("");
+  const [estimasiNotes, setEstimasiNotes] = useState("");
   // ===================================================
 
   useEffect(() => {
@@ -119,12 +136,26 @@ export default function OngoingPage() {
     setKendalaImageFile(null);
     setEscalateChoice("");
 
-    // Load existing invoice items from database
-    if (res.invoice_data && res.invoice_data.items) {
-      setInvoiceItems(res.invoice_data.items);
+    // Load estimation or invoice data depending on phase
+    const isCheckup = res.service_type?.toLowerCase().includes("pengecekan") || res.service_type?.toLowerCase().includes("checkup");
+    const phase = res.current_phase || 0;
+    
+    if (!isCheckup && phase === 0) {
+      if (res.estimation_data && res.estimation_data.items) {
+        setInvoiceItems(res.estimation_data.items);
+      } else {
+        setInvoiceItems([]);
+      }
     } else {
-      setInvoiceItems([]);
+      if (res.invoice_data && res.invoice_data.items) {
+        setInvoiceItems(res.invoice_data.items);
+      } else {
+        setInvoiceItems([]);
+      }
     }
+
+    setEstimationStatus(res.estimation_status || null);
+    setEstimationRejectReason(res.estimation_reject_reason || null);
 
     setIsDetailOpen(true);
   };
@@ -149,10 +180,22 @@ export default function OngoingPage() {
 
       // Simpan fase ke database agar tidak reset saat dialog ditutup
       try {
-        await supabase.from("bookings").update({ current_phase: nextPhase, updated_at: new Date().toISOString() }).eq("id", selectedRes.id);
+        const updateData: any = { current_phase: nextPhase, updated_at: new Date().toISOString() };
+        
+        // Do not copy estimation data anymore to invoice data
+        // because invoice will be generated based on real items in the next phase
+        if (!isCheckup && currentPhaseIndex === 0) {
+          // just let invoice_data be empty for real item entries later
+        }
+
+        
+        await supabase.from("bookings").update(updateData).eq("id", selectedRes.id);
         
         // Update local state agar tidak reset saat dialog ditutup/dibuka ulang
-        setSelectedRes({ ...selectedRes, current_phase: nextPhase });
+        const updatedRes = { ...selectedRes, current_phase: nextPhase };
+        // Do not assign estimation data to invoice_data locally either
+
+        setSelectedRes(updatedRes);
         setReservations(prev => prev.map(r => r.id === selectedRes.id ? { ...r, current_phase: nextPhase } : r));
 
         // Send email notification for phase change
@@ -209,6 +252,96 @@ export default function OngoingPage() {
     }
   };
 
+  const handleCancelService = async () => {
+    if (!selectedRes) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled", updated_at: new Date().toISOString() })
+        .eq("id", selectedRes.id);
+
+      if (error) throw error;
+
+      toast.success("Layanan berhasil dibatalkan.");
+      setIsDetailOpen(false);
+      setSelectedRes(null);
+      fetchBookings();
+    } catch (error: any) {
+      toast.error("Gagal membatalkan layanan: " + error.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const submitEstimasiForm = async () => {
+    if (!selectedRes) return;
+    if (!estimasiPart && !estimasiJasa) {
+      toast.error("Mohon isi setidaknya estimasi part atau jasa.");
+      return;
+    }
+
+    setEstimationEmailLoading(true);
+    try {
+      const pPrice = Number(estimasiPart) || 0;
+      const sPrice = Number(estimasiJasa) || 0;
+      const total = pPrice + sPrice;
+      const items = [];
+
+      if (pPrice > 0) items.push({ id: Date.now(), name: "Estimasi Biaya Parts", type: "Part-Estimasi", qty: 1, price: pPrice });
+      if (sPrice > 0) items.push({ id: Date.now() + 1, name: "Estimasi Biaya Jasa", type: "Jasa-Estimasi", qty: 1, price: sPrice });
+
+      // Save estimation to DB
+      const { error: dbError } = await supabase
+        .from("bookings")
+        .update({ 
+          estimation_data: { items, total },
+          estimation_status: "pending"
+        })
+        .eq("id", selectedRes.id);
+
+      if (dbError) throw dbError;
+
+      // Send Email
+      const emailRes = await fetch('/api/send-estimation-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: selectedRes.customer_name,
+          customerEmail: selectedRes.customer_email,
+          vehicleInfo: selectedRes.vehicle_info,
+          vehicleYear: selectedRes.vehicle_year || '-',
+          serviceType: selectedRes.service_type,
+          estimationItems: items,
+          estimationTotal: total,
+          estimationNotes: estimasiNotes,
+          bookingId: selectedRes.id,
+          trackingCode: selectedRes.tracking_code,
+        }),
+      });
+
+      if (!emailRes.ok) throw new Error("Gagal mengirim email estimasi");
+
+      toast.success("Estimasi berhasil dikirim ke pelanggan!");
+      setEstimationStatus("pending");
+      setInvoiceItems(items);
+      setShowEstimasiFormModal(false);
+      
+      // Update local state
+      setSelectedRes({
+        ...selectedRes,
+        estimation_status: "pending",
+        estimation_data: { items, total }
+      });
+      fetchBookings();
+    } catch (err: any) {
+      toast.error("Terjadi kesalahan: " + err.message);
+    } finally {
+      setEstimationEmailLoading(false);
+    }
+  };
+
+
   // ================= INVOICE FUNCTIONS =================
 
   // Helper: harga jasa bongkar/pasang berdasarkan jenis item
@@ -226,15 +359,23 @@ export default function OngoingPage() {
     if (!selectedRes) return;
     const total = items.reduce((acc: number, curr: any) => acc + (curr.price * curr.qty), 0);
     try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ invoice_data: { items, total } })
-        .eq("id", selectedRes.id);
-      if (error) {
-        console.error("Gagal menyimpan invoice ke DB:", error.message);
+      if (!isCheckup && currentPhaseIndex === 0) {
+        // Save as estimation
+        const { error } = await supabase
+          .from("bookings")
+          .update({ estimation_data: { items, total } })
+          .eq("id", selectedRes.id);
+        if (error) console.error("Gagal menyimpan estimasi ke DB:", error.message);
+      } else {
+        // Save as invoice
+        const { error } = await supabase
+          .from("bookings")
+          .update({ invoice_data: { items, total } })
+          .eq("id", selectedRes.id);
+        if (error) console.error("Gagal menyimpan invoice ke DB:", error.message);
       }
     } catch (err: any) {
-      console.error("Gagal menyimpan invoice:", err.message);
+      console.error("Gagal menyimpan:", err.message);
     }
   };
 
@@ -259,7 +400,6 @@ export default function OngoingPage() {
 
     // Auto-add jasa bongkar/pasang berdasarkan jenis item
     const jasaPrice = getJasaBongkarPasangPrice(partCustItemType);
-    let newItems = itemsWithPart;
     if (jasaPrice > 0) {
       const jasaItem = {
         id: Date.now() + 1,
@@ -268,14 +408,21 @@ export default function OngoingPage() {
         qty: 1,
         price: jasaPrice
       };
-      newItems = [...itemsWithPart, jasaItem];
+      // Tampilkan modal kompleksitas sebelum menambahkan
+      setPendingInvoiceItems(itemsWithPart);
+      setPendingJasaItem(jasaItem);
+      setKompleksitasPrice(0);
+      setShowPartCustModal(false);
+      setShowKompleksitasModal(true);
+    } else {
+      // "Lainnya" atau tipe tanpa jasa — langsung simpan tanpa jasa bongkar/pasang
+      setInvoiceItems(itemsWithPart);
+      saveInvoiceToDb(itemsWithPart);
     }
 
-    setInvoiceItems(newItems);
-    saveInvoiceToDb(newItems);
     setPartCustName("");
     setPartCustItemType("");
-    setShowPartCustModal(false);
+    if (jasaPrice <= 0) setShowPartCustModal(false);
   };
 
   // Fetch inventory dari database
@@ -337,7 +484,6 @@ export default function OngoingPage() {
     // Auto-add jasa bongkar/pasang berdasarkan jenis item dari inventory
     const itemType = selectedInvItem.item_type || "";
     const jasaPrice = getJasaBongkarPasangPrice(itemType);
-    let newItems = itemsWithPart;
     if (jasaPrice > 0) {
       const jasaItem = {
         id: Date.now() + 1,
@@ -346,15 +492,21 @@ export default function OngoingPage() {
         qty: 1,
         price: jasaPrice
       };
-      newItems = [...itemsWithPart, jasaItem];
+      // Tampilkan modal kompleksitas
+      setPendingInvoiceItems(itemsWithPart);
+      setPendingJasaItem(jasaItem);
+      setKompleksitasPrice(0);
+      setShowInvQtyModal(false);
+      setShowKompleksitasModal(true);
+    } else {
+      // Tipe tanpa jasa (Lainnya dll) — langsung simpan
+      setInvoiceItems(itemsWithPart);
+      saveInvoiceToDb(itemsWithPart);
+      setShowInvQtyModal(false);
     }
-
-    setInvoiceItems(newItems);
-    saveInvoiceToDb(newItems);
 
     setInvQty("");
     setSelectedInvItem(null);
-    setShowInvQtyModal(false);
   };
 
   const submitJasa = () => {
@@ -396,7 +548,6 @@ export default function OngoingPage() {
 
     // Auto-add jasa bongkar/pasang berdasarkan jenis item
     const jasaPrice = getJasaBongkarPasangPrice(indenItemType);
-    let newItems = itemsWithPart;
     if (jasaPrice > 0) {
       const jasaItem = {
         id: Date.now() + 1,
@@ -405,15 +556,22 @@ export default function OngoingPage() {
         qty: 1,
         price: jasaPrice
       };
-      newItems = [...itemsWithPart, jasaItem];
+      // Tampilkan modal kompleksitas
+      setPendingInvoiceItems(itemsWithPart);
+      setPendingJasaItem(jasaItem);
+      setKompleksitasPrice(0);
+      setShowPartIndenModal(false);
+      setShowKompleksitasModal(true);
+    } else {
+      // Tipe tanpa jasa (Lainnya dll) — langsung simpan
+      setInvoiceItems(itemsWithPart);
+      saveInvoiceToDb(itemsWithPart);
+      setShowPartIndenModal(false);
     }
 
-    setInvoiceItems(newItems);
-    saveInvoiceToDb(newItems);
     setIndenName("");
     setIndenItemType("");
     setIndenPriceTotal("");
-    setShowPartIndenModal(false);
   };
 
   // Hapus Item (+ simpan ke DB, kembalikan stok jika Part-Inventory)
@@ -635,61 +793,110 @@ export default function OngoingPage() {
 
                    {/* Tombol tambah - hanya tampil saat fase "Memasang komponen baru" */}
                    {(isMelepasPhase || isMerasangPhase) && (
-                     <div className="flex gap-2 mb-3">
-                       <Button size="sm" onClick={() => setShowAddPartModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
-                         + Tambah Part
-                       </Button>
-                       <Button size="sm" onClick={() => setShowAddJasaModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8">
-                         + Tambah Jasa
-                       </Button>
+                     <div className="flex flex-col gap-2 mb-3">
+                       {isMelepasPhase && (
+                         <div className="mb-2">
+                           {estimationStatus === "pending" && (
+                             <Badge className="bg-yellow-500 text-slate-900 animate-pulse w-fit">Menunggu Persetujuan Pelanggan...</Badge>
+                           )}
+                           {estimationStatus === "approved" && (
+                             <Badge className="bg-emerald-600 text-white w-fit">Estimasi Disetujui ✅</Badge>
+                           )}
+                           {estimationStatus === "rejected" && (
+                             <div className="bg-rose-900/30 border border-rose-700 rounded-lg p-3 w-full text-sm mt-2">
+                               <Badge className="bg-rose-600 text-white mb-2">Estimasi Ditolak ❌</Badge>
+                               <p className="text-rose-400 font-semibold">Alasan Pelanggan:</p>
+                               <p className="text-slate-300">{estimationRejectReason}</p>
+                               <p className="text-xs text-slate-400 mt-2 mb-3">Pelanggan telah menolak layanan ini. Anda dapat membatalkan layanan.</p>
+                               <Button 
+                                 size="sm" 
+                                 onClick={handleCancelService} 
+                                 disabled={actionLoading}
+                                 className="bg-rose-600 hover:bg-rose-500 text-white text-xs"
+                               >
+                                 Batalkan Layanan
+                               </Button>
+                             </div>
+                           )}
+                           
+                           {estimationStatus !== "pending" && estimationStatus !== "approved" && (
+                             <Button 
+                               size="sm" 
+                               onClick={() => setShowEstimasiFormModal(true)} 
+                               className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8 mt-2"
+                             >
+                               📝 Buat Form Estimasi
+                             </Button>
+                           )}
+                         </div>
+                       )}
+                       
+                       {(!isMelepasPhase || (estimationStatus !== "pending" && estimationStatus !== "approved")) && (
+                         <div className="flex gap-2">
+                           {!isMelepasPhase && (
+                             <>
+                               <Button size="sm" onClick={() => setShowAddPartModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
+                                 + Tambah Part
+                               </Button>
+                               <Button size="sm" onClick={() => setShowAddJasaModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8">
+                                 + Tambah Jasa
+                               </Button>
+                             </>
+                           )}
+                         </div>
+                       )}
                      </div>
                    )}
 
-                   {/* Tabel ringkasan item */}
-                   {invoiceItems.length > 0 ? (
-                     <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
-                       <table className="w-full text-xs text-left text-slate-300">
-                         <thead className="text-[10px] text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
-                           <tr>
-                             <th className="px-2 py-2 text-center">No</th>
-                             <th className="px-2 py-2">Nama</th>
-                             <th className="px-2 py-2">Jenis</th>
-                             <th className="px-2 py-2 text-center">Qty</th>
-                             <th className="px-2 py-2 text-right">Harga</th>
-                             {(isMelepasPhase || isMerasangPhase) && <th className="px-2 py-2 text-center w-10"></th>}
-                           </tr>
-                         </thead>
-                         <tbody>
-                           {invoiceItems.map((item, index) => (
-                             <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                               <td className="px-2 py-2 text-center">{index + 1}</td>
-                               <td className="px-2 py-2 font-medium text-slate-200">{item.name}</td>
-                               <td className="px-2 py-2">
-                                 <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">{item.type}</span>
-                               </td>
-                               <td className="px-2 py-2 text-center">{item.qty}</td>
-                               <td className="px-2 py-2 text-right">Rp {(item.price * item.qty).toLocaleString("id-ID")}</td>
-                               {(isMelepasPhase || isMerasangPhase) && (
-                                 <td className="px-2 py-2 text-center">
-                                   <button onClick={() => removeItem(item.id)} className="text-rose-400 hover:text-rose-300 transition-colors p-1">
-                                     <Trash2 className="h-3.5 w-3.5" />
-                                   </button>
-                                 </td>
-                               )}
+                   {/* Tabel ringkasan item - Di fase melepas tidak perlu tabel, hanya form saja. Tapi kalau ada invoiceItems, kita bisa tampilkan. */}
+                   {(!isMelepasPhase || estimationStatus === "pending" || estimationStatus === "approved") && (
+                     invoiceItems.length > 0 ? (
+                       <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
+                         <table className="w-full text-xs text-left text-slate-300">
+                           <thead className="text-[10px] text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+                             <tr>
+                               <th className="px-2 py-2 text-center">No</th>
+                               <th className="px-2 py-2">Nama</th>
+                               <th className="px-2 py-2">Jenis</th>
+                               <th className="px-2 py-2 text-center">Qty</th>
+                               <th className="px-2 py-2 text-right">Harga</th>
+                               {isMerasangPhase && <th className="px-2 py-2 text-center w-10"></th>}
                              </tr>
-                           ))}
-                         </tbody>
-                       </table>
-                     </div>
-                   ) : (
-                     <div className="text-center py-4 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
-                       Belum ada barang atau jasa ditambahkan
-                     </div>
+                           </thead>
+                           <tbody>
+                             {invoiceItems.map((item, index) => (
+                               <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
+                                 <td className="px-2 py-2 text-center">{index + 1}</td>
+                                 <td className="px-2 py-2 font-medium text-slate-200">{item.name}</td>
+                                 <td className="px-2 py-2">
+                                   <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">{item.type}</span>
+                                 </td>
+                                 <td className="px-2 py-2 text-center">{item.qty}</td>
+                                 <td className="px-2 py-2 text-right">Rp {(item.price * item.qty).toLocaleString("id-ID")}</td>
+                                 {isMerasangPhase && (
+                                   <td className="px-2 py-2 text-center">
+                                     <button onClick={() => removeItem(item.id)} className="text-rose-400 hover:text-rose-300 transition-colors p-1">
+                                       <Trash2 className="h-3.5 w-3.5" />
+                                     </button>
+                                   </td>
+                                 )}
+                               </tr>
+                             ))}
+                           </tbody>
+                         </table>
+                       </div>
+                     ) : (
+                       !isMelepasPhase && (
+                         <div className="text-center py-4 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
+                           Belum ada barang atau jasa ditambahkan
+                         </div>
+                       )
+                     )
                    )}
 
                    {/* Total sementara */}
-                   {invoiceItems.length > 0 && (
-                     <div className="flex justify-end mt-2">
+                   {(!isMelepasPhase || estimationStatus === "pending" || estimationStatus === "approved") && invoiceItems.length > 0 && (
+                     <div className="flex flex-col items-end gap-3 mt-3">
                        <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
                          <span className="text-slate-400">Total: </span>
                          <span className="text-emerald-400 font-bold">Rp {runningTotal.toLocaleString("id-ID")}</span>
@@ -717,7 +924,11 @@ export default function OngoingPage() {
               </Button>
               
               {!isLastPhase && (
-                <Button onClick={handleLanjutProgress} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+                <Button 
+                  onClick={handleLanjutProgress} 
+                  disabled={isMelepasPhase && estimationStatus !== "approved"}
+                  className={(isMelepasPhase && estimationStatus !== "approved") ? "bg-slate-800 text-slate-500 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500 text-white"}
+                >
                   Lanjut progress
                 </Button>
               )}
@@ -736,16 +947,19 @@ export default function OngoingPage() {
 
       {/* ================= MODAL INVOICE (READ-ONLY SUMMARY) ================= */}
       <AlertDialog open={showInvoiceModal}>
-        <AlertDialogContent className="bg-slate-900 border-slate-700 sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+        <AlertDialogContent className="bg-slate-900 border-slate-700 w-full !max-w-[95vw] md:!max-w-4xl lg:!max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 print:hidden">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-bold text-white text-center pb-2 border-b border-slate-800">
-              Invoice
+            <AlertDialogTitle className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-4">
+                <img src="/scorpionlogo.png" alt="Scorpion Autoworks Logo" className="h-12 w-auto object-contain" />
+              </div>
+              <span className="text-2xl font-bold text-white text-right">Invoice</span>
             </AlertDialogTitle>
           </AlertDialogHeader>
           
-          <div className="py-4 space-y-6">
+          <div className="py-4 space-y-6 print:py-0">
             {/* Info Pelanggan */}
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300 print:bg-transparent print:border-none print:p-0 print:text-black">
               <div>
                 <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedRes?.customer_name}</p>
                 <p className="mb-1"><strong>Telepon:</strong> {selectedRes?.customer_phone || '-'}</p>
@@ -760,15 +974,15 @@ export default function OngoingPage() {
 
             {/* Tabel Item Invoice (Read-Only) */}
             <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
-              <table className="w-full text-sm text-left text-slate-300">
+              <table className="w-full text-sm text-left text-slate-300 min-w-[600px]">
                 <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
                   <tr>
-                    <th className="px-4 py-3 text-center">No.</th>
-                    <th className="px-4 py-3">Nama</th>
-                    <th className="px-4 py-3">Jenis</th>
-                    <th className="px-4 py-3 text-center">Jumlah</th>
-                    <th className="px-4 py-3 text-right">Harga Satuan</th>
-                    <th className="px-4 py-3 text-right">Subtotal</th>
+                    <th className="px-4 py-3 text-center whitespace-nowrap">No.</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Nama</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Jenis</th>
+                    <th className="px-4 py-3 text-center whitespace-nowrap">Jumlah</th>
+                    <th className="px-4 py-3 text-right whitespace-nowrap">Harga Satuan</th>
+                    <th className="px-4 py-3 text-right whitespace-nowrap">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -777,12 +991,12 @@ export default function OngoingPage() {
                   ) : (
                     invoiceItems.map((item, index) => (
                       <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                        <td className="px-4 py-3 text-center">{index + 1}</td>
+                        <td className="px-4 py-3 text-center whitespace-nowrap">{index + 1}</td>
                         <td className="px-4 py-3 font-medium text-slate-200">{item.name}</td>
-                        <td className="px-4 py-3"><Badge className="bg-slate-700 text-slate-300">{item.type}</Badge></td>
-                        <td className="px-4 py-3 text-center">{item.qty}</td>
-                        <td className="px-4 py-3 text-right">Rp {item.price.toLocaleString("id-ID")}</td>
-                        <td className="px-4 py-3 text-right text-slate-200 font-medium">
+                        <td className="px-4 py-3 whitespace-nowrap"><Badge className="bg-slate-700 text-slate-300">{item.type}</Badge></td>
+                        <td className="px-4 py-3 text-center whitespace-nowrap">{item.qty}</td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">Rp {item.price.toLocaleString("id-ID")}</td>
+                        <td className="px-4 py-3 text-right text-slate-200 font-medium whitespace-nowrap">
                           Rp {(item.price * item.qty).toLocaleString("id-ID")}
                         </td>
                       </tr>
@@ -794,9 +1008,9 @@ export default function OngoingPage() {
 
             {/* Total Keseluruhan */}
             <div className="flex justify-end items-center">
-              <div className="bg-slate-800 px-6 py-3 rounded-lg border border-slate-700 flex gap-4 items-center">
-                <span className="text-slate-400 font-medium">Total Keseluruhan:</span>
-                <span className="text-2xl text-emerald-400 font-bold">
+              <div className="bg-slate-800 px-4 sm:px-6 py-3 rounded-lg border border-slate-700 flex gap-2 sm:gap-4 items-center flex-wrap sm:flex-nowrap justify-end">
+                <span className="text-slate-400 font-medium whitespace-nowrap">Total Keseluruhan:</span>
+                <span className="text-xl sm:text-2xl text-emerald-400 font-bold whitespace-nowrap">
                   Rp {runningTotal.toLocaleString("id-ID")}
                 </span>
               </div>
@@ -822,6 +1036,99 @@ export default function OngoingPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ================= PRINT ONLY INVOICE ================= */}
+      {showInvoiceModal && selectedRes && (
+        <div id="print-invoice-container" className="hidden print:block absolute top-0 left-0 w-full text-slate-300 z-[999999] bg-slate-900 min-h-screen">
+          <style>{`
+            @media print {
+              @page { margin: 0; size: auto; }
+              body, html { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                overflow: visible !important;
+                height: auto !important;
+                background-color: #0f172a !important;
+              }
+              body * { visibility: hidden !important; }
+              #print-invoice-container, #print-invoice-container * { visibility: visible !important; }
+              #print-invoice-container {
+                position: absolute !important; left: 0 !important; top: 0 !important;
+                width: 100% !important; display: block !important;
+                margin: 0 !important; padding: 1.5cm !important;
+                background-color: #0f172a !important;
+              }
+            }
+          `}</style>
+          
+          <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-4">
+                <img src="/scorpionlogo.png" alt="Scorpion Autoworks Logo" className="h-16 w-auto object-contain" />
+              </div>
+              <span className="text-3xl font-bold text-white text-right">Invoice</span>
+            </div>
+
+            <div className="flex justify-between items-start gap-3 bg-slate-950 p-6 rounded-lg border border-slate-800 text-sm">
+              <div>
+                <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedRes.customer_name}</p>
+                <p className="mb-1"><strong>Telepon:</strong> {selectedRes.customer_phone || '-'}</p>
+                <p className="mb-1"><strong>Kendaraan:</strong> {selectedRes.vehicle_info}</p>
+                <p className="mb-1"><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedRes.service_type}</span></p>
+              </div>
+              <div className="text-right">
+                <p className="mb-1"><strong>Tanggal Booking:</strong> {new Date(selectedRes.booking_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p className="mb-1"><strong>Waktu:</strong> {new Date(selectedRes.booking_date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
+                {selectedRes.tracking_code && (
+                  <p className="mb-1 mt-2"><strong>Kode Tracking:</strong> <span className="font-mono bg-slate-800 px-2 py-1 rounded text-white">{selectedRes.tracking_code}</span></p>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-slate-700 bg-slate-950 overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+                  <tr>
+                    <th className="px-4 py-3 text-center w-16">No.</th>
+                    <th className="px-4 py-3">Nama</th>
+                    <th className="px-4 py-3 w-32">Jenis</th>
+                    <th className="px-4 py-3 text-center w-24">Jumlah</th>
+                    <th className="px-4 py-3 text-right w-40">Harga Satuan</th>
+                    <th className="px-4 py-3 text-right w-40">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceItems.length === 0 ? (
+                    <tr><td colSpan={6} className="text-center py-6 text-slate-500">Tidak ada item</td></tr>
+                  ) : (
+                    invoiceItems.map((item, index) => (
+                      <tr key={item.id} className="border-b border-slate-800">
+                        <td className="px-4 py-3 text-center">{index + 1}</td>
+                        <td className="px-4 py-3 font-medium text-slate-200">{item.name}</td>
+                        <td className="px-4 py-3"><Badge className="bg-slate-700 text-slate-300">{item.type}</Badge></td>
+                        <td className="px-4 py-3 text-center">{item.qty}</td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap">Rp {item.price.toLocaleString("id-ID")}</td>
+                        <td className="px-4 py-3 text-right text-slate-200 font-medium whitespace-nowrap">
+                          Rp {(item.price * item.qty).toLocaleString("id-ID")}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end items-center mt-4">
+              <div className="bg-slate-800 px-6 py-4 rounded-lg border border-slate-700 flex gap-4 items-center justify-end">
+                <span className="text-slate-400 font-medium">Total Keseluruhan:</span>
+                <span className="text-2xl text-emerald-400 font-bold">
+                  Rp {runningTotal.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= MODAL TAMBAH PART ================= */}
       <Dialog open={showAddPartModal} onOpenChange={setShowAddPartModal}>
@@ -862,6 +1169,7 @@ export default function OngoingPage() {
                 <option value="Engine Component">Engine Component</option>
                 <option value="Understeel (Suspension)">Understeel (Suspension)</option>
                 <option value="Understeel (Brakes)">Understeel (Brakes)</option>
+                <option value="Lainnya">Lainnya</option>
               </select>
             </div>
           </div>
@@ -992,6 +1300,102 @@ export default function OngoingPage() {
         </DialogContent>
       </Dialog>
 
+
+      {/* ================= MODAL JASA KOMPLEKSITAS ================= */}
+      <Dialog open={showKompleksitasModal} onOpenChange={(open) => {
+        if (!open) {
+          // Jika ditutup tanpa submit, tetap tambahkan jasa dengan base price saja
+          if (pendingJasaItem && pendingInvoiceItems.length > 0) {
+            const finalItems = [...pendingInvoiceItems, pendingJasaItem];
+            setInvoiceItems(finalItems);
+            saveInvoiceToDb(finalItems);
+          }
+          setShowKompleksitasModal(false);
+          setPendingInvoiceItems([]);
+          setPendingJasaItem(null);
+          setKompleksitasPrice(0);
+        }
+      }}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-amber-500 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+              Jasa Kompleksitas
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {/* Info jasa base */}
+            {pendingJasaItem && (
+              <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 space-y-1">
+                <p className="text-xs text-slate-400">Jasa Bongkar/Pasang otomatis ditambahkan:</p>
+                <p className="text-sm text-slate-200 font-medium">{pendingJasaItem.name}</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Harga Dasar:</span>
+                  <span className="text-emerald-400 font-bold">Rp {pendingJasaItem.price.toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm text-slate-400 mb-2">Tambahan Harga Kompleksitas (Rp)</label>
+              <input
+                type="number"
+                min="0"
+                value={kompleksitasPrice}
+                onChange={(e) => setKompleksitasPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-amber-500 outline-none"
+                placeholder="Contoh: 50000 (isi 0 jika tidak ada)"
+              />
+              <p className="text-xs text-slate-500 mt-1">Biaya tambahan untuk kompleksitas kerja (misal: baut berkarat, akses sulit, dll)</p>
+            </div>
+
+            {/* Visual Feedback: Total kalkulasi */}
+            {pendingJasaItem && (
+              <div className="bg-slate-950 border border-amber-500/30 rounded-lg p-3 space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Harga Dasar:</span>
+                  <span className="text-slate-200">Rp {pendingJasaItem.price.toLocaleString("id-ID")}</span>
+                </div>
+                {Number(kompleksitasPrice || 0) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-amber-400">+ Kompleksitas:</span>
+                    <span className="text-amber-400">Rp {Number(kompleksitasPrice).toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm pt-1 border-t border-slate-800">
+                  <span className="text-emerald-400 font-semibold">Total Jasa:</span>
+                  <span className="text-emerald-400 font-bold text-base">Rp {(pendingJasaItem.price + Number(kompleksitasPrice || 0)).toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                if (!pendingJasaItem || pendingInvoiceItems.length === 0) return;
+                const finalJasa = {
+                  ...pendingJasaItem,
+                  price: pendingJasaItem.price + Number(kompleksitasPrice || 0)
+                };
+                // Jika ada kompleksitas, ubah nama untuk kejelasan
+                if (Number(kompleksitasPrice || 0) > 0) {
+                  finalJasa.name = `${pendingJasaItem.name} + Kompleksitas`;
+                }
+                const finalItems = [...pendingInvoiceItems, finalJasa];
+                setInvoiceItems(finalItems);
+                saveInvoiceToDb(finalItems);
+                setShowKompleksitasModal(false);
+                setPendingInvoiceItems([]);
+                setPendingJasaItem(null);
+                setKompleksitasPrice(0);
+              }}
+              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold"
+            >
+              Tambahkan ke Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* EXISTING POP-UPS (Kendala & Escalate) */}
       <AlertDialog open={showKendalaPopup}>
@@ -1271,6 +1675,52 @@ export default function OngoingPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* DIALOG FORM ESTIMASI */}
+      <Dialog open={showEstimasiFormModal} onOpenChange={setShowEstimasiFormModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200">
+          <DialogHeader>
+            <DialogTitle className="text-emerald-500">Form Estimasi</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Estimasi Biaya Parts (Rp)</label>
+              <input 
+                type="number" 
+                value={estimasiPart} 
+                onChange={(e) => setEstimasiPart(Number(e.target.value) || "")} 
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white" 
+                placeholder="Contoh: 1500000"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Estimasi Biaya Jasa (Rp)</label>
+              <input 
+                type="number" 
+                value={estimasiJasa} 
+                onChange={(e) => setEstimasiJasa(Number(e.target.value) || "")} 
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white" 
+                placeholder="Contoh: 500000"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Keterangan (Opsional)</label>
+              <textarea 
+                value={estimasiNotes} 
+                onChange={(e) => setEstimasiNotes(e.target.value)} 
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white min-h-[100px]" 
+                placeholder="Catatan untuk pelanggan terkait estimasi..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEstimasiFormModal(false)} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
+            <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+              {estimationEmailLoading ? "Mengirim..." : "Kirim Estimasi"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

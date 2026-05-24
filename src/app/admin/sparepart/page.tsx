@@ -16,7 +16,7 @@ export default function SparepartPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState<"all" | "Fast Moving Parts" | "Sparepart Components">("all");
-  const [filterItemType, setFilterItemType] = useState<"all" | "Engine Component" | "Understeel (Suspension)" | "Understeel (Brakes)">("all");
+  const [filterItemType, setFilterItemType] = useState<"all" | "Engine Component" | "Understeel (Suspension)" | "Understeel (Brakes)" | "Lainnya">("all");
   const [filterStock, setFilterStock] = useState<"all" | "available" | "low">("all");
 
   // State Pop-up
@@ -29,7 +29,7 @@ export default function SparepartPage() {
 
   // Form State: Tambah Produk Baru
   const [newItemName, setNewItemName] = useState("");
-  const [newItemType, setNewItemType] = useState<"Engine Component" | "Understeel (Suspension)" | "Understeel (Brakes)" | "">("");
+  const [newItemType, setNewItemType] = useState<"Engine Component" | "Understeel (Suspension)" | "Understeel (Brakes)" | "Lainnya" | "">("");
   const [newItemCategory, setNewItemCategory] = useState<"Fast Moving Parts" | "Sparepart Components" | "">("");
   const [newItemVendor, setNewItemVendor] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
@@ -204,6 +204,7 @@ export default function SparepartPage() {
               { value: "Engine Component", label: "Engine" },
               { value: "Understeel (Suspension)", label: "Suspension" },
               { value: "Understeel (Brakes)", label: "Brakes" },
+              { value: "Lainnya", label: "Lainnya" },
             ] as const).map((opt) => (
               <button
                 key={opt.value}
@@ -342,6 +343,7 @@ export default function SparepartPage() {
                 <option value="Engine Component">Engine Component</option>
                 <option value="Understeel (Suspension)">Understeel (Suspension)</option>
                 <option value="Understeel (Brakes)">Understeel (Brakes)</option>
+                <option value="Lainnya">Lainnya</option>
               </select>
             </div>
             <div>

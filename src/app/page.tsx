@@ -182,20 +182,19 @@ export default function BookingPage() {
 
         setIsDateFullyBooked(false)
 
-        // 2. Kalkulasi Jam Bentrok (Blok 3 jam ke depan) — selalu dalam WIB
+        // 2. Kalkulasi Jam Bentrok (Blok 1 jam ke depan) — selalu dalam WIB
         const blockedHours = new Set<number>()
         data.forEach(booking => {
           const bookingHour = getHourWIB(booking.booking_date)
           blockedHours.add(bookingHour)
           blockedHours.add(bookingHour + 1)
-          blockedHours.add(bookingHour + 2)
         })
 
         // 3. Jam Operasional (09:00 - 19:00). Max pesanan masuk jam 16:00
         const allSlots = [9, 10, 11, 12, 13, 14, 15, 16]
         const validSlots = allSlots.filter(slot => {
-          // Slot valid jika jam tersebut dan 2 jam ke depannya KOSONG
-          return !blockedHours.has(slot) && !blockedHours.has(slot + 1) && !blockedHours.has(slot + 2)
+          // Slot valid jika jam tersebut dan 1 jam ke depannya KOSONG
+          return !blockedHours.has(slot) && !blockedHours.has(slot + 1)
         })
 
         setAvailableTimes(validSlots.map(h => `${h.toString().padStart(2, '0')}:00`))
@@ -659,7 +658,7 @@ export default function BookingPage() {
                     </select>
                   )}
                   {!isDateFullyBooked && selectedDate && availableTimes.length === 0 && !isCheckingTime && (
-                    <p className="text-xs text-red-400 mt-1">Semua slot di tanggal ini sudah terisi (Bentrok jadwal 3 jam).</p>
+                    <p className="text-xs text-red-400 mt-1">Semua slot di tanggal ini sudah terisi (Bentrok jadwal 2 jam).</p>
                   )}
                 </div>
               </div>
