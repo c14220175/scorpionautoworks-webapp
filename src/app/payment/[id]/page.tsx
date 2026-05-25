@@ -142,6 +142,17 @@ export default function PaymentPage() {
     );
   }
 
+  let dpAmount = 0;
+  if (booking?.invoice_items) {
+    let parsedItems = [];
+    if (typeof booking.invoice_items === "string") {
+      try { parsedItems = JSON.parse(booking.invoice_items); } catch(e){}
+    } else if (Array.isArray(booking.invoice_items)) {
+      parsedItems = booking.invoice_items;
+    }
+    dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4 text-slate-200">
       <Card className="w-full max-w-lg bg-slate-900 border-slate-800 shadow-xl">
@@ -162,6 +173,12 @@ export default function PaymentPage() {
               <span className="font-semibold text-right text-emerald-400">{booking.service_type}</span>
               <span className="text-slate-400">Kendaraan:</span>
               <span className="font-semibold text-right">{booking.vehicle_info}</span>
+              {dpAmount > 0 && (
+                <>
+                  <span className="text-slate-400 mt-2">Total DP:</span>
+                  <span className="font-bold text-right text-lg text-emerald-500 mt-2">Rp {dpAmount.toLocaleString('id-ID')}</span>
+                </>
+              )}
             </div>
           </div>
 

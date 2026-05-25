@@ -756,7 +756,14 @@ export default function OngoingPage() {
       toast.error("Pelanggan ini tidak memiliki alamat email yang tersimpan.");
       return;
     }
-    
+    let parsedItems = [];
+    if (typeof res.invoice_items === "string") {
+      try { parsedItems = JSON.parse(res.invoice_items); } catch(e){}
+    } else if (Array.isArray(res.invoice_items)) {
+      parsedItems = res.invoice_items;
+    }
+    const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
+
     setIsSendingDpEmail(true);
     try {
       const response = await fetch('/api/send-dp-email', {
@@ -766,6 +773,7 @@ export default function OngoingPage() {
           customerName: res.customer_name,
           customerEmail: res.customer_email,
           vehicleInfo: res.vehicle_info,
+          dpAmount,
           dpLink: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id'}/payment/${res.id}`
         })
       });

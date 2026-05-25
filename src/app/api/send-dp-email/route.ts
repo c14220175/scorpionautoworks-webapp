@@ -10,7 +10,8 @@ export async function POST(request: Request) {
       customerName, 
       customerEmail, 
       vehicleInfo,
-      dpLink
+      dpLink,
+      dpAmount
     } = body;
 
     console.log('[send-dp-email] Request body:', JSON.stringify(body, null, 2));
@@ -60,6 +61,17 @@ export async function POST(request: Request) {
                       <p style="color: #94a3b8 !important; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
                         Terdapat tagihan <strong>DP (Down Payment)</strong> untuk pemesanan <em>Part Inden</em> kendaraan Anda (${vehicleInfo}) di Scorpion Autoworks.
                       </p>
+                      
+                      ${dpAmount && dpAmount > 0 ? `
+                      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+                        <tr>
+                          <td bgcolor="#0f172a" style="background-color: #0f172a; border: 1px solid #334155; padding: 16px; border-radius: 4px; text-align: center;">
+                            <p style="color: #94a3b8 !important; font-size: 14px; margin: 0 0 8px 0;">Total DP yang harus dibayar:</p>
+                            <p style="color: #10b981 !important; font-size: 24px; font-weight: bold; margin: 0;">Rp ${dpAmount.toLocaleString('id-ID')}</p>
+                          </td>
+                        </tr>
+                      </table>
+                      ` : ''}
                       
                       <!-- Action Card -->
                       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
