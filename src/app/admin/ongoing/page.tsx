@@ -557,15 +557,15 @@ export default function OngoingPage() {
     if (!indenItemType) { toast.error("Pilih jenis item terlebih dahulu"); return; }
     if (!indenPriceTotal || indenPriceTotal <= 0) { toast.error("Estimasi harga total harus lebih dari 0"); return; }
 
-    const dpPrice = Math.round(Number(indenPriceTotal) / 2);
+    const fullPrice = Number(indenPriceTotal);
     const newItem = {
       id: Date.now(),
-      name: `${indenName} (DP 50%)`,
+      name: `${indenName} (Part Inden)`,
       item_type: indenItemType,
       type: "Part-Inden",
       qty: 1,
-      price: dpPrice,
-      full_price: Number(indenPriceTotal)
+      price: fullPrice,
+      full_price: fullPrice
     };
     const itemsWithPart = [...invoiceItems, newItem];
 
@@ -713,13 +713,51 @@ export default function OngoingPage() {
     if (!dpVerificationRes) return;
     setDpActionLoading(true);
     try {
+      let updatePayload: any = { dp_status: "verified", updated_at: new Date().toISOString() };
+      
+      // Inject DP-Deduction item into invoice or estimation
+      let targetDataField = null;
+      let parsedItems = [];
+      
+      if (dpVerificationRes.invoice_data?.items?.some((i: any) => i.type === 'Part-Inden')) {
+        targetDataField = 'invoice_data';
+        parsedItems = dpVerificationRes.invoice_data.items;
+      } else if (dpVerificationRes.estimation_data?.items?.some((i: any) => i.type === 'Part-Inden')) {
+        targetDataField = 'estimation_data';
+        parsedItems = dpVerificationRes.estimation_data.items;
+      }
+
+      if (targetDataField) {
+        const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (Math.round((item.price * item.qty) / 2)), 0);
+        const alreadyHasDeduction = parsedItems.some((i: any) => i.type === 'DP-Deduction');
+        
+        if (dpAmount > 0 && !alreadyHasDeduction) {
+          const deductionItem = {
+            id: Date.now(),
+            name: "Pembayaran DP (-50%)",
+            type: "DP-Deduction",
+            qty: 1,
+            price: -dpAmount,
+            item_type: "Deduction"
+          };
+          const newItems = [...parsedItems, deductionItem];
+          const newTotal = newItems.reduce((acc: number, curr: any) => acc + (curr.price * curr.qty), 0);
+          
+          updatePayload[targetDataField] = { items: newItems, total: newTotal };
+        }
+      }
+
       const { error } = await supabase
         .from("bookings")
-        .update({ dp_status: "verified", updated_at: new Date().toISOString() })
+        .update(updatePayload)
         .eq("id", dpVerificationRes.id);
 
       if (error) throw error;
       toast.success("DP berhasil diverifikasi.");
+      
+      if (selectedRes && selectedRes.id === dpVerificationRes.id && updatePayload[targetDataField as string]) {
+         setInvoiceItems(updatePayload[targetDataField as string].items);
+      }
       setShowDpVerificationModal(false);
       setDpVerificationRes(null);
       fetchBookings();
@@ -759,7 +797,7 @@ export default function OngoingPage() {
     const invoiceItems = res.invoice_data?.items || [];
     const estimationItems = res.estimation_data?.items || [];
     const parsedItems = [...invoiceItems, ...estimationItems];
-    const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
+    const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (Math.round((item.price * item.qty) / 2)), 0);
 
     setIsSendingDpEmail(true);
     try {

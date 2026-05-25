@@ -147,7 +147,7 @@ export default function PaymentPage() {
     const invoiceItems = booking.invoice_data?.items || [];
     const estimationItems = booking.estimation_data?.items || [];
     const parsedItems = [...invoiceItems, ...estimationItems];
-    dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
+    dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (Math.round((item.price * item.qty) / 2)), 0);
   }
 
   return (
