@@ -165,11 +165,11 @@ export default function PaymentPage() {
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm">
             <div className="grid grid-cols-2 gap-y-2">
               <span className="text-slate-400">Atas Nama:</span>
-              <span className="font-semibold text-right">{booking.customer_name}</span>
+              <span className="font-semibold text-right text-slate-200">{booking.customer_name}</span>
               <span className="text-slate-400">Layanan:</span>
               <span className="font-semibold text-right text-emerald-400">{booking.service_type}</span>
               <span className="text-slate-400">Kendaraan:</span>
-              <span className="font-semibold text-right">{booking.vehicle_info}</span>
+              <span className="font-semibold text-right text-slate-200">{booking.vehicle_info}</span>
               {dpAmount > 0 && (
                 <>
                   <span className="text-slate-400 mt-2">Total DP:</span>
