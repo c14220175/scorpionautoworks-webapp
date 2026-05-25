@@ -88,6 +88,12 @@ export default function OngoingPage() {
   const [estimasiPart, setEstimasiPart] = useState<number | "">("");
   const [estimasiJasa, setEstimasiJasa] = useState<number | "">("");
   const [estimasiNotes, setEstimasiNotes] = useState("");
+
+  // ================= DP VERIFICATION STATES =================
+  const [showDpVerificationModal, setShowDpVerificationModal] = useState(false);
+  const [dpVerificationRes, setDpVerificationRes] = useState<any | null>(null);
+  const [dpActionLoading, setDpActionLoading] = useState(false);
+  const [isSendingDpEmail, setIsSendingDpEmail] = useState(false);
   // ===================================================
 
   useEffect(() => {
@@ -702,6 +708,83 @@ export default function OngoingPage() {
   // Hitung total sementara
   const runningTotal = invoiceItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
 
+  // ================= DP VERIFICATION HANDLERS =================
+  const handleVerifyDp = async () => {
+    if (!dpVerificationRes) return;
+    setDpActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ dp_status: "verified", updated_at: new Date().toISOString() })
+        .eq("id", dpVerificationRes.id);
+
+      if (error) throw error;
+      toast.success("DP berhasil diverifikasi.");
+      setShowDpVerificationModal(false);
+      setDpVerificationRes(null);
+      fetchBookings();
+    } catch (err: any) {
+      toast.error("Gagal verifikasi DP: " + err.message);
+    } finally {
+      setDpActionLoading(false);
+    }
+  };
+
+  const handleRejectDp = async () => {
+    if (!dpVerificationRes) return;
+    setDpActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ dp_status: "rejected", updated_at: new Date().toISOString() })
+        .eq("id", dpVerificationRes.id);
+
+      if (error) throw error;
+      toast.success("DP ditolak. Pelanggan dapat mengunggah ulang.");
+      setShowDpVerificationModal(false);
+      setDpVerificationRes(null);
+      fetchBookings();
+    } catch (err: any) {
+      toast.error("Gagal menolak DP: " + err.message);
+    } finally {
+      setDpActionLoading(false);
+    }
+  };
+
+  const handleSendDpEmail = async (res: any) => {
+    if (!res.customer_email) {
+      toast.error("Pelanggan ini tidak memiliki alamat email yang tersimpan.");
+      return;
+    }
+    
+    setIsSendingDpEmail(true);
+    try {
+      const response = await fetch('/api/send-dp-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: res.customer_name,
+          customerEmail: res.customer_email,
+          vehicleInfo: res.vehicle_info,
+          dpLink: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id'}/payment/${res.id}`
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal mengirim email');
+      }
+
+      toast.success("Email tagihan DP berhasil dikirim ke pelanggan!");
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setIsSendingDpEmail(false);
+    }
+  };
+
+  const awaitingDpReservations = reservations.filter(res => res.dp_status === "awaiting_verification");
+  const ongoingReservations = reservations.filter(res => res.dp_status !== "awaiting_verification");
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-4">
@@ -711,13 +794,47 @@ export default function OngoingPage() {
         </Button>
       </div>
 
+      {awaitingDpReservations.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-amber-500 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Menunggu Verifikasi DP
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {awaitingDpReservations.map((res) => (
+              <Card key={res.id} className="bg-slate-900 border border-amber-900/50 transition-all shadow-lg">
+                <CardContent className="p-5 flex flex-col gap-2">
+                  <div className="flex justify-between w-full">
+                    <Badge className="bg-amber-600 text-white animate-pulse">Menunggu Verifikasi</Badge>
+                  </div>
+                  <div className="mt-2">
+                    <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
+                    <p className="text-amber-500 text-xs mb-1 font-medium">{res.service_type}</p>
+                    <p className="text-slate-400 text-sm mt-1 mb-4">{res.vehicle_info}</p>
+                    <Button 
+                      onClick={() => {
+                        setDpVerificationRes(res);
+                        setShowDpVerificationModal(true);
+                      }}
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+                    >
+                      Cek Bukti Pembayaran
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-20 text-slate-500 animate-pulse">Memuat data...</div>
-      ) : reservations.length === 0 ? (
+      ) : ongoingReservations.length === 0 ? (
         <Card className="bg-slate-900 border-slate-800"><CardContent className="text-center py-20 text-slate-500">Tidak ada kendaraan yang sedang dikerjakan.</CardContent></Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reservations.map((res) => (
+          {ongoingReservations.map((res) => (
             <Card key={res.id} onClick={() => handleOpenDetail(res)} className="bg-slate-900 border border-emerald-900/50 hover:border-emerald-500/50 cursor-pointer transition-all group shadow-lg">
               <CardContent className="p-5 flex flex-col gap-2">
                 <div className="flex justify-between w-full">
@@ -917,10 +1034,53 @@ export default function OngoingPage() {
                        <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
                          <span className="text-slate-400">Total: </span>
                          <span className="text-emerald-400 font-bold">Rp {runningTotal.toLocaleString("id-ID")}</span>
+                         </div>
                        </div>
-                     </div>
-                   )}
-                 </div>
+                     )}
+
+                     {/* DP Section */}
+                     {invoiceItems.some(i => i.type === "Part-Inden") && (
+                       <div className="mt-4 bg-slate-950 border border-slate-700 rounded-lg p-4">
+                         <h4 className="text-sm font-semibold text-emerald-500 flex items-center gap-2 mb-3">
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                           Status Pembayaran DP Part Inden
+                         </h4>
+                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                           <div>
+                             <span className="text-slate-400 mr-2">Status:</span>
+                             {selectedRes?.dp_status === 'verified' && <Badge className="bg-emerald-600">Terverifikasi</Badge>}
+                             {selectedRes?.dp_status === 'awaiting_verification' && <Badge className="bg-amber-600">Menunggu Verifikasi (Cek di atas)</Badge>}
+                             {selectedRes?.dp_status === 'rejected' && <Badge className="bg-rose-600">Ditolak</Badge>}
+                             {(!selectedRes?.dp_status || selectedRes?.dp_status === 'pending') && <Badge className="bg-slate-700">Belum Dibayar</Badge>}
+                           </div>
+                           <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                             <Button 
+                               size="sm" 
+                               onClick={() => {
+                                 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id';
+                                 const url = `${baseUrl}/payment/${selectedRes.id}`;
+                                 navigator.clipboard.writeText(url);
+                                 toast.success("Link pembayaran DP berhasil disalin! Kirimkan ke pelanggan.");
+                               }}
+                               className="bg-slate-700 hover:bg-slate-600 text-white flex items-center gap-2"
+                             >
+                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                               Copy Link
+                             </Button>
+                             <Button 
+                               size="sm" 
+                               onClick={() => handleSendDpEmail(selectedRes!)}
+                               disabled={isSendingDpEmail}
+                               className="bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-2"
+                             >
+                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                               {isSendingDpEmail ? "Mengirim..." : "Kirim via Email"}
+                             </Button>
+                           </div>
+                         </div>
+                       </div>
+                     )}
+                   </div>
                )}
 
                <p className="mt-4 pt-2 border-t border-slate-800 text-slate-400">{selectedRes?.problem_description}</p>
@@ -1733,6 +1893,53 @@ export default function OngoingPage() {
             <Button variant="outline" onClick={() => setShowEstimasiFormModal(false)} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
             <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white">
               {estimationEmailLoading ? "Mengirim..." : "Kirim Estimasi"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL DP VERIFICATION ================= */}
+      <Dialog open={showDpVerificationModal} onOpenChange={setShowDpVerificationModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-emerald-500">Verifikasi Bukti DP</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-slate-300 text-sm">
+              Pesanan atas nama <strong className="text-emerald-400">{dpVerificationRes?.customer_name}</strong>
+            </p>
+            {dpVerificationRes?.dp_proof_url ? (
+              <div className="border border-slate-700 rounded-lg p-2 bg-slate-950">
+                {dpVerificationRes.dp_proof_url.toLowerCase().endsWith('.pdf') ? (
+                  <div className="flex flex-col items-center justify-center p-8">
+                    <svg className="w-16 h-16 text-rose-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    <a href={dpVerificationRes.dp_proof_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline text-sm">
+                      Buka Dokumen PDF
+                    </a>
+                  </div>
+                ) : (
+                  <img src={dpVerificationRes.dp_proof_url} alt="Bukti Transfer" className="w-full max-h-[60vh] object-contain rounded" />
+                )}
+              </div>
+            ) : (
+              <p className="text-rose-500 text-sm text-center py-8">Bukti transfer tidak ditemukan.</p>
+            )}
+          </div>
+          <DialogFooter className="flex-row sm:justify-between gap-2">
+            <Button 
+              variant="destructive" 
+              onClick={handleRejectDp}
+              disabled={dpActionLoading}
+              className="w-full sm:w-auto bg-rose-600 hover:bg-rose-500 text-white"
+            >
+              {dpActionLoading ? "Loading..." : "Tolak"}
+            </Button>
+            <Button 
+              onClick={handleVerifyDp}
+              disabled={dpActionLoading}
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white"
+            >
+              {dpActionLoading ? "Loading..." : "Verifikasi"}
             </Button>
           </DialogFooter>
         </DialogContent>
