@@ -50,11 +50,11 @@ function ThankYouContent() {
               {type === "estimation" ? (
                 rejected === "true" ? (
                   <span className="block mt-2 text-rose-400 font-semibold">
-                    Penolakan estimasi telah kami terima. Tim kami akan segera menindaklanjuti.
+                    Penolakan penawaran harga telah kami terima. Tim kami akan segera menindaklanjuti.
                   </span>
                 ) : choice === "yes" ? (
                   <span className="block mt-2 text-emerald-400 font-semibold">
-                    Estimasi biaya disetujui. Tim kami akan segera melanjutkan pengerjaan kendaraan Anda.
+                    Penawaran harga disetujui. Tim kami akan segera melanjutkan pengerjaan kendaraan Anda.
                   </span>
                 ) : null
               ) : (

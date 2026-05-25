@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       `;
     });
 
-    const emailSubject = `Estimasi Biaya Servis - ${customerName}`;
+    const emailSubject = `Penawaran Harga Servis - ${customerName}`;
 
     const { data, error } = await resend.emails.send({
       from: 'Scorpion Autoworks <admin@scorpionautoworks.my.id>',
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
                     <td bgcolor="#0f172a" style="background-color: #0f172a; background-image: linear-gradient(#0f172a, #0f172a); padding: 32px 24px;">
                       <h1 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 22px; margin: 0 0 12px 0;">Halo, ${customerName}!</h1>
                       <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-                        Berikut adalah <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">estimasi biaya servis</strong> untuk kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong>. Mohon review dan berikan persetujuan Anda.
+                        Berikut adalah <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">penawaran harga servis</strong> untuk kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong>. Mohon review dan berikan persetujuan Anda.
                       </p>
                       
                       <!-- Data Kendaraan Card -->
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
                       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
                         <tr>
                           <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px;">
-                            <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">💰 Estimasi Biaya</h3>
+                            <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">💰 Penawaran Harga</h3>
                             
                             <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 12px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; border-collapse: collapse;">
                               <thead style="background-color: #0f172a; text-transform: uppercase; font-size: 10px; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
                             </table>
 
                             <div style="margin-top: 16px; text-align: right; background-color: #0f172a; padding: 12px; border-radius: 4px; border: 1px solid #334155;">
-                              <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">Total Estimasi:</span>
+                              <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">Total Penawaran:</span>
                               <span style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-weight: bold; font-size: 18px;">Rp ${(estimationTotal || 0).toLocaleString("id-ID")}</span>
                             </div>
                           </td>
@@ -159,7 +159,7 @@ export async function POST(request: Request) {
                       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 24px; border-top: 1px solid #334155;">
                         <tr>
                           <td style="padding-top: 24px; text-align: center;">
-                            <p style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-weight: bold; font-size: 16px; margin: 0 0 8px 0;">Apakah Anda menyetujui estimasi biaya di atas?</p>
+                            <p style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-weight: bold; font-size: 16px; margin: 0 0 8px 0;">Apakah Anda menyetujui penawaran harga di atas?</p>
                             <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 13px; margin: 0 0 20px 0;">Klik salah satu tombol di bawah untuk memberikan respon Anda.</p>
                             
                             <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">

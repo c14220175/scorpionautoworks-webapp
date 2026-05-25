@@ -311,8 +311,8 @@ export default function OngoingPage() {
       const total = pPrice + sPrice;
       const items = [];
 
-      if (pPrice > 0) items.push({ id: Date.now(), name: "Estimasi Biaya Parts", type: "Part-Estimasi", qty: 1, price: pPrice });
-      if (sPrice > 0) items.push({ id: Date.now() + 1, name: "Estimasi Biaya Jasa", type: "Jasa-Estimasi", qty: 1, price: sPrice });
+      if (pPrice > 0) items.push({ id: Date.now(), name: "Penawaran Harga Parts", type: "Part-Estimasi", qty: 1, price: pPrice });
+      if (sPrice > 0) items.push({ id: Date.now() + 1, name: "Penawaran Harga Jasa", type: "Jasa-Estimasi", qty: 1, price: sPrice });
 
       // Save estimation to DB
       const { error: dbError } = await supabase
@@ -343,9 +343,9 @@ export default function OngoingPage() {
         }),
       });
 
-      if (!emailRes.ok) throw new Error("Gagal mengirim email estimasi");
+      if (!emailRes.ok) throw new Error("Gagal mengirim email penawaran");
 
-      toast.success("Estimasi berhasil dikirim ke pelanggan!");
+      toast.success("Penawaran berhasil dikirim ke pelanggan!");
       setEstimationStatus("pending");
       setInvoiceItems(items);
       setShowEstimasiFormModal(false);
@@ -388,7 +388,7 @@ export default function OngoingPage() {
           .from("bookings")
           .update({ estimation_data: { items, total } })
           .eq("id", selectedRes.id);
-        if (error) console.error("Gagal menyimpan estimasi ke DB:", error.message);
+        if (error) console.error("Gagal menyimpan penawaran ke DB:", error.message);
       } else {
         // Save as invoice
         const { error } = await supabase
@@ -555,7 +555,7 @@ export default function OngoingPage() {
   const submitPartInden = () => {
     if (!indenName.trim()) { toast.error("Nama part tidak boleh kosong"); return; }
     if (!indenItemType) { toast.error("Pilih jenis item terlebih dahulu"); return; }
-    if (!indenPriceTotal || indenPriceTotal <= 0) { toast.error("Estimasi harga total harus lebih dari 0"); return; }
+    if (!indenPriceTotal || indenPriceTotal <= 0) { toast.error("Penawaran harga total harus lebih dari 0"); return; }
 
     const fullPrice = Number(indenPriceTotal);
     const newItem = {
@@ -977,11 +977,11 @@ export default function OngoingPage() {
                              <Badge className="bg-yellow-500 text-slate-900 animate-pulse w-fit">Menunggu Persetujuan Pelanggan...</Badge>
                            )}
                            {estimationStatus === "approved" && (
-                             <Badge className="bg-emerald-600 text-white w-fit">Estimasi Disetujui ✅</Badge>
+                             <Badge className="bg-emerald-600 text-white w-fit">Penawaran Disetujui ✅</Badge>
                            )}
                            {estimationStatus === "rejected" && (
                              <div className="bg-rose-900/30 border border-rose-700 rounded-lg p-3 w-full text-sm mt-2">
-                               <Badge className="bg-rose-600 text-white mb-2">Estimasi Ditolak ❌</Badge>
+                               <Badge className="bg-rose-600 text-white mb-2">Penawaran Ditolak ❌</Badge>
                                <p className="text-rose-400 font-semibold">Alasan Pelanggan:</p>
                                <p className="text-slate-300">{estimationRejectReason}</p>
                                <p className="text-xs text-slate-400 mt-2 mb-3">Pelanggan telah menolak layanan ini. Anda dapat membatalkan layanan.</p>
@@ -1002,7 +1002,7 @@ export default function OngoingPage() {
                                onClick={() => setShowEstimasiFormModal(true)} 
                                className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8 mt-2"
                              >
-                               📝 Buat Form Estimasi
+                               📝 Buat Form Penawaran
                              </Button>
                            )}
                          </div>
@@ -1496,7 +1496,7 @@ export default function OngoingPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-slate-400 mb-2">Estimasi Harga Total (Rp)</label>
+              <label className="block text-sm text-slate-400 mb-2">Penawaran Harga Total (Rp)</label>
               <input type="number" min="0" value={indenPriceTotal} onChange={(e) => setIndenPriceTotal(Number(e.target.value))} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Contoh: 1000000" />
             </div>
 
@@ -1504,7 +1504,7 @@ export default function OngoingPage() {
             {indenPriceTotal && Number(indenPriceTotal) > 0 && (
               <div className="bg-slate-950 border border-slate-800 rounded-lg p-3 space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Estimasi Total:</span>
+                  <span className="text-slate-400">Total Penawaran:</span>
                   <span className="text-slate-200 font-medium">Rp {Number(indenPriceTotal).toLocaleString("id-ID")}</span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -1899,11 +1899,11 @@ export default function OngoingPage() {
       <Dialog open={showEstimasiFormModal} onOpenChange={setShowEstimasiFormModal}>
         <DialogContent className="bg-slate-900 border-slate-700 text-slate-200">
           <DialogHeader>
-            <DialogTitle className="text-emerald-500">Form Estimasi</DialogTitle>
+            <DialogTitle className="text-emerald-500">Form Penawaran</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Estimasi Biaya Parts (Rp)</label>
+              <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Parts (Rp)</label>
               <input 
                 type="number" 
                 value={estimasiPart} 
@@ -1913,7 +1913,7 @@ export default function OngoingPage() {
               />
             </div>
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Estimasi Biaya Jasa (Rp)</label>
+              <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Jasa (Rp)</label>
               <input 
                 type="number" 
                 value={estimasiJasa} 
@@ -1928,14 +1928,14 @@ export default function OngoingPage() {
                 value={estimasiNotes} 
                 onChange={(e) => setEstimasiNotes(e.target.value)} 
                 className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white min-h-[100px]" 
-                placeholder="Catatan untuk pelanggan terkait estimasi..."
+                placeholder="Catatan untuk pelanggan terkait penawaran..."
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEstimasiFormModal(false)} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
             <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading} className="bg-emerald-600 hover:bg-emerald-500 text-white">
-              {estimationEmailLoading ? "Mengirim..." : "Kirim Estimasi"}
+              {estimationEmailLoading ? "Mengirim..." : "Kirim Penawaran"}
             </Button>
           </DialogFooter>
         </DialogContent>

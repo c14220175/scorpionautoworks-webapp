@@ -169,7 +169,7 @@ export async function POST(request: Request) {
     // Determine the main message
     let mainMessage = '';
     if (isCancelled) {
-      mainMessage = `Layanan servis untuk kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah dibatalkan karena penolakan estimasi harga atau atas permintaan Anda. Silakan hubungi admin untuk pengambilan kendaraan.`;
+      mainMessage = `Layanan servis untuk kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah dibatalkan karena penolakan penawaran harga atau atas permintaan Anda. Silakan hubungi admin untuk pengambilan kendaraan.`;
     } else if (isCheckupResult && !hasIssues) {
       mainMessage = `Pengecekan kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah selesai dan tidak ditemukan kendala. Kendaraan Anda siap untuk diambil.`;
     } else if (isCheckupResult && hasIssues) {

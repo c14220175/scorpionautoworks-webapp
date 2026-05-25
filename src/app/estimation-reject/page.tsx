@@ -73,10 +73,10 @@ function RejectContent() {
         <div className="text-center mb-6">
           <div className="text-5xl mb-4">❌</div>
           <h1 className="text-2xl font-bold text-rose-500 mb-2">
-            Tolak Estimasi Biaya
+            Tolak Penawaran Harga
           </h1>
           <p className="text-slate-400 text-sm">
-            Mohon beritahu kami alasan Anda menolak estimasi biaya ini, agar kami dapat memberikan solusi terbaik.
+            Mohon beritahu kami alasan Anda menolak penawaran harga ini, agar kami dapat memberikan solusi terbaik.
           </p>
         </div>
 
