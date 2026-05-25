@@ -757,10 +757,10 @@ export default function OngoingPage() {
       return;
     }
     let parsedItems = [];
-    if (typeof res.invoice_items === "string") {
-      try { parsedItems = JSON.parse(res.invoice_items); } catch(e){}
-    } else if (Array.isArray(res.invoice_items)) {
-      parsedItems = res.invoice_items;
+    if (res.estimation_data && res.estimation_data.items) {
+      parsedItems = res.estimation_data.items;
+    } else if (res.invoice_data && res.invoice_data.items) {
+      parsedItems = res.invoice_data.items;
     }
     const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
 

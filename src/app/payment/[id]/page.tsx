@@ -143,12 +143,12 @@ export default function PaymentPage() {
   }
 
   let dpAmount = 0;
-  if (booking?.invoice_items) {
+  if (booking) {
     let parsedItems = [];
-    if (typeof booking.invoice_items === "string") {
-      try { parsedItems = JSON.parse(booking.invoice_items); } catch(e){}
-    } else if (Array.isArray(booking.invoice_items)) {
-      parsedItems = booking.invoice_items;
+    if (booking.estimation_data && booking.estimation_data.items) {
+      parsedItems = booking.estimation_data.items;
+    } else if (booking.invoice_data && booking.invoice_data.items) {
+      parsedItems = booking.invoice_data.items;
     }
     dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
   }
