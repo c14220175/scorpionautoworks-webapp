@@ -144,12 +144,9 @@ export default function PaymentPage() {
 
   let dpAmount = 0;
   if (booking) {
-    let parsedItems = [];
-    if (booking.estimation_data && booking.estimation_data.items) {
-      parsedItems = booking.estimation_data.items;
-    } else if (booking.invoice_data && booking.invoice_data.items) {
-      parsedItems = booking.invoice_data.items;
-    }
+    const invoiceItems = booking.invoice_data?.items || [];
+    const estimationItems = booking.estimation_data?.items || [];
+    const parsedItems = [...invoiceItems, ...estimationItems];
     dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
   }
 

@@ -756,12 +756,9 @@ export default function OngoingPage() {
       toast.error("Pelanggan ini tidak memiliki alamat email yang tersimpan.");
       return;
     }
-    let parsedItems = [];
-    if (res.estimation_data && res.estimation_data.items) {
-      parsedItems = res.estimation_data.items;
-    } else if (res.invoice_data && res.invoice_data.items) {
-      parsedItems = res.invoice_data.items;
-    }
+    const invoiceItems = res.invoice_data?.items || [];
+    const estimationItems = res.estimation_data?.items || [];
+    const parsedItems = [...invoiceItems, ...estimationItems];
     const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (item.price * item.qty), 0);
 
     setIsSendingDpEmail(true);
