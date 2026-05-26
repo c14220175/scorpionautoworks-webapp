@@ -1,7 +1,3 @@
-/**
- * Format tanggal dari database ke tampilan WIB (Asia/Jakarta).
- * Selalu dikunci ke timezone Jakarta agar tidak terpengaruh timezone browser/server.
- */
 export const formatWIB = (dateString: string): string => {
   if (!dateString) return "-";
   return new Intl.DateTimeFormat('id-ID', {
@@ -14,9 +10,7 @@ export const formatWIB = (dateString: string): string => {
   }).format(new Date(dateString));
 };
 
-/**
- * Format tanggal singkat DD/MM/YYYY — selalu WIB.
- */
+
 export const formatWIBShort = (dateString: string): string => {
   if (!dateString) return "-";
   return new Intl.DateTimeFormat('id-ID', {
@@ -27,9 +21,6 @@ export const formatWIBShort = (dateString: string): string => {
   }).format(new Date(dateString));
 };
 
-/**
- * Format tanggal lengkap dengan hari — selalu WIB.
- */
 export const formatWIBFull = (dateString: string): string => {
   if (!dateString) return "-";
   return new Intl.DateTimeFormat('id-ID', {
@@ -43,10 +34,6 @@ export const formatWIBFull = (dateString: string): string => {
   }).format(new Date(dateString));
 };
 
-/**
- * Ambil jam (number) dari string tanggal — selalu dalam WIB.
- * Digunakan untuk kalkulasi slot waktu yang tersedia.
- */
 export const getHourWIB = (dateString: string): number => {
   return parseInt(
     new Intl.DateTimeFormat('id-ID', {
@@ -57,25 +44,14 @@ export const getHourWIB = (dateString: string): number => {
   );
 };
 
-/**
- * Buat ISO string dari tanggal dan jam WIB.
- * Format: "YYYY-MM-DDTHH:mm:ss+07:00"
- * TIDAK menggunakan .toISOString() agar tidak ada silent conversion ke UTC.
- */
 export const toWIBISOString = (date: string, time: string): string => {
   return `${date}T${time}:00+07:00`;
 };
 
-/**
- * Buat batas awal hari (00:00:00) dalam format ISO WIB.
- */
 export const startOfDayWIB = (yyyy: string, mm: string, dd: string): string => {
   return new Date(`${yyyy}-${mm}-${dd}T00:00:00+07:00`).toISOString();
 };
 
-/**
- * Buat batas akhir hari (23:59:59) dalam format ISO WIB.
- */
 export const endOfDayWIB = (yyyy: string, mm: string, dd: string): string => {
   return new Date(`${yyyy}-${mm}-${dd}T23:59:59.999+07:00`).toISOString();
 };

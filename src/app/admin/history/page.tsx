@@ -73,7 +73,7 @@ export default function HistoryPage() {
           type="text"
           value={searchQuery}
           onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-          placeholder="Cari nama, kendaraan, jenis servis, keluhan..."
+          placeholder="Cari nama, kendaraan, nomor polisi, telepon, jenis servis, keluhan..."
           className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all"
         />
         {searchQuery && (
@@ -101,9 +101,11 @@ export default function HistoryPage() {
           ? historyData.filter((res) =>
               (res.customer_name || "").toLowerCase().includes(query) ||
               (res.vehicle_info || "").toLowerCase().includes(query) ||
+              (res.license_plate || "").toLowerCase().includes(query) ||
               (res.service_type || "").toLowerCase().includes(query) ||
               (res.problem_description || "").toLowerCase().includes(query) ||
               (res.customer_email || "").toLowerCase().includes(query) ||
+              (res.customer_phone || "").toLowerCase().includes(query) ||
               String(res.id).includes(query) ||
               formatWIBShort(res.completed_at).includes(query)
             )
@@ -134,6 +136,12 @@ export default function HistoryPage() {
                       <p className="text-emerald-500 text-xs mb-2 font-medium">{res.service_type}</p>
                       <div className="bg-slate-950 p-3 rounded-md border border-slate-800">
                         <p className="text-slate-400 text-sm mb-1"><strong>Kendaraan:</strong> {res.vehicle_info}</p>
+                        {res.license_plate && (
+                          <p className="text-slate-400 text-sm mb-1 flex items-center gap-1.5">
+                            <strong>Nopol:</strong>
+                            <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                          </p>
+                        )}
                         <p className="text-slate-400 text-sm line-clamp-2"><strong>Keluhan:</strong> {res.problem_description}</p>
                       </div>
                     </div>
@@ -227,6 +235,9 @@ export default function HistoryPage() {
                   <p className="mb-1 text-slate-400"><strong>Email:</strong> {selectedBooking.customer_email || '-'}</p>
                   <p className="mb-1 text-slate-400"><strong>Telepon:</strong> {selectedBooking.customer_phone || '-'}</p>
                   <p className="mb-1"><strong>Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
+                  {selectedBooking.license_plate && (
+                    <p className="mb-1 text-slate-400"><strong>Nopol:</strong> <span className="text-yellow-500 font-mono font-bold tracking-wider">{selectedBooking.license_plate}</span></p>
+                  )}
                   <p><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedBooking.service_type}</span></p>
                 </div>
                 <div className="sm:text-right">
@@ -333,6 +344,9 @@ export default function HistoryPage() {
                 <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedBooking.customer_name}</p>
                 <p className="mb-1 text-slate-400"><strong>Email:</strong> {selectedBooking.customer_email || '-'}</p>
                 <p className="mb-1"><strong>Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
+                {selectedBooking.license_plate && (
+                  <p className="mb-1 text-slate-400"><strong>Nopol:</strong> <span className="text-yellow-500 font-mono font-bold tracking-wider">{selectedBooking.license_plate}</span></p>
+                )}
                 <p className="mb-1"><strong>Tipe Servis:</strong> <span className="text-emerald-400">{selectedBooking.service_type}</span></p>
               </div>
               <div className="text-right">

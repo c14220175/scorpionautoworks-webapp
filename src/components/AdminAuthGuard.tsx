@@ -16,7 +16,6 @@ export default function AdminAuthGuard({
   const [isAuthed, setIsAuthed] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
-  // Fungsi untuk mengecek apakah session masih valid
   const checkSession = useCallback(() => {
     const token = sessionStorage.getItem(SESSION_KEY);
     const lastActivity = sessionStorage.getItem(TIMESTAMP_KEY);
@@ -27,7 +26,6 @@ export default function AdminAuthGuard({
 
     const elapsed = Date.now() - parseInt(lastActivity, 10);
     if (elapsed > SESSION_TIMEOUT_MS) {
-      // Session expired — bersihkan data
       sessionStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(TIMESTAMP_KEY);
       return false;
@@ -44,19 +42,17 @@ export default function AdminAuthGuard({
     }
   }, []);
 
-  // Cek session saat komponen pertama kali di-mount
   useEffect(() => {
     const valid = checkSession();
     if (!valid) {
       router.replace("/admin-login");
     } else {
-      updateActivity(); // Reset timer saat load halaman
+      updateActivity();
       setIsAuthed(true);
     }
     setIsChecking(false);
   }, [checkSession, updateActivity, router]);
 
-  // Listener untuk aktivitas user (mouse, keyboard, scroll, click)
   useEffect(() => {
     if (!isAuthed) return;
 
@@ -65,7 +61,6 @@ export default function AdminAuthGuard({
       window.addEventListener(event, updateActivity, { passive: true })
     );
 
-    // Cek session expiry setiap 60 detik
     const interval = setInterval(() => {
       const valid = checkSession();
       if (!valid) {
@@ -101,7 +96,6 @@ export default function AdminAuthGuard({
   return <>{children}</>;
 }
 
-// Helper: fungsi logout yang bisa dipakai di komponen lain
 export function adminLogout() {
   sessionStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(TIMESTAMP_KEY);

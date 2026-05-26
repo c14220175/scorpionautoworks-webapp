@@ -351,6 +351,12 @@ export default function AdminDashboard() {
                     ) : '-'}
                   </div>
                 </div>
+                {selectedRes.license_plate && (
+                  <div className="md:col-span-2 bg-slate-800/50 p-3 rounded-lg border border-yellow-500/20">
+                    <div className="text-slate-500 text-xs mb-1">Nomor Polisi</div>
+                    <div className="font-bold text-yellow-500 font-mono tracking-wider text-lg">{selectedRes.license_plate}</div>
+                  </div>
+                )}
                 <div><div className="text-slate-500 text-xs mb-1">ID Reservasi</div><div className="font-semibold text-slate-200">{selectedRes.id}</div></div>
                 <div><div className="text-slate-500 text-xs mb-1">Waktu Masuk</div><div className="font-semibold text-yellow-500 text-base">{formatWIB(selectedRes.booking_date)}</div></div>
                 <div><div className="text-slate-500 text-xs mb-1">Tipe Servis</div><div className="font-semibold text-slate-200">{selectedRes.service_type}</div></div>

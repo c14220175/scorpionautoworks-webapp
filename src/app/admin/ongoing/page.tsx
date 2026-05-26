@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { 
-  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, 
-  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction 
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction
 } from "@/components/ui/alert-dialog";
 import { Search, Trash2, Printer, X } from "lucide-react";
 
@@ -18,7 +18,7 @@ export default function OngoingPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  
+
   // State Dialog Utama
   const [selectedRes, setSelectedRes] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -43,10 +43,10 @@ export default function OngoingPage() {
   // ================= INVOICE STATES =================
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
-  
+
   // Tambah Part Modal
   const [showAddPartModal, setShowAddPartModal] = useState(false);
-  
+
   // Part Customer Modal
   const [showPartCustModal, setShowPartCustModal] = useState(false);
   const [partCustName, setPartCustName] = useState("");
@@ -57,7 +57,7 @@ export default function OngoingPage() {
   const [indenItemType, setIndenItemType] = useState("");
   const [indenPriceTotal, setIndenPriceTotal] = useState<number | "">("")
   const [partCustItemType, setPartCustItemType] = useState("");
-  
+
   // Part Inventory Modal
   const [showPartInvModal, setShowPartInvModal] = useState(false);
   const [inventoryList, setInventoryList] = useState<any[]>([]);
@@ -77,12 +77,12 @@ export default function OngoingPage() {
   const [kompleksitasPrice, setKompleksitasPrice] = useState<number | "">(0);
   const [pendingInvoiceItems, setPendingInvoiceItems] = useState<any[]>([]);
   const [pendingJasaItem, setPendingJasaItem] = useState<any | null>(null);
-  
+
   // ================= ESTIMATION STATES =================
   const [estimationStatus, setEstimationStatus] = useState<string | null>(null);
   const [estimationRejectReason, setEstimationRejectReason] = useState<string | null>(null);
   const [estimationEmailLoading, setEstimationEmailLoading] = useState(false);
-  
+
   // Modal Form Estimasi
   const [showEstimasiFormModal, setShowEstimasiFormModal] = useState(false);
   const [estimasiPart, setEstimasiPart] = useState<number | "">("");
@@ -145,7 +145,7 @@ export default function OngoingPage() {
     // Load estimation or invoice data depending on phase
     const isCheckup = res.service_type?.toLowerCase().includes("pengecekan") || res.service_type?.toLowerCase().includes("checkup");
     const phase = res.current_phase || 0;
-    
+
     if (!isCheckup && phase === 0) {
       if (res.estimation_data && res.estimation_data.items) {
         setInvoiceItems(res.estimation_data.items);
@@ -187,16 +187,16 @@ export default function OngoingPage() {
       // Simpan fase ke database agar tidak reset saat dialog ditutup
       try {
         const updateData: any = { current_phase: nextPhase, updated_at: new Date().toISOString() };
-        
+
         // Do not copy estimation data anymore to invoice data
         // because invoice will be generated based on real items in the next phase
         if (!isCheckup && currentPhaseIndex === 0) {
           // just let invoice_data be empty for real item entries later
         }
 
-        
+
         await supabase.from("bookings").update(updateData).eq("id", selectedRes.id);
-        
+
         // Update local state agar tidak reset saat dialog ditutup/dibuka ulang
         const updatedRes = { ...selectedRes, current_phase: nextPhase };
         // Do not assign estimation data to invoice_data locally either
@@ -317,7 +317,7 @@ export default function OngoingPage() {
       // Save estimation to DB
       const { error: dbError } = await supabase
         .from("bookings")
-        .update({ 
+        .update({
           estimation_data: { items, total },
           estimation_status: "pending"
         })
@@ -349,7 +349,7 @@ export default function OngoingPage() {
       setEstimationStatus("pending");
       setInvoiceItems(items);
       setShowEstimasiFormModal(false);
-      
+
       // Update local state
       setSelectedRes({
         ...selectedRes,
@@ -451,9 +451,9 @@ export default function OngoingPage() {
   // Fetch inventory dari database
   const fetchInventory = async () => {
     setShowAddPartModal(false);
-    setShowPartInvModal(true); 
-    setLoadingInventory(true); 
-    
+    setShowPartInvModal(true);
+    setLoadingInventory(true);
+
     try {
       const { data, error } = await supabase.from("inventory").select("*").gt("stock_count", 0);
       if (error) throw error;
@@ -493,7 +493,7 @@ export default function OngoingPage() {
 
     const newItem = {
       id: Date.now(),
-      inv_id: selectedInvItem.id, 
+      inv_id: selectedInvItem.id,
       name: selectedInvItem.name,
       type: "Part-Inventory",
       qty: qtyNum,
@@ -636,7 +636,7 @@ export default function OngoingPage() {
   const executeFinishInvoice = async () => {
     if (!selectedRes) return;
     setActionLoading(true);
-    
+
     try {
       // Stok sudah dikurangi saat part ditambahkan ke invoice, jadi langsung simpan
 
@@ -646,28 +646,28 @@ export default function OngoingPage() {
 
       const { error } = await supabase
         .from("bookings")
-        .update({ 
+        .update({
           status: "completed",
           completed_at: currentTime,
           invoice_data: { items: invoiceItems, total: totalBayar },
           tracking_code: null // Set null agar kode bisa dipakai kembali
         })
         .eq("id", selectedRes.id);
-        
+
       if (error) {
         console.error("Error saving invoice_data:", error);
         const { error: fallbackError } = await supabase
           .from("bookings")
           .update({ status: "completed", completed_at: currentTime })
           .eq("id", selectedRes.id);
-          
+
         if (fallbackError) throw fallbackError;
         toast.warning("Servis selesai, tetapi struk invoice tidak tersimpan karena kolom belum dibuat di Database.");
       } else {
         toast.success("Servis & Invoice Selesai! Data dipindahkan ke Riwayat.");
       }
-      
-      // Send email notification for service completion
+
+      // Send email notification, service finished
       if (selectedRes.customer_email) {
         try {
           await fetch('/api/send-service-email', {
@@ -689,7 +689,7 @@ export default function OngoingPage() {
           console.error("Gagal mengirim email invoice:", emailErr);
         }
       }
-      
+
       setShowInvoiceModal(false);
       setSelectedRes(null);
       fetchBookings();
@@ -701,7 +701,7 @@ export default function OngoingPage() {
   };
 
   // Filter pencarian inventory
-  const filteredInventory = inventoryList.filter(inv => 
+  const filteredInventory = inventoryList.filter(inv =>
     (inv.name || "").toLowerCase().includes(invSearch.toLowerCase())
   );
 
@@ -714,11 +714,10 @@ export default function OngoingPage() {
     setDpActionLoading(true);
     try {
       let updatePayload: any = { dp_status: "verified", updated_at: new Date().toISOString() };
-      
-      // Inject DP-Deduction item into invoice or estimation
+
       let targetDataField = null;
       let parsedItems = [];
-      
+
       if (dpVerificationRes.invoice_data?.items?.some((i: any) => i.type === 'Part-Inden')) {
         targetDataField = 'invoice_data';
         parsedItems = dpVerificationRes.invoice_data.items;
@@ -730,7 +729,7 @@ export default function OngoingPage() {
       if (targetDataField) {
         const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (Math.round((item.price * item.qty) / 2)), 0);
         const alreadyHasDeduction = parsedItems.some((i: any) => i.type === 'DP-Deduction');
-        
+
         if (dpAmount > 0 && !alreadyHasDeduction) {
           const deductionItem = {
             id: Date.now(),
@@ -742,7 +741,7 @@ export default function OngoingPage() {
           };
           const newItems = [...parsedItems, deductionItem];
           const newTotal = newItems.reduce((acc: number, curr: any) => acc + (curr.price * curr.qty), 0);
-          
+
           updatePayload[targetDataField] = { items: newItems, total: newTotal };
         }
       }
@@ -754,9 +753,9 @@ export default function OngoingPage() {
 
       if (error) throw error;
       toast.success("DP berhasil diverifikasi.");
-      
+
       if (selectedRes && selectedRes.id === dpVerificationRes.id && updatePayload[targetDataField as string]) {
-         setInvoiceItems(updatePayload[targetDataField as string].items);
+        setInvoiceItems(updatePayload[targetDataField as string].items);
       }
       setShowDpVerificationModal(false);
       setDpVerificationRes(null);
@@ -853,8 +852,15 @@ export default function OngoingPage() {
                   <div className="mt-2">
                     <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
                     <p className="text-amber-500 text-xs mb-1 font-medium">{res.service_type}</p>
-                    <p className="text-slate-400 text-sm mt-1 mb-4">{res.vehicle_info}</p>
-                    <Button 
+                    <p className="text-slate-400 text-sm mt-1 mb-1">{res.vehicle_info}</p>
+                    {res.license_plate && (
+                      <p className="text-sm mb-3 flex items-center gap-1.5">
+                        <span className="text-slate-500 text-xs">Nopol:</span>
+                        <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                      </p>
+                    )}
+                    {!res.license_plate && <div className="mb-4" />}
+                    <Button
                       onClick={() => {
                         setDpVerificationRes(res);
                         setShowDpVerificationModal(true);
@@ -889,6 +895,12 @@ export default function OngoingPage() {
                   <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
                   <p className="text-emerald-500 text-xs mb-1 font-medium">{res.service_type}</p>
                   <p className="text-slate-400 text-sm mt-1">{res.vehicle_info}</p>
+                  {res.license_plate && (
+                    <p className="text-sm mt-1 flex items-center gap-1.5">
+                      <span className="text-slate-500 text-xs">Nopol:</span>
+                      <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -897,237 +909,243 @@ export default function OngoingPage() {
       )}
 
       {/* MODAL UTAMA: Detail Pengerjaan */}
-      <Dialog open={isDetailOpen} onOpenChange={(open) => { if(!open) handleCloseDetail(); }}>
+      <Dialog open={isDetailOpen} onOpenChange={(open) => { if (!open) handleCloseDetail(); }}>
         <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-emerald-500 text-xl border-b border-slate-700 pb-3">Detail Pengerjaan</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-2">
-             <div className="text-sm text-slate-300 space-y-3">
-               <p><strong>Pelanggan:</strong> {selectedRes?.customer_name}</p>
-               <p className="flex items-center gap-2">
-                 <strong>Telepon:</strong> 
-                 {selectedRes?.customer_phone ? (
-                   <a href={`tel:${selectedRes.customer_phone}`} className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1.5">
-                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                     {selectedRes.customer_phone}
-                   </a>
-                 ) : <span className="text-slate-500">-</span>}
-               </p>
-               <p><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
-               <p><strong>Jenis Layanan:</strong> {selectedRes?.service_type}</p>
-               <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                  <p><strong>Fase Pengerjaan:</strong> <span className="text-emerald-400 font-bold ml-1">{phases[currentPhaseIndex]}</span></p>
-               </div>
+            <div className="text-sm text-slate-300 space-y-3">
+              <p><strong>Pelanggan:</strong> {selectedRes?.customer_name}</p>
+              <p className="flex items-center gap-2">
+                <strong>Telepon:</strong>
+                {selectedRes?.customer_phone ? (
+                  <a href={`tel:${selectedRes.customer_phone}`} className="text-yellow-500 hover:text-yellow-400 transition-colors flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    {selectedRes.customer_phone}
+                  </a>
+                ) : <span className="text-slate-500">-</span>}
+              </p>
+              <p><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
+              {selectedRes?.license_plate && (
+                <p className="flex items-center gap-2">
+                  <strong>Nopol:</strong>
+                  <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{selectedRes.license_plate}</span>
+                </p>
+              )}
+              <p><strong>Jenis Layanan:</strong> {selectedRes?.service_type}</p>
+              <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                <p><strong>Fase Pengerjaan:</strong> <span className="text-emerald-400 font-bold ml-1">{phases[currentPhaseIndex]}</span></p>
+              </div>
 
-                {/* ====== Checkup Description (if exists) ====== */}
-                {selectedRes?.checkup_description && (
-                  <div className="bg-yellow-900/20 p-3 rounded-lg border border-yellow-700/50 mt-2">
-                    <p className="text-sm font-bold text-yellow-500 mb-1">🔍 Kendala Ditemukan:</p>
-                    <p className="text-sm text-slate-300 whitespace-pre-wrap">{selectedRes.checkup_description}</p>
-                    {selectedRes.checkup_image_url && (
-                      <img src={selectedRes.checkup_image_url} alt="Foto kendala" className="mt-2 rounded-lg max-w-full max-h-48 object-cover border border-slate-700" />
-                    )}
+              {/* ====== Checkup Description (if exists) ====== */}
+              {selectedRes?.checkup_description && (
+                <div className="bg-yellow-900/20 p-3 rounded-lg border border-yellow-700/50 mt-2">
+                  <p className="text-sm font-bold text-yellow-500 mb-1">🔍 Kendala Ditemukan:</p>
+                  <p className="text-sm text-slate-300 whitespace-pre-wrap">{selectedRes.checkup_description}</p>
+                  {selectedRes.checkup_image_url && (
+                    <img src={selectedRes.checkup_image_url} alt="Foto kendala" className="mt-2 rounded-lg max-w-full max-h-48 object-cover border border-slate-700" />
+                  )}
+                </div>
+              )}
+
+              {/* ====== Customer Checkup Response ====== */}
+              {selectedRes?.checkup_description && !selectedRes?.customer_checkup_response && (
+                <div className="bg-amber-900/20 p-3 rounded-lg border border-amber-700/50 mt-2">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    </span>
+                    <p className="text-sm font-bold text-amber-400">Menunggu Respon Pelanggan...</p>
                   </div>
-                )}
+                  <p className="text-xs text-slate-400 mt-2">Email kendala telah dikirim. Menunggu pelanggan memilih apakah akan melanjutkan perbaikan atau tidak.</p>
+                </div>
+              )}
 
-                {/* ====== Customer Checkup Response ====== */}
-                {selectedRes?.checkup_description && !selectedRes?.customer_checkup_response && (
-                  <div className="bg-amber-900/20 p-3 rounded-lg border border-amber-700/50 mt-2">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
-                      </span>
-                      <p className="text-sm font-bold text-amber-400">Menunggu Respon Pelanggan...</p>
+              {selectedRes?.customer_checkup_response && (
+                <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-700 mt-2">
+                  <p className="text-sm font-bold text-blue-400">Respon Pelanggan:</p>
+                  <p className="text-lg text-white font-bold">{selectedRes.customer_checkup_response}</p>
+                  <p className="text-xs text-blue-300 mt-2">
+                    {selectedRes.customer_checkup_response === 'Lanjut Reparasi'
+                      ? "Gunakan tombol 'Escalate' untuk mengubah layanan."
+                      : "Silahkan klik 'Selesaikan Servis' untuk membuat invoice."}
+                  </p>
+                </div>
+              )}
+
+              {/* ====== SECTION: Barang & Jasa (tampil saat fase "Memasang komponen baru" atau setelahnya) ====== */}
+              {(isMelepasPhase || isMerasangPhase || showInvoiceItemsReadOnly) && (
+                <div className="mt-4 pt-4 border-t border-slate-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-yellow-500 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                      Barang & Jasa
+                    </h4>
+                  </div>
+
+                  {/* Tombol tambah - hanya tampil saat fase "Memasang komponen baru" */}
+                  {(isMelepasPhase || isMerasangPhase) && (
+                    <div className="flex flex-col gap-2 mb-3">
+                      {isMelepasPhase && (
+                        <div className="mb-2">
+                          {estimationStatus === "pending" && (
+                            <Badge className="bg-yellow-500 text-slate-900 animate-pulse w-fit">Menunggu Persetujuan Pelanggan...</Badge>
+                          )}
+                          {estimationStatus === "approved" && (
+                            <Badge className="bg-emerald-600 text-white w-fit">Penawaran Disetujui ✅</Badge>
+                          )}
+                          {estimationStatus === "rejected" && (
+                            <div className="bg-rose-900/30 border border-rose-700 rounded-lg p-3 w-full text-sm mt-2">
+                              <Badge className="bg-rose-600 text-white mb-2">Penawaran Ditolak ❌</Badge>
+                              <p className="text-rose-400 font-semibold">Alasan Pelanggan:</p>
+                              <p className="text-slate-300">{estimationRejectReason}</p>
+                              <p className="text-xs text-slate-400 mt-2 mb-3">Pelanggan telah menolak layanan ini. Anda dapat membatalkan layanan.</p>
+                              <Button
+                                size="sm"
+                                onClick={handleCancelService}
+                                disabled={actionLoading}
+                                className="bg-rose-600 hover:bg-rose-500 text-white text-xs"
+                              >
+                                Batalkan Layanan
+                              </Button>
+                            </div>
+                          )}
+
+                          {estimationStatus !== "pending" && estimationStatus !== "approved" && (
+                            <Button
+                              size="sm"
+                              onClick={() => setShowEstimasiFormModal(true)}
+                              className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8 mt-2"
+                            >
+                              📝 Buat Form Penawaran
+                            </Button>
+                          )}
+                        </div>
+                      )}
+
+                      {(!isMelepasPhase || (estimationStatus !== "pending" && estimationStatus !== "approved")) && (
+                        <div className="flex gap-2">
+                          {!isMelepasPhase && (
+                            <>
+                              <Button size="sm" onClick={() => setShowAddPartModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
+                                + Tambah Part
+                              </Button>
+                              <Button size="sm" onClick={() => setShowAddJasaModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8">
+                                + Tambah Jasa
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-2">Email kendala telah dikirim. Menunggu pelanggan memilih apakah akan melanjutkan perbaikan atau tidak.</p>
-                  </div>
-                )}
+                  )}
 
-                {selectedRes?.customer_checkup_response && (
-                  <div className="bg-blue-900/30 p-3 rounded-lg border border-blue-700 mt-2">
-                    <p className="text-sm font-bold text-blue-400">Respon Pelanggan:</p>
-                    <p className="text-lg text-white font-bold">{selectedRes.customer_checkup_response}</p>
-                    <p className="text-xs text-blue-300 mt-2">
-                      {selectedRes.customer_checkup_response === 'Lanjut Reparasi'
-                        ? "Gunakan tombol 'Escalate' untuk mengubah layanan."
-                        : "Silahkan klik 'Selesaikan Servis' untuk membuat invoice."}
-                    </p>
-                  </div>
-                )}
+                  {/* Tabel ringkasan item - Di fase melepas tidak perlu tabel, hanya form saja. Tapi kalau ada invoiceItems, kita bisa tampilkan. */}
+                  {(!isMelepasPhase || estimationStatus === "pending" || estimationStatus === "approved") && (
+                    invoiceItems.length > 0 ? (
+                      <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
+                        <table className="w-full text-xs text-left text-slate-300">
+                          <thead className="text-[10px] text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+                            <tr>
+                              <th className="px-2 py-2 text-center">No</th>
+                              <th className="px-2 py-2">Nama</th>
+                              <th className="px-2 py-2">Jenis</th>
+                              <th className="px-2 py-2 text-center">Qty</th>
+                              <th className="px-2 py-2 text-right">Harga</th>
+                              {isMerasangPhase && <th className="px-2 py-2 text-center w-10"></th>}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {invoiceItems.map((item, index) => (
+                              <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
+                                <td className="px-2 py-2 text-center">{index + 1}</td>
+                                <td className="px-2 py-2 font-medium text-slate-200">{item.name}</td>
+                                <td className="px-2 py-2">
+                                  <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">{item.type}</span>
+                                </td>
+                                <td className="px-2 py-2 text-center">{item.qty}</td>
+                                <td className="px-2 py-2 text-right">Rp {(item.price * item.qty).toLocaleString("id-ID")}</td>
+                                {isMerasangPhase && (
+                                  <td className="px-2 py-2 text-center">
+                                    <button onClick={() => removeItem(item.id)} className="text-rose-400 hover:text-rose-300 transition-colors p-1">
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  </td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      !isMelepasPhase && (
+                        <div className="text-center py-4 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
+                          Belum ada barang atau jasa ditambahkan
+                        </div>
+                      )
+                    )
+                  )}
 
-               {/* ====== SECTION: Barang & Jasa (tampil saat fase "Memasang komponen baru" atau setelahnya) ====== */}
-               {(isMelepasPhase || isMerasangPhase || showInvoiceItemsReadOnly) && (
-                 <div className="mt-4 pt-4 border-t border-slate-800">
-                   <div className="flex items-center justify-between mb-3">
-                     <h4 className="text-sm font-semibold text-yellow-500 flex items-center gap-2">
-                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                       Barang & Jasa
-                     </h4>
-                   </div>
+                  {/* Total sementara */}
+                  {(!isMelepasPhase || estimationStatus === "pending" || estimationStatus === "approved") && invoiceItems.length > 0 && (
+                    <div className="flex flex-col items-end gap-3 mt-3">
+                      <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
+                        <span className="text-slate-400">Total: </span>
+                        <span className="text-emerald-400 font-bold">Rp {runningTotal.toLocaleString("id-ID")}</span>
+                      </div>
+                    </div>
+                  )}
 
-                   {/* Tombol tambah - hanya tampil saat fase "Memasang komponen baru" */}
-                   {(isMelepasPhase || isMerasangPhase) && (
-                     <div className="flex flex-col gap-2 mb-3">
-                       {isMelepasPhase && (
-                         <div className="mb-2">
-                           {estimationStatus === "pending" && (
-                             <Badge className="bg-yellow-500 text-slate-900 animate-pulse w-fit">Menunggu Persetujuan Pelanggan...</Badge>
-                           )}
-                           {estimationStatus === "approved" && (
-                             <Badge className="bg-emerald-600 text-white w-fit">Penawaran Disetujui ✅</Badge>
-                           )}
-                           {estimationStatus === "rejected" && (
-                             <div className="bg-rose-900/30 border border-rose-700 rounded-lg p-3 w-full text-sm mt-2">
-                               <Badge className="bg-rose-600 text-white mb-2">Penawaran Ditolak ❌</Badge>
-                               <p className="text-rose-400 font-semibold">Alasan Pelanggan:</p>
-                               <p className="text-slate-300">{estimationRejectReason}</p>
-                               <p className="text-xs text-slate-400 mt-2 mb-3">Pelanggan telah menolak layanan ini. Anda dapat membatalkan layanan.</p>
-                               <Button 
-                                 size="sm" 
-                                 onClick={handleCancelService} 
-                                 disabled={actionLoading}
-                                 className="bg-rose-600 hover:bg-rose-500 text-white text-xs"
-                               >
-                                 Batalkan Layanan
-                               </Button>
-                             </div>
-                           )}
-                           
-                           {estimationStatus !== "pending" && estimationStatus !== "approved" && (
-                             <Button 
-                               size="sm" 
-                               onClick={() => setShowEstimasiFormModal(true)} 
-                               className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8 mt-2"
-                             >
-                               📝 Buat Form Penawaran
-                             </Button>
-                           )}
-                         </div>
-                       )}
-                       
-                       {(!isMelepasPhase || (estimationStatus !== "pending" && estimationStatus !== "approved")) && (
-                         <div className="flex gap-2">
-                           {!isMelepasPhase && (
-                             <>
-                               <Button size="sm" onClick={() => setShowAddPartModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8">
-                                 + Tambah Part
-                               </Button>
-                               <Button size="sm" onClick={() => setShowAddJasaModal(true)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-8">
-                                 + Tambah Jasa
-                               </Button>
-                             </>
-                           )}
-                         </div>
-                       )}
-                     </div>
-                   )}
+                  {/* DP Section */}
+                  {invoiceItems.some(i => i.type === "Part-Inden") && (
+                    <div className="mt-4 bg-slate-950 border border-slate-700 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold text-emerald-500 flex items-center gap-2 mb-3">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                        Status Pembayaran DP Part Inden
+                      </h4>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                        <div>
+                          <span className="text-slate-400 mr-2">Status:</span>
+                          {selectedRes?.dp_status === 'verified' && <Badge className="bg-emerald-600">Terverifikasi</Badge>}
+                          {selectedRes?.dp_status === 'awaiting_verification' && <Badge className="bg-amber-600">Menunggu Verifikasi (Cek di atas)</Badge>}
+                          {selectedRes?.dp_status === 'rejected' && <Badge className="bg-rose-600">Ditolak</Badge>}
+                          {(!selectedRes?.dp_status || selectedRes?.dp_status === 'pending') && <Badge className="bg-slate-700">Belum Dibayar</Badge>}
+                        </div>
+                        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id';
+                              const url = `${baseUrl}/payment/${selectedRes.id}`;
+                              navigator.clipboard.writeText(url);
+                              toast.success("Link pembayaran DP berhasil disalin! Kirimkan ke pelanggan.");
+                            }}
+                            className="bg-slate-700 hover:bg-slate-600 text-white flex items-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            Copy Link
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleSendDpEmail(selectedRes!)}
+                            disabled={isSendingDpEmail}
+                            className="bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            {isSendingDpEmail ? "Mengirim..." : "Kirim via Email"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
-                   {/* Tabel ringkasan item - Di fase melepas tidak perlu tabel, hanya form saja. Tapi kalau ada invoiceItems, kita bisa tampilkan. */}
-                   {(!isMelepasPhase || estimationStatus === "pending" || estimationStatus === "approved") && (
-                     invoiceItems.length > 0 ? (
-                       <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
-                         <table className="w-full text-xs text-left text-slate-300">
-                           <thead className="text-[10px] text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
-                             <tr>
-                               <th className="px-2 py-2 text-center">No</th>
-                               <th className="px-2 py-2">Nama</th>
-                               <th className="px-2 py-2">Jenis</th>
-                               <th className="px-2 py-2 text-center">Qty</th>
-                               <th className="px-2 py-2 text-right">Harga</th>
-                               {isMerasangPhase && <th className="px-2 py-2 text-center w-10"></th>}
-                             </tr>
-                           </thead>
-                           <tbody>
-                             {invoiceItems.map((item, index) => (
-                               <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                                 <td className="px-2 py-2 text-center">{index + 1}</td>
-                                 <td className="px-2 py-2 font-medium text-slate-200">{item.name}</td>
-                                 <td className="px-2 py-2">
-                                   <span className="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">{item.type}</span>
-                                 </td>
-                                 <td className="px-2 py-2 text-center">{item.qty}</td>
-                                 <td className="px-2 py-2 text-right">Rp {(item.price * item.qty).toLocaleString("id-ID")}</td>
-                                 {isMerasangPhase && (
-                                   <td className="px-2 py-2 text-center">
-                                     <button onClick={() => removeItem(item.id)} className="text-rose-400 hover:text-rose-300 transition-colors p-1">
-                                       <Trash2 className="h-3.5 w-3.5" />
-                                     </button>
-                                   </td>
-                                 )}
-                               </tr>
-                             ))}
-                           </tbody>
-                         </table>
-                       </div>
-                     ) : (
-                       !isMelepasPhase && (
-                         <div className="text-center py-4 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
-                           Belum ada barang atau jasa ditambahkan
-                         </div>
-                       )
-                     )
-                   )}
-
-                   {/* Total sementara */}
-                   {(!isMelepasPhase || estimationStatus === "pending" || estimationStatus === "approved") && invoiceItems.length > 0 && (
-                     <div className="flex flex-col items-end gap-3 mt-3">
-                       <div className="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
-                         <span className="text-slate-400">Total: </span>
-                         <span className="text-emerald-400 font-bold">Rp {runningTotal.toLocaleString("id-ID")}</span>
-                         </div>
-                       </div>
-                     )}
-
-                     {/* DP Section */}
-                     {invoiceItems.some(i => i.type === "Part-Inden") && (
-                       <div className="mt-4 bg-slate-950 border border-slate-700 rounded-lg p-4">
-                         <h4 className="text-sm font-semibold text-emerald-500 flex items-center gap-2 mb-3">
-                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                           Status Pembayaran DP Part Inden
-                         </h4>
-                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
-                           <div>
-                             <span className="text-slate-400 mr-2">Status:</span>
-                             {selectedRes?.dp_status === 'verified' && <Badge className="bg-emerald-600">Terverifikasi</Badge>}
-                             {selectedRes?.dp_status === 'awaiting_verification' && <Badge className="bg-amber-600">Menunggu Verifikasi (Cek di atas)</Badge>}
-                             {selectedRes?.dp_status === 'rejected' && <Badge className="bg-rose-600">Ditolak</Badge>}
-                             {(!selectedRes?.dp_status || selectedRes?.dp_status === 'pending') && <Badge className="bg-slate-700">Belum Dibayar</Badge>}
-                           </div>
-                           <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                             <Button 
-                               size="sm" 
-                               onClick={() => {
-                                 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id';
-                                 const url = `${baseUrl}/payment/${selectedRes.id}`;
-                                 navigator.clipboard.writeText(url);
-                                 toast.success("Link pembayaran DP berhasil disalin! Kirimkan ke pelanggan.");
-                               }}
-                               className="bg-slate-700 hover:bg-slate-600 text-white flex items-center gap-2"
-                             >
-                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                               Copy Link
-                             </Button>
-                             <Button 
-                               size="sm" 
-                               onClick={() => handleSendDpEmail(selectedRes!)}
-                               disabled={isSendingDpEmail}
-                               className="bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-2"
-                             >
-                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                               {isSendingDpEmail ? "Mengirim..." : "Kirim via Email"}
-                             </Button>
-                           </div>
-                         </div>
-                       </div>
-                     )}
-                   </div>
-               )}
-
-               <p className="mt-4 pt-2 border-t border-slate-800 text-slate-400">{selectedRes?.problem_description}</p>
-             </div>
+              <p className="mt-4 pt-2 border-t border-slate-800 text-slate-400">{selectedRes?.problem_description}</p>
+            </div>
           </div>
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 border-t border-slate-800 pt-4 mt-2">
@@ -1142,10 +1160,10 @@ export default function OngoingPage() {
               <Button variant="outline" onClick={handleCloseDetail} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
                 Tutup
               </Button>
-              
+
               {!isLastPhase && (
-                <Button 
-                  onClick={handleLanjutProgress} 
+                <Button
+                  onClick={handleLanjutProgress}
                   disabled={isMelepasPhase && estimationStatus !== "approved"}
                   className={(isMelepasPhase && estimationStatus !== "approved") ? "bg-slate-800 text-slate-500 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500 text-white"}
                 >
@@ -1153,9 +1171,9 @@ export default function OngoingPage() {
                 </Button>
               )}
 
-              <Button 
-                onClick={openInvoice} 
-                disabled={!(isLastPhase || (isCheckup && selectedRes?.customer_checkup_response === 'Selesai / Tanpa Perbaikan')) || actionLoading} 
+              <Button
+                onClick={openInvoice}
+                disabled={!(isLastPhase || (isCheckup && selectedRes?.customer_checkup_response === 'Selesai / Tanpa Perbaikan')) || actionLoading}
                 className={(isLastPhase || (isCheckup && selectedRes?.customer_checkup_response === 'Selesai / Tanpa Perbaikan')) ? "bg-blue-600 hover:bg-blue-500 text-white" : "bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed"}
               >
                 Selesaikan Servis
@@ -1176,7 +1194,7 @@ export default function OngoingPage() {
               <span className="text-2xl font-bold text-white text-right">Invoice</span>
             </AlertDialogTitle>
           </AlertDialogHeader>
-          
+
           <div className="py-4 space-y-6 print:py-0">
             {/* Info Pelanggan */}
             <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300 print:bg-transparent print:border-none print:p-0 print:text-black">
@@ -1244,7 +1262,7 @@ export default function OngoingPage() {
                 Print
               </Button>
             </div>
-            
+
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowInvoiceModal(false)} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
                 Batal
@@ -1280,7 +1298,7 @@ export default function OngoingPage() {
               }
             }
           `}</style>
-          
+
           <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-4">
@@ -1410,7 +1428,7 @@ export default function OngoingPage() {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
               <input type="text" value={invSearch} onChange={(e) => setInvSearch(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-slate-200 focus:border-emerald-500 outline-none" placeholder="Cari nama part..." />
             </div>
-            
+
             <div className="max-h-64 overflow-y-auto space-y-2 pr-2">
               {loadingInventory ? (
                 <p className="text-slate-500 text-center py-4 animate-pulse">Memuat data inventory...</p>
@@ -1748,7 +1766,7 @@ export default function OngoingPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg text-white text-center">Konfirmasi Laporan</AlertDialogTitle>
             <AlertDialogDescription className="text-center pt-2">
-              Anda merekomendasikan: <strong className="text-emerald-400">{kendalaType}</strong><br/><br/>Email notifikasi akan dikirim ke pelanggan.
+              Anda merekomendasikan: <strong className="text-emerald-400">{kendalaType}</strong><br /><br />Email notifikasi akan dikirim ke pelanggan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center">
@@ -1764,7 +1782,7 @@ export default function OngoingPage() {
                   const { error: uploadError } = await supabase.storage
                     .from('checkup-images')
                     .upload(fileName, kendalaImageFile);
-                  
+
                   if (uploadError) {
                     console.error("Upload error:", uploadError);
                     toast.error("Gagal upload foto, tapi email tetap dikirim.");
@@ -1904,30 +1922,30 @@ export default function OngoingPage() {
           <div className="space-y-4 py-4">
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Parts (Rp)</label>
-              <input 
-                type="number" 
-                value={estimasiPart} 
-                onChange={(e) => setEstimasiPart(Number(e.target.value) || "")} 
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white" 
+              <input
+                type="number"
+                value={estimasiPart}
+                onChange={(e) => setEstimasiPart(Number(e.target.value) || "")}
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white"
                 placeholder="Contoh: 1500000"
               />
             </div>
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Jasa (Rp)</label>
-              <input 
-                type="number" 
-                value={estimasiJasa} 
-                onChange={(e) => setEstimasiJasa(Number(e.target.value) || "")} 
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white" 
+              <input
+                type="number"
+                value={estimasiJasa}
+                onChange={(e) => setEstimasiJasa(Number(e.target.value) || "")}
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white"
                 placeholder="Contoh: 500000"
               />
             </div>
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Keterangan (Opsional)</label>
-              <textarea 
-                value={estimasiNotes} 
-                onChange={(e) => setEstimasiNotes(e.target.value)} 
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white min-h-[100px]" 
+              <textarea
+                value={estimasiNotes}
+                onChange={(e) => setEstimasiNotes(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white min-h-[100px]"
                 placeholder="Catatan untuk pelanggan terkait penawaran..."
               />
             </div>
@@ -1969,15 +1987,15 @@ export default function OngoingPage() {
             )}
           </div>
           <DialogFooter className="flex-row sm:justify-between gap-2">
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleRejectDp}
               disabled={dpActionLoading}
               className="w-full sm:w-auto bg-rose-600 hover:bg-rose-500 text-white"
             >
               {dpActionLoading ? "Loading..." : "Tolak"}
             </Button>
-            <Button 
+            <Button
               onClick={handleVerifyDp}
               disabled={dpActionLoading}
               className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white"

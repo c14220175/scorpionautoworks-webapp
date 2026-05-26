@@ -77,6 +77,12 @@ export default function ScheduledPage() {
                   <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
                   <p className="text-blue-400 text-xs mb-1 font-medium">{res.service_type}</p>
                   <p className="text-slate-400 text-sm mt-1">{res.vehicle_info}</p>
+                  {res.license_plate && (
+                    <p className="text-sm mt-1 flex items-center gap-1.5">
+                      <span className="text-slate-500 text-xs">Nopol:</span>
+                      <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

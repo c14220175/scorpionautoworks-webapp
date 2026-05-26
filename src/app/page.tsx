@@ -20,7 +20,6 @@ export default function BookingPage() {
   const [availableTrims, setAvailableTrims] = useState<string[]>([])
   const [availableYears, setAvailableYears] = useState<number[]>([])
 
-  // State untuk Tanggal & Waktu
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [availableTimes, setAvailableTimes] = useState<string[]>([])
   const [isDateFullyBooked, setIsDateFullyBooked] = useState<boolean>(false)
@@ -28,7 +27,6 @@ export default function BookingPage() {
   const [todayString, setTodayString] = useState<string>('')
   const [isHolidayError, setIsHolidayError] = useState<string | null>(null)
 
-  // State untuk menyimpan daftar hari libur dari API
   const [holidaysMap, setHolidaysMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -36,30 +34,29 @@ export default function BookingPage() {
       try {
         const currentYear = new Date().getFullYear();
         const nextYear = currentYear + 1;
-        
+
         const [resCurrent, resNext] = await Promise.all([
           fetch(`/api/holidays?year=${currentYear}`),
           fetch(`/api/holidays?year=${nextYear}`)
         ]);
-        
+
         const dataCurrent = await resCurrent.json();
         const dataNext = await resNext.json();
-        
+
         const newHolidaysMap: Record<string, string> = {};
-        
+
         if (dataCurrent.status === "success") {
           dataCurrent.data.forEach((h: any) => {
             newHolidaysMap[h.date] = h.description;
           });
         }
-        
+
         if (dataNext.status === "success") {
           dataNext.data.forEach((h: any) => {
             newHolidaysMap[h.date] = h.description;
           });
         }
 
-        // Fetch hari tutup custom dari admin (Supabase)
         try {
           const { data: closedDays, error } = await supabase
             .from('closed_days')
@@ -74,7 +71,6 @@ export default function BookingPage() {
           console.error("Gagal memuat data hari tutup dari database:", closedErr);
         }
 
-        // Fetch holiday overrides dari admin (tanggal libur yang di-override agar tetap buka)
         try {
           const { data: overrides, error } = await supabase
             .from('holiday_overrides')
@@ -82,14 +78,13 @@ export default function BookingPage() {
 
           if (!error && overrides) {
             overrides.forEach((o: any) => {
-              // Hapus tanggal ini dari map hari libur karena admin override (tetap buka)
               delete newHolidaysMap[o.override_date];
             });
           }
         } catch (overrideErr) {
           console.error("Gagal memuat data override hari libur:", overrideErr);
         }
-        
+
         setHolidaysMap(newHolidaysMap);
       } catch (err) {
         console.error("Gagal memuat data hari libur dari API:", err);
@@ -114,10 +109,11 @@ export default function BookingPage() {
     year: '',
     serviceType: '',
     description: '',
-    manualCarName: '', 
-    reservationTime: '', // Tambahan state waktu
+    manualCarName: '',
+    reservationTime: '',
+    licensePlate: '',
   })
-  
+
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [isManualInput, setIsManualInput] = useState(false)
 
@@ -212,9 +208,6 @@ export default function BookingPage() {
 
 
 
-
-
-  // Fungsi untuk apply data kendaraan yang dipilih ke form
   const applyVehicleData = (vehicle: VehicleOption) => {
     setFormData(prev => ({
       ...prev,
@@ -233,7 +226,7 @@ export default function BookingPage() {
     setShowVehicleModal(false)
   }
 
-  // Handle Cari Data dari Email (query Supabase)
+
   const fetchVehicleByEmail = async () => {
     const email = formData.email.trim()
     if (!email) {
@@ -256,7 +249,7 @@ export default function BookingPage() {
         return
       }
 
-      // Deduplikasi berdasarkan vehicle_info + vehicle_year
+
       const seen = new Set<string>()
       const uniqueVehicles: VehicleOption[] = []
       for (const row of data) {
@@ -329,7 +322,7 @@ export default function BookingPage() {
       setIsHolidayError(`Tanggal ini adalah hari libur nasional: "${holidayName}". Silakan pilih tanggal lain.`)
       return
     }
-    
+
     setLoading(true)
 
     try {
@@ -343,20 +336,21 @@ export default function BookingPage() {
         photoUrl = urlData.publicUrl
       }
 
-      const namaMobil = isManualInput 
-        ? formData.manualCarName 
+      const namaMobil = isManualInput
+        ? formData.manualCarName
         : `${formData.brand} ${formData.model} ${formData.trim}`;
 
-      // Menggabungkan Tanggal dan Jam — kirim LANGSUNG dengan offset WIB, TANPA .toISOString()
+      // Menggabungkan Tanggal dan Jam
       const finalBookingDate = toWIBISOString(selectedDate, formData.reservationTime)
 
       const { error: bookingError } = await supabase.from('bookings').insert({
-        customer_name: formData.fullName, 
+        customer_name: formData.fullName,
         customer_email: formData.email,
         customer_phone: formData.phoneNumber,
         service_type: formData.serviceType,
         vehicle_year: parseInt(formData.year),
         vehicle_info: namaMobil,
+        license_plate: formData.licensePlate.toUpperCase() || null,
         problem_description: formData.description,
         photo_url: photoUrl,
         status: 'pending_approval',
@@ -383,8 +377,8 @@ export default function BookingPage() {
 
 
       alert('✅ Booking Berhasil Dibuat! Email konfirmasi telah dikirim.')
-      
-      setFormData({ fullName: '', email: '', phoneNumber: '', description: '', year: '', model: '', trim: '', brand: '', manualCarName: '', serviceType: '', reservationTime: '' })
+
+      setFormData({ fullName: '', email: '', phoneNumber: '', description: '', year: '', model: '', trim: '', brand: '', manualCarName: '', serviceType: '', reservationTime: '', licensePlate: '' })
       setSelectedDate('')
       setPhotoFile(null)
       setIsManualInput(false)
@@ -465,16 +459,16 @@ export default function BookingPage() {
         </div>
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-400">Nama Lengkap</label>
-                <input type="text" required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
+                <input type="text" required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-400">Alamat Email</label>
                 <div className="flex items-center gap-2">
-                  <input type="email" required className="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.email} onChange={(e) => { setFormData({...formData, email: e.target.value}); setEmailSearchResult('idle') }} />
+                  <input type="email" required className="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); setEmailSearchResult('idle') }} />
                   <button
                     type="button"
                     onClick={fetchVehicleByEmail}
@@ -517,12 +511,12 @@ export default function BookingPage() {
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                   </div>
-                  <input 
-                    type="tel" 
-                    required 
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-500" 
-                    value={formData.phoneNumber} 
-                    onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})} 
+                  <input
+                    type="tel"
+                    required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-500"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     placeholder="Contoh: 08123456789"
                   />
                 </div>
@@ -533,10 +527,29 @@ export default function BookingPage() {
 
             <h3 className="text-xl font-semibold text-yellow-500">Data Kendaraan</h3>
 
+            {/* Input Nomor Polisi */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-400">Nomor Polisi Kendaraan</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h.01M18 12h.01" /></svg>
+                </div>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-yellow-500 uppercase tracking-wider"
+                  value={formData.licensePlate}
+                  onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value.toUpperCase() })}
+                  placeholder="Contoh: B 1234 ABC"
+                  maxLength={15}
+                />
+              </div>
+              <p className="text-xs text-slate-500">Masukkan nomor plat kendaraan Anda untuk memudahkan pencarian riwayat servis.</p>
+            </div>
 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Dropdowns Mobil sama seperti sebelumnya... */}
+              {/* Dropdown Mobil*/}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-400">Merk Mobil</label>
                 <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" onChange={handleBrandChange} value={formData.brand} required>
@@ -550,11 +563,11 @@ export default function BookingPage() {
                 <>
                   <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-semibold text-yellow-500">Tuliskan Data Mobil (Merk, Model, Tipe)</label>
-                    <input type="text" required className="w-full bg-slate-800 border border-yellow-600 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.manualCarName} onChange={(e) => setFormData({...formData, manualCarName: e.target.value})} />
+                    <input type="text" required className="w-full bg-slate-800 border border-yellow-600 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.manualCarName} onChange={(e) => setFormData({ ...formData, manualCarName: e.target.value })} />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <label className="text-sm font-semibold text-slate-400">Tahun Produksi</label>
-                    <input type="number" required min="1990" max="2026" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} />
+                    <input type="number" required min="1990" max="2026" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} />
                   </div>
                 </>
               ) : (
@@ -568,14 +581,14 @@ export default function BookingPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-400">Tipe / Trim</label>
-                    <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.trim} onChange={(e) => setFormData({...formData, trim: e.target.value})} disabled={!formData.model || availableTrims.length === 0} required={!isManualInput}>
+                    <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.trim} onChange={(e) => setFormData({ ...formData, trim: e.target.value })} disabled={!formData.model || availableTrims.length === 0} required={!isManualInput}>
                       <option value="">-- Pilih Tipe --</option>
                       {availableTrims.map((t, index) => <option key={index} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-400">Tahun Produksi</label>
-                    <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.year} onChange={(e) => setFormData({...formData, year: e.target.value})} disabled={!formData.model || availableYears.length === 0} required={!isManualInput}>
+                    <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.year} onChange={(e) => setFormData({ ...formData, year: e.target.value })} disabled={!formData.model || availableYears.length === 0} required={!isManualInput}>
                       <option value="">-- Pilih Tahun --</option>
                       {availableYears.map((y, index) => <option key={index} value={y}>{y}</option>)}
                     </select>
@@ -590,10 +603,10 @@ export default function BookingPage() {
 
             <h3 className="text-xl font-semibold text-yellow-500">Detail Layanan & Jadwal</h3>
             <div className="space-y-4">
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-400">Pilih Jenis Layanan</label>
-                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.serviceType} onChange={(e) => setFormData({...formData, serviceType: e.target.value})} required>
+                <select className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.serviceType} onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })} required>
                   <option value="">-- Pilih Jenis Layanan --</option>
                   <option value="General Checkup">General Checkup</option>
                   <option value="Service Rutin">Service Rutin (Ganti Oli, Tune Up, dll)</option>
@@ -606,9 +619,9 @@ export default function BookingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-400">Tanggal Servis</label>
-                  <input 
-                    type="date" 
-                    required 
+                  <input
+                    type="date"
+                    required
                     min={todayString || undefined}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500 text-slate-200"
                     value={selectedDate}
@@ -644,10 +657,10 @@ export default function BookingPage() {
                       Penuh! Maksimal 4 pesanan per hari.
                     </div>
                   ) : (
-                    <select 
+                    <select
                       className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500 disabled:opacity-50"
                       value={formData.reservationTime}
-                      onChange={(e) => setFormData({...formData, reservationTime: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, reservationTime: e.target.value })}
                       disabled={!selectedDate || availableTimes.length === 0}
                       required
                     >
@@ -665,9 +678,9 @@ export default function BookingPage() {
 
               <div className="space-y-2 pt-4">
                 <label className="text-sm font-semibold text-slate-400">Jelaskan Keluhan / Detail yang Dibutuhkan</label>
-                <textarea required rows={4} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}></textarea>
+                <textarea required rows={4} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })}></textarea>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-400">Upload Foto Kendala (Opsional)</label>
                 <input type="file" accept="image/*" onChange={(e) => { if (e.target.files) setPhotoFile(e.target.files[0]) }} className="w-full text-slate-400 bg-slate-800 border border-slate-700 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-500 file:text-slate-900 hover:file:bg-yellow-400 cursor-pointer" />
