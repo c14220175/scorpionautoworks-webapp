@@ -82,6 +82,8 @@ export default function OngoingPage() {
   const [estimationStatus, setEstimationStatus] = useState<string | null>(null);
   const [estimationRejectReason, setEstimationRejectReason] = useState<string | null>(null);
   const [estimationEmailLoading, setEstimationEmailLoading] = useState(false);
+  const [showManualRejectModal, setShowManualRejectModal] = useState(false);
+  const [manualRejectReason, setManualRejectReason] = useState("");
 
   // Modal Form Estimasi
   const [showEstimasiFormModal, setShowEstimasiFormModal] = useState(false);
@@ -896,6 +898,8 @@ export default function OngoingPage() {
       if (error) throw error;
       setEstimationStatus("rejected");
       setEstimationRejectReason(reason.trim());
+      setShowManualRejectModal(false);
+      setManualRejectReason("");
       toast.success("Estimasi ditolak secara manual!");
       fetchBookings();
     } catch (err: any) {
@@ -1256,10 +1260,7 @@ export default function OngoingPage() {
                                 </Button>
                                 <Button
                                   size="sm"
-                                  onClick={() => {
-                                    const reason = window.prompt("Masukkan alasan penolakan pelanggan:");
-                                    if (reason && reason.trim()) handleManualRejectEstimation(reason);
-                                  }}
+                                  onClick={() => setShowManualRejectModal(true)}
                                   disabled={actionLoading}
                                   className="bg-rose-600 hover:bg-rose-500 text-white text-xs h-7"
                                 >
@@ -1473,6 +1474,42 @@ export default function OngoingPage() {
               </Button>
             </div>
           </DialogFooter>
+
+          {/* ================= MODAL TOLAK MANUAL (Nested) ================= */}
+          <Dialog open={showManualRejectModal} onOpenChange={(open) => {
+            if (!open) {
+              setShowManualRejectModal(false);
+              setManualRejectReason("");
+            }
+          }}>
+            <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-sm" style={{ zIndex: 100 }}>
+              <DialogHeader>
+                <DialogTitle className="text-rose-500">Tolak Manual</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <p className="text-sm text-slate-300">Masukkan alasan penolakan dari pelanggan:</p>
+                <textarea
+                  value={manualRejectReason}
+                  onChange={(e) => setManualRejectReason(e.target.value)}
+                  placeholder="Contoh: Harga terlalu mahal..."
+                  className="bg-slate-950 border-slate-800 text-slate-200 resize-none h-24 p-2 w-full rounded-md border"
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowManualRejectModal(false)} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
+                  Batal
+                </Button>
+                <Button 
+                  onClick={() => handleManualRejectEstimation(manualRejectReason)} 
+                  disabled={actionLoading || !manualRejectReason.trim()} 
+                  className="bg-rose-600 hover:bg-rose-500 text-white"
+                >
+                  Simpan Tolak
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
         </DialogContent>
       </Dialog>
 
@@ -1529,35 +1566,35 @@ export default function OngoingPage() {
 
       {/* ================= MODAL INVOICE (READ-ONLY SUMMARY) ================= */}
       <AlertDialog open={showInvoiceModal}>
-        <AlertDialogContent className="bg-slate-900 border-slate-700 w-full !max-w-[95vw] md:!max-w-4xl lg:!max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 print:hidden">
+        <AlertDialogContent className="bg-slate-900 border-slate-700 w-full !max-w-[95vw] md:!max-w-4xl lg:!max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 print:!bg-white print:!text-black print:!border-none print:!shadow-none print:!w-full print:!max-w-none print:!max-h-none print:!p-8 print:!m-0 print:!overflow-visible">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center justify-between pb-4 border-b border-slate-800">
+            <AlertDialogTitle className="flex items-center justify-between pb-4 border-b border-slate-800 print:!border-black">
               <div className="flex items-center gap-4">
-                <img src="/scorpionlogo.png" alt="Scorpion Autoworks Logo" className="h-12 w-auto object-contain" />
+                <img src="/scorpionlogo.png" alt="Scorpion Autoworks Logo" className="h-12 w-auto object-contain print:!invert" />
               </div>
-              <span className="text-2xl font-bold text-white text-right">Invoice</span>
+              <span className="text-2xl font-bold text-white print:!text-black text-right">Invoice</span>
             </AlertDialogTitle>
           </AlertDialogHeader>
 
-          <div className="py-4 space-y-6 print:py-0">
+          <div className="py-4 space-y-6 print:!py-0">
             {/* Info Pelanggan */}
-            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300 print:bg-transparent print:border-none print:p-0 print:text-black">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300 print:!bg-transparent print:!border-none print:!p-0 print:!text-black">
               <div>
-                <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedRes?.customer_name}</p>
-                <p className="mb-1"><strong>Telepon:</strong> {selectedRes?.customer_phone || '-'}</p>
-                <p className="mb-1"><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
-                <p><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedRes?.service_type}</span></p>
+                <p className="mb-1"><strong className="print:!text-black">Nama Pelanggan:</strong> {selectedRes?.customer_name}</p>
+                <p className="mb-1"><strong className="print:!text-black">Telepon:</strong> {selectedRes?.customer_phone || '-'}</p>
+                <p className="mb-1"><strong className="print:!text-black">Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
+                <p><strong className="print:!text-black">Jenis Servis:</strong> <span className="text-emerald-400 print:!text-black">{selectedRes?.service_type}</span></p>
               </div>
-              <div className="sm:text-right">
-                <p className="text-xs text-slate-500">ID Reservasi</p>
-                <p className="text-slate-300 font-bold">{selectedRes?.id}</p>
+              <div className="sm:text-right mt-4 sm:mt-0">
+                <p className="text-xs text-slate-500 print:!text-black">ID Reservasi</p>
+                <p className="text-slate-300 font-bold print:!text-black">{selectedRes?.id}</p>
               </div>
             </div>
 
             {/* Tabel Item Invoice (Read-Only) */}
-            <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
-              <table className="w-full text-sm text-left text-slate-300 min-w-[600px]">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+            <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950 print:!bg-transparent print:!border-black">
+              <table className="w-full text-sm text-left text-slate-300 print:!text-black min-w-[600px]">
+                <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700 print:!bg-gray-100 print:!text-black print:!border-black">
                   <tr>
                     <th className="px-4 py-3 text-center whitespace-nowrap">No.</th>
                     <th className="px-4 py-3 whitespace-nowrap">Nama</th>
@@ -1569,16 +1606,16 @@ export default function OngoingPage() {
                 </thead>
                 <tbody>
                   {invoiceItems.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-6 text-slate-500">Tidak ada item dalam invoice</td></tr>
+                    <tr><td colSpan={6} className="text-center py-6 text-slate-500 print:!text-black">Tidak ada item dalam invoice</td></tr>
                   ) : (
                     invoiceItems.map((item, index) => (
-                      <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                        <td className="px-4 py-3 text-center whitespace-nowrap">{index + 1}</td>
-                        <td className="px-4 py-3 font-medium text-slate-200">{item.name}</td>
-                        <td className="px-4 py-3 whitespace-nowrap"><Badge className="bg-slate-700 text-slate-300">{item.type}</Badge></td>
-                        <td className="px-4 py-3 text-center whitespace-nowrap">{item.qty}</td>
-                        <td className="px-4 py-3 text-right whitespace-nowrap">Rp {item.price.toLocaleString("id-ID")}</td>
-                        <td className="px-4 py-3 text-right text-slate-200 font-medium whitespace-nowrap">
+                      <tr key={item.id} className="border-b border-slate-800 hover:bg-slate-800/50 print:!border-gray-300 print:hover:!bg-transparent">
+                        <td className="px-4 py-3 text-center whitespace-nowrap print:!text-black">{index + 1}</td>
+                        <td className="px-4 py-3 font-medium text-slate-200 print:!text-black">{item.name}</td>
+                        <td className="px-4 py-3 whitespace-nowrap"><Badge className="bg-slate-700 text-slate-300 print:!bg-transparent print:!text-black print:!border print:!border-black">{item.type}</Badge></td>
+                        <td className="px-4 py-3 text-center whitespace-nowrap print:!text-black">{item.qty}</td>
+                        <td className="px-4 py-3 text-right whitespace-nowrap print:!text-black">Rp {item.price.toLocaleString("id-ID")}</td>
+                        <td className="px-4 py-3 text-right text-slate-200 font-medium whitespace-nowrap print:!text-black">
                           Rp {(item.price * item.qty).toLocaleString("id-ID")}
                         </td>
                       </tr>
@@ -1590,16 +1627,16 @@ export default function OngoingPage() {
 
             {/* Total Keseluruhan */}
             <div className="flex justify-end items-center">
-              <div className="bg-slate-800 px-4 sm:px-6 py-3 rounded-lg border border-slate-700 flex gap-2 sm:gap-4 items-center flex-wrap sm:flex-nowrap justify-end">
-                <span className="text-slate-400 font-medium whitespace-nowrap">Total Keseluruhan:</span>
-                <span className="text-xl sm:text-2xl text-emerald-400 font-bold whitespace-nowrap">
+              <div className="bg-slate-800 px-4 sm:px-6 py-3 rounded-lg border border-slate-700 flex gap-2 sm:gap-4 items-center flex-wrap sm:flex-nowrap justify-end print:!bg-transparent print:!border-black">
+                <span className="text-slate-400 font-medium whitespace-nowrap print:!text-black">Total Keseluruhan:</span>
+                <span className="text-xl sm:text-2xl text-emerald-400 font-bold whitespace-nowrap print:!text-black">
                   Rp {runningTotal.toLocaleString("id-ID")}
                 </span>
               </div>
             </div>
           </div>
 
-          <AlertDialogFooter className="sm:justify-between w-full flex-col sm:flex-row gap-4 mt-4">
+          <AlertDialogFooter className="sm:justify-between w-full flex-col sm:flex-row gap-4 mt-4 print:!hidden">
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => window.print()} className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white flex gap-2">
                 <Printer className="w-4 h-4" />
