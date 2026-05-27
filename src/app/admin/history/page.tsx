@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ReceiptText, CalendarCheck, ChevronLeft, ChevronRight, Search, Printer } from "lucide-react";
+import { ReceiptText, CalendarCheck, ChevronLeft, ChevronRight, Search, Printer, ShieldCheck, ShieldX, Shield } from "lucide-react";
 import { formatWIB, formatWIBShort } from "@/utils/formatWIB";
 
 const ITEMS_PER_PAGE = 6;
+const WARRANTY_SPAREPART_DAYS = 14; // 2 minggu
+const WARRANTY_JASA_DAYS = 7; // 1 minggu
 
 export default function HistoryPage() {
   const supabase = createClient();
@@ -23,8 +25,15 @@ export default function HistoryPage() {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
 
+  // State untuk data hari libur (garansi)
+  const [holidaysMap, setHolidaysMap] = useState<Record<string, string>>({});
+  const [closedDaysSet, setClosedDaysSet] = useState<Set<string>>(new Set());
+  const [overridesSet, setOverridesSet] = useState<Set<string>>(new Set());
+  const [holidaysLoaded, setHolidaysLoaded] = useState(false);
+
   useEffect(() => {
     fetchHistory();
+    fetchHolidaysData();
   }, []);
 
   const fetchHistory = async () => {
@@ -44,6 +53,147 @@ export default function HistoryPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch semua data hari libur untuk kalkulasi garansi
+  const fetchHolidaysData = async () => {
+    try {
+      const currentYear = new Date().getFullYear();
+      // Fetch holidays for current year and surrounding years
+      const years = [currentYear - 1, currentYear, currentYear + 1];
+      const newHolidaysMap: Record<string, string> = {};
+
+      await Promise.all(
+        years.map(async (year) => {
+          try {
+            const res = await fetch(`/api/holidays?year=${year}`);
+            const data = await res.json();
+            if (data.status === "success" && Array.isArray(data.data)) {
+              data.data.forEach((h: { date: string; description: string }) => {
+                newHolidaysMap[h.date] = h.description;
+              });
+            }
+          } catch {}
+        })
+      );
+
+      // Fetch closed_days dari Supabase
+      const { data: closedDays } = await supabase
+        .from("closed_days")
+        .select("closed_date");
+
+      const closedSet = new Set<string>();
+      if (closedDays) {
+        closedDays.forEach((cd: any) => {
+          closedSet.add(cd.closed_date);
+          // Juga masukkan ke holidaysMap agar dikenali sebagai hari tutup
+          if (!newHolidaysMap[cd.closed_date]) {
+            newHolidaysMap[cd.closed_date] = "Bengkel Tutup";
+          }
+        });
+      }
+
+      // Fetch holiday_overrides dari Supabase
+      const { data: overrides } = await supabase
+        .from("holiday_overrides")
+        .select("override_date");
+
+      const overrideSet = new Set<string>();
+      if (overrides) {
+        overrides.forEach((o: any) => {
+          overrideSet.add(o.override_date);
+          // Hapus dari holidaysMap karena di-override menjadi buka
+          delete newHolidaysMap[o.override_date];
+        });
+      }
+
+      setHolidaysMap(newHolidaysMap);
+      setClosedDaysSet(closedSet);
+      setOverridesSet(overrideSet);
+      setHolidaysLoaded(true);
+    } catch (error: any) {
+      console.error("Gagal memuat data hari libur untuk garansi:", error);
+      setHolidaysLoaded(true); // tetap set loaded agar UI tidak stuck
+    }
+  };
+
+  // Cek apakah suatu tanggal adalah hari libur/tutup (setelah memperhitungkan override)
+  const isClosedDate = (dateStr: string): boolean => {
+    // Jika di-override, berarti buka
+    if (overridesSet.has(dateStr)) return false;
+    // Cek apakah ada di holidaysMap (sudah termasuk closed_days dan holidays API)
+    if (holidaysMap[dateStr]) return true;
+    return false;
+  };
+
+  // Format tanggal ke "YYYY-MM-DD"
+  const toDateStr = (date: Date): string => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  // Hitung tanggal garansi terakhir, digeser mundur jika jatuh di hari libur/tutup
+  const getWarrantyExpiry = (completedAt: string, warrantyDays: number): Date => {
+    // Konversi completed_at ke tanggal WIB
+    const completedDate = new Date(completedAt);
+    // Tambahkan warranty days
+    const expiryDate = new Date(completedDate);
+    expiryDate.setDate(expiryDate.getDate() + warrantyDays);
+
+    // Geser mundur jika jatuh di hari libur/tutup
+    let adjustedExpiry = new Date(expiryDate);
+    let maxIterations = 30; // safety guard
+    while (isClosedDate(toDateStr(adjustedExpiry)) && maxIterations > 0) {
+      adjustedExpiry.setDate(adjustedExpiry.getDate() - 1);
+      maxIterations--;
+    }
+
+    return adjustedExpiry;
+  };
+
+  // Dapatkan status garansi (aktif/expired + sisa hari)
+  const getWarrantyStatus = (completedAt: string, warrantyDays: number) => {
+    if (!completedAt || !holidaysLoaded) return null;
+
+    const expiryDate = getWarrantyExpiry(completedAt, warrantyDays);
+    const now = new Date();
+
+    // Reset jam ke 00:00 untuk perbandingan hari saja
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const expiryStart = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
+
+    const diffMs = expiryStart.getTime() - todayStart.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    const isActive = diffDays >= 0;
+
+    // Format tanggal kadaluarsa
+    const formattedExpiry = new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'Asia/Jakarta',
+    }).format(expiryDate);
+
+    return { isActive, diffDays, formattedExpiry, expiryDate };
+  };
+
+  // Cek apakah booking punya items sparepart di invoice
+  const hasSparepart = (booking: any): boolean => {
+    if (!booking.invoice_data?.items) return false;
+    return booking.invoice_data.items.some((item: any) =>
+      item.type === "Part-Inventory" || item.type === "Part-Customer" || item.type === "Part-Inden"
+    );
+  };
+
+  // Cek apakah booking punya items jasa di invoice
+  const hasJasa = (booking: any): boolean => {
+    if (!booking.invoice_data?.items) return false;
+    return booking.invoice_data.items.some((item: any) =>
+      item.type === "Jasa"
+    );
   };
 
   const openInvoice = (booking: any) => {
@@ -118,8 +268,20 @@ export default function HistoryPage() {
         return (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedData.map((res) => (
-                <Card key={res.id} className="bg-slate-900 border border-slate-800 hover:border-slate-600 transition-all shadow-lg flex flex-col justify-between">
+              {paginatedData.map((res) => {
+                const sparepartStatus = hasSparepart(res) ? getWarrantyStatus(res.completed_at, WARRANTY_SPAREPART_DAYS) : null;
+                const jasaStatus = hasJasa(res) ? getWarrantyStatus(res.completed_at, WARRANTY_JASA_DAYS) : null;
+                // Jika tidak ada invoice items sama sekali, tampilkan garansi generic berdasarkan jasa
+                const genericJasaStatus = !sparepartStatus && !jasaStatus && res.completed_at ? getWarrantyStatus(res.completed_at, WARRANTY_JASA_DAYS) : null;
+
+                const anyWarrantyActive = sparepartStatus?.isActive || jasaStatus?.isActive || genericJasaStatus?.isActive;
+
+                return (
+                <Card key={res.id} className={`bg-slate-900 border transition-all shadow-lg flex flex-col justify-between ${
+                  anyWarrantyActive 
+                    ? "border-emerald-500/30 hover:border-emerald-500/50" 
+                    : "border-slate-800 hover:border-slate-600"
+                }`}>
                   <CardContent className="p-5 flex flex-col gap-3">
                     <div className="flex justify-between w-full items-start">
                       <Badge className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border-0">
@@ -146,6 +308,68 @@ export default function HistoryPage() {
                       </div>
                     </div>
 
+                    {/* ===== INDIKATOR GARANSI ===== */}
+                    {holidaysLoaded && (
+                      <div className="mt-2 space-y-1.5">
+                        {/* Garansi Sparepart */}
+                        {sparepartStatus && (
+                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${
+                            sparepartStatus.isActive
+                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                              : "bg-slate-800/50 border-slate-700/50 text-slate-500"
+                          }`}>
+                            {sparepartStatus.isActive ? (
+                              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                            ) : (
+                              <ShieldX className="w-3.5 h-3.5 shrink-0" />
+                            )}
+                            <span className="flex-1">Garansi Sparepart</span>
+                            {sparepartStatus.isActive ? (
+                              <span className="font-bold text-emerald-300">
+                                {sparepartStatus.diffDays === 0 ? "Hari Terakhir!" : `${sparepartStatus.diffDays} hari lagi`}
+                              </span>
+                            ) : (
+                              <span className="text-slate-600">Berakhir {sparepartStatus.formattedExpiry}</span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Garansi Jasa */}
+                        {(jasaStatus || genericJasaStatus) && (() => {
+                          const status = jasaStatus || genericJasaStatus!;
+                          return (
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${
+                              status.isActive
+                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                : "bg-slate-800/50 border-slate-700/50 text-slate-500"
+                            }`}>
+                              {status.isActive ? (
+                                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                              ) : (
+                                <ShieldX className="w-3.5 h-3.5 shrink-0" />
+                              )}
+                              <span className="flex-1">Garansi Jasa</span>
+                              {status.isActive ? (
+                                <span className="font-bold text-emerald-300">
+                                  {status.diffDays === 0 ? "Hari Terakhir!" : `${status.diffDays} hari lagi`}
+                                </span>
+                              ) : (
+                                <span className="text-slate-600">Berakhir {status.formattedExpiry}</span>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Jika tidak ada invoice data sama sekali */}
+                        {!sparepartStatus && !jasaStatus && !genericJasaStatus && (
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-slate-800/30 border-slate-700/30 text-xs text-slate-600">
+                            <Shield className="w-3.5 h-3.5 shrink-0" />
+                            <span>Data garansi tidak tersedia</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Tombol Lihat Invoice muncul jika ada data invoice */}
                     <div className="mt-4 pt-4 border-t border-slate-800">
                       {res.invoice_data ? (
@@ -164,7 +388,8 @@ export default function HistoryPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
 
             {/* Pagination Controls */}
