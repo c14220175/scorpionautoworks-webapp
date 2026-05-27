@@ -23,7 +23,8 @@ export async function POST(request: Request) {
       checkupDesc,
       checkupImage,
       bookingId,
-      isCancelled
+      isCancelled,
+      isLanjutAdmin
     } = body;
 
     console.log('[send-service-email] Request body:', JSON.stringify(body, null, 2));
@@ -41,11 +42,23 @@ export async function POST(request: Request) {
     if (isCancelled) {
       emailSubject = `Pembatalan Servis - ${customerName}`;
     }
+    if (isLanjutAdmin) {
+      emailSubject = `Perbaikan Dilanjutkan (Part Telah Tiba) - ${customerName}`;
+    }
 
     let invoiceHtml = '';
     if (isCompleted && invoiceItems && invoiceItems.length > 0) {
       let itemsHtml = '';
+      let subtotal = 0;
+      let dpDeduction = 0;
+
       invoiceItems.forEach((item: any, index: number) => {
+        if (item.type === 'DP-Deduction') {
+          dpDeduction += Math.abs(item.price * item.qty);
+        } else {
+          subtotal += (item.price * item.qty);
+        }
+
         itemsHtml += `
           <tr style="border-bottom: 1px solid #334155;">
             <td style="padding: 8px 4px; text-align: center;">${index + 1}</td>
@@ -85,9 +98,21 @@ export async function POST(request: Request) {
                 </tbody>
               </table>
 
-              <div style="margin-top: 16px; text-align: right; background-color: #0f172a; padding: 12px; border-radius: 4px; border: 1px solid #334155;">
-                <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">Total Keseluruhan:</span>
-                <span style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-weight: bold; font-size: 18px;">Rp ${(totalBayar || 0).toLocaleString("id-ID")}</span>
+              <div style="margin-top: 16px; background-color: #0f172a; padding: 12px; border-radius: 4px; border: 1px solid #334155;">
+                ${dpDeduction > 0 ? `
+                <div style="text-align: right; margin-bottom: 8px;">
+                  <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 14px; margin-right: 12px;">Subtotal:</span>
+                  <span style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-weight: bold; font-size: 14px;">Rp ${subtotal.toLocaleString("id-ID")}</span>
+                </div>
+                <div style="text-align: right; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 12px;">
+                  <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 14px; margin-right: 12px;">DP yang telah dibayar:</span>
+                  <span style="color: #ef4444 !important; -webkit-text-fill-color: #ef4444 !important; font-weight: bold; font-size: 14px;">- Rp ${dpDeduction.toLocaleString("id-ID")}</span>
+                </div>
+                ` : ''}
+                <div style="text-align: right;">
+                  <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">${dpDeduction > 0 ? 'Sisa Tagihan' : 'Total Keseluruhan'}:</span>
+                  <span style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-weight: bold; font-size: 18px;">Rp ${(totalBayar || 0).toLocaleString("id-ID")}</span>
+                </div>
               </div>
             </td>
           </tr>
@@ -166,10 +191,11 @@ export async function POST(request: Request) {
       `;
     }
 
-    // Determine the main message
     let mainMessage = '';
     if (isCancelled) {
       mainMessage = `Layanan servis untuk kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah dibatalkan karena penolakan penawaran harga atau atas permintaan Anda. Silakan hubungi admin untuk pengambilan kendaraan.`;
+    } else if (isLanjutAdmin) {
+      mainMessage = `Kabar baik! Part inden pesanan Anda telah tiba di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong>. Perbaikan kendaraan Anda sedang dilanjutkan oleh mekanik kami.`;
     } else if (isCheckupResult && !hasIssues) {
       mainMessage = `Pengecekan kendaraan Anda di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong> telah selesai dan tidak ditemukan kendala. Kendaraan Anda siap untuk diambil.`;
     } else if (isCheckupResult && hasIssues) {

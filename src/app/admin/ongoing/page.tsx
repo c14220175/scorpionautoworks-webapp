@@ -94,6 +94,17 @@ export default function OngoingPage() {
   const [dpVerificationRes, setDpVerificationRes] = useState<any | null>(null);
   const [dpActionLoading, setDpActionLoading] = useState(false);
   const [isSendingDpEmail, setIsSendingDpEmail] = useState(false);
+
+  // ================= CANCELLATION STATES =================
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+
+  // ================= PART INDEN PENDING STATES =================
+  const [activeTab, setActiveTab] = useState<"ongoing" | "pending">("ongoing");
+  const [showLanjutModal, setShowLanjutModal] = useState(false);
+  const [lanjutActionLoading, setLanjutActionLoading] = useState(false);
+  const [selectedPendingRes, setSelectedPendingRes] = useState<any | null>(null);
   // ===================================================
 
   useEffect(() => {
@@ -106,7 +117,7 @@ export default function OngoingPage() {
       const { data, error } = await supabase
         .from("bookings")
         .select("*")
-        .eq("status", "in_progress")
+        .in("status", ["in_progress", "pending_part", "pending_reschedule"])
         .order("booking_date", { ascending: false });
 
       if (error) throw error;
@@ -258,20 +269,24 @@ export default function OngoingPage() {
     }
   };
 
-  const handleCancelService = async () => {
+  const handleCancelService = async (reason?: string) => {
     if (!selectedRes) return;
-    setActionLoading(true);
+    setCancelLoading(true);
     try {
       const { error } = await supabase
         .from("bookings")
-        .update({ status: "cancelled", updated_at: new Date().toISOString() })
+        .update({
+          status: "cancelled",
+          cancellation_reason: reason || null,
+          updated_at: new Date().toISOString()
+        })
         .eq("id", selectedRes.id);
 
       if (error) throw error;
 
-      // Send cancellation email
+      // Send cancellation email with reason
       if (selectedRes.customer_email) {
-        await fetch('/api/send-service-email', {
+        await fetch('/api/send-cancellation-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -280,20 +295,22 @@ export default function OngoingPage() {
             vehicleInfo: selectedRes.vehicle_info,
             vehicleYear: selectedRes.vehicle_year || '-',
             serviceType: selectedRes.service_type,
-            currentPhase: phases[currentPhaseIndex] || "-",
-            isCancelled: true,
+            bookingDate: selectedRes.booking_date,
+            cancellationReason: reason || "Dibatalkan oleh pihak bengkel.",
           }),
         });
       }
 
       toast.success("Layanan berhasil dibatalkan dan email pembatalan telah dikirim.");
+      setShowCancelModal(false);
+      setCancelReason("");
       setIsDetailOpen(false);
       setSelectedRes(null);
       fetchBookings();
     } catch (error: any) {
       toast.error("Gagal membatalkan layanan: " + error.message);
     } finally {
-      setActionLoading(false);
+      setCancelLoading(false);
     }
   };
 
@@ -717,6 +734,7 @@ export default function OngoingPage() {
 
       let targetDataField = null;
       let parsedItems = [];
+      let finalDpAmount = 0;
 
       if (dpVerificationRes.invoice_data?.items?.some((i: any) => i.type === 'Part-Inden')) {
         targetDataField = 'invoice_data';
@@ -727,16 +745,16 @@ export default function OngoingPage() {
       }
 
       if (targetDataField) {
-        const dpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (Math.round((item.price * item.qty) / 2)), 0);
+        finalDpAmount = parsedItems.filter((i: any) => i.type === 'Part-Inden').reduce((sum: number, item: any) => sum + (Math.round((item.price * item.qty) / 2)), 0);
         const alreadyHasDeduction = parsedItems.some((i: any) => i.type === 'DP-Deduction');
 
-        if (dpAmount > 0 && !alreadyHasDeduction) {
+        if (finalDpAmount > 0 && !alreadyHasDeduction) {
           const deductionItem = {
             id: Date.now(),
             name: "Pembayaran DP (-50%)",
             type: "DP-Deduction",
             qty: 1,
-            price: -dpAmount,
+            price: -finalDpAmount,
             item_type: "Deduction"
           };
           const newItems = [...parsedItems, deductionItem];
@@ -753,6 +771,23 @@ export default function OngoingPage() {
 
       if (error) throw error;
       toast.success("DP berhasil diverifikasi.");
+
+      if (dpVerificationRes.customer_email && finalDpAmount > 0) {
+        try {
+          await fetch('/api/send-dp-invoice-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customerName: dpVerificationRes.customer_name,
+              customerEmail: dpVerificationRes.customer_email,
+              vehicleInfo: dpVerificationRes.vehicle_info,
+              dpAmount: finalDpAmount
+            })
+          });
+        } catch (emailErr) {
+          console.error("Gagal mengirim kuitansi DP:", emailErr);
+        }
+      }
 
       if (selectedRes && selectedRes.id === dpVerificationRes.id && updatePayload[targetDataField as string]) {
         setInvoiceItems(updatePayload[targetDataField as string].items);
@@ -824,19 +859,184 @@ export default function OngoingPage() {
     }
   };
 
-  const awaitingDpReservations = reservations.filter(res => res.dp_status === "awaiting_verification");
-  const ongoingReservations = reservations.filter(res => res.dp_status !== "awaiting_verification");
+  const handleManualApproveEstimation = async () => {
+    if (!selectedRes) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ estimation_status: "approved", updated_at: new Date().toISOString() })
+        .eq("id", selectedRes.id);
+
+      if (error) throw error;
+      setEstimationStatus("approved");
+      setEstimationRejectReason(null);
+      toast.success("Estimasi disetujui secara manual!");
+      fetchBookings();
+    } catch (err: any) {
+      toast.error("Gagal menyetujui estimasi secara manual: " + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleManualRejectEstimation = async (reason: string) => {
+    if (!selectedRes) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({
+          estimation_status: "rejected",
+          estimation_reject_reason: reason.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", selectedRes.id);
+
+      if (error) throw error;
+      setEstimationStatus("rejected");
+      setEstimationRejectReason(reason.trim());
+      toast.success("Estimasi ditolak secara manual!");
+      fetchBookings();
+    } catch (err: any) {
+      toast.error("Gagal menolak estimasi secara manual: " + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleTungguPart = async () => {
+    if (!selectedRes) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "pending_part", updated_at: new Date().toISOString() })
+        .eq("id", selectedRes.id);
+
+      if (error) throw error;
+      toast.success("Servis dipause. Dipindahkan ke tab Menunggu Part.");
+      setIsDetailOpen(false);
+      setSelectedRes(null);
+      fetchBookings();
+    } catch (err: any) {
+      toast.error("Gagal memindah ke Menunggu Part: " + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleLanjutPartOption = async (option: 'A' | 'B') => {
+    if (!selectedPendingRes) return;
+    setLanjutActionLoading(true);
+
+    try {
+      if (option === 'A') {
+        // Option A: Send Reschedule Email
+        if (!selectedPendingRes.customer_email) {
+          toast.error("Email pelanggan tidak ada!");
+          setLanjutActionLoading(false);
+          return;
+        }
+
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id';
+        await fetch('/api/send-reschedule-link-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerName: selectedPendingRes.customer_name,
+            customerEmail: selectedPendingRes.customer_email,
+            vehicleInfo: selectedPendingRes.vehicle_info,
+            rescheduleLink: `${baseUrl}/reschedule/${selectedPendingRes.id}`
+          })
+        });
+
+        // Ubah status jadi pending_reschedule
+        await supabase
+          .from("bookings")
+          .update({ status: "pending_reschedule", updated_at: new Date().toISOString() })
+          .eq("id", selectedPendingRes.id);
+
+        toast.success("Email lanjutan (reschedule) berhasil dikirim!");
+        setShowLanjutModal(false);
+        fetchBookings();
+
+      } else {
+        // Option B: Admin continues service
+        await supabase
+          .from("bookings")
+          .update({ status: "in_progress", updated_at: new Date().toISOString() })
+          .eq("id", selectedPendingRes.id);
+
+        if (selectedPendingRes.customer_email) {
+          try {
+            await fetch('/api/send-service-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customerName: selectedPendingRes.customer_name,
+                customerEmail: selectedPendingRes.customer_email,
+                vehicleInfo: selectedPendingRes.vehicle_info,
+                vehicleYear: selectedPendingRes.vehicle_year || '-',
+                serviceType: selectedPendingRes.service_type,
+                isLanjutAdmin: true
+              })
+            });
+          } catch (e) {
+            console.error("Gagal mengirim email Lanjut Admin:", e);
+          }
+        }
+        toast.success("Servis dilanjutkan! Data kembali ke Ongoing.");
+        setShowLanjutModal(false);
+        fetchBookings();
+      }
+    } catch (error: any) {
+      toast.error("Terjadi kesalahan: " + error.message);
+    } finally {
+      setLanjutActionLoading(false);
+    }
+  };
+
+  const awaitingDpReservations = reservations.filter(res => res.dp_status === "awaiting_verification" && (res.status === 'in_progress' || res.status === 'pending_part'));
+  const ongoingReservations = reservations.filter(res => res.dp_status !== "awaiting_verification" && res.status === "in_progress");
+  const pendingPartReservations = reservations.filter(res => res.status === "pending_part" || res.status === "pending_reschedule");
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-4">
-        <h1 className="text-2xl font-bold text-slate-100">Sedang Dikerjakan (Ongoing)</h1>
+        <h1 className="text-2xl font-bold text-slate-100">Daftar Pengerjaan</h1>
         <Button variant="outline" onClick={fetchBookings} className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white">
           Refresh Data
         </Button>
       </div>
 
-      {awaitingDpReservations.length > 0 && (
+      {/* TABS MANUAL */}
+      <div className="flex space-x-1 bg-slate-900 border border-slate-800 p-1 rounded-lg w-full max-w-sm">
+        <button
+          onClick={() => setActiveTab("ongoing")}
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${
+            activeTab === "ongoing"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+          }`}
+        >
+          Ongoing
+        </button>
+        <button
+          onClick={() => setActiveTab("pending")}
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${
+            activeTab === "pending"
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+          }`}
+        >
+          Menunggu Part
+        </button>
+      </div>
+
+      {activeTab === "ongoing" && (
+        <>
+          {awaitingDpReservations.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-bold text-amber-500 mb-4 flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -905,6 +1105,57 @@ export default function OngoingPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+        </>
+      )}
+
+      {activeTab === "pending" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <h2 className="text-xl font-bold text-slate-200">Menunggu Part Datang</h2>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-20 text-slate-500 animate-pulse">Memuat data...</div>
+          ) : pendingPartReservations.length === 0 ? (
+            <Card className="bg-slate-900 border-slate-800"><CardContent className="text-center py-20 text-slate-500">Tidak ada kendaraan yang sedang menunggu part.</CardContent></Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pendingPartReservations.map((res) => (
+                <Card key={res.id} className="bg-slate-900 border border-blue-900/50 hover:border-blue-500/50 transition-all shadow-lg">
+                  <CardContent className="p-5 flex flex-col gap-2">
+                    <div className="flex justify-between w-full">
+                      {res.status === 'pending_reschedule' ? (
+                        <Badge className="bg-amber-600 text-white animate-pulse">Menunggu Pelanggan Reschedule</Badge>
+                      ) : (
+                        <Badge className="bg-blue-600 text-white animate-pulse">Menunggu Part</Badge>
+                      )}
+                    </div>
+                    <div className="mt-2">
+                      <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
+                      <p className="text-blue-500 text-xs mb-1 font-medium">{res.service_type}</p>
+                      <p className="text-slate-400 text-sm mt-1">{res.vehicle_info}</p>
+                    </div>
+                    {res.status === 'pending_part' && (
+                      <div className="mt-4 border-t border-slate-800 pt-4">
+                        <Button
+                          onClick={() => {
+                            setSelectedPendingRes(res);
+                            setShowLanjutModal(true);
+                          }}
+                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold"
+                        >
+                          Part Datang (Lanjut)
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -992,7 +1243,30 @@ export default function OngoingPage() {
                       {isMelepasPhase && (
                         <div className="mb-2">
                           {estimationStatus === "pending" && (
-                            <Badge className="bg-yellow-500 text-slate-900 animate-pulse w-fit">Menunggu Persetujuan Pelanggan...</Badge>
+                            <div className="flex flex-col gap-2 w-fit mb-2">
+                              <Badge className="bg-yellow-500 text-slate-900 animate-pulse w-fit">Menunggu Persetujuan Pelanggan...</Badge>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={handleManualApproveEstimation}
+                                  disabled={actionLoading}
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-7"
+                                >
+                                  Setujui Manual
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    const reason = window.prompt("Masukkan alasan penolakan pelanggan:");
+                                    if (reason && reason.trim()) handleManualRejectEstimation(reason);
+                                  }}
+                                  disabled={actionLoading}
+                                  className="bg-rose-600 hover:bg-rose-500 text-white text-xs h-7"
+                                >
+                                  Tolak Manual
+                                </Button>
+                              </div>
+                            </div>
                           )}
                           {estimationStatus === "approved" && (
                             <Badge className="bg-emerald-600 text-white w-fit">Penawaran Disetujui ✅</Badge>
@@ -1005,8 +1279,8 @@ export default function OngoingPage() {
                               <p className="text-xs text-slate-400 mt-2 mb-3">Pelanggan telah menolak layanan ini. Anda dapat membatalkan layanan.</p>
                               <Button
                                 size="sm"
-                                onClick={handleCancelService}
-                                disabled={actionLoading}
+                                onClick={() => { setCancelReason("Penawaran harga ditolak oleh pelanggan."); setShowCancelModal(true); }}
+                                disabled={cancelLoading}
                                 className="bg-rose-600 hover:bg-rose-500 text-white text-xs"
                               >
                                 Batalkan Layanan
@@ -1149,12 +1423,20 @@ export default function OngoingPage() {
           </div>
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 border-t border-slate-800 pt-4 mt-2">
-            <div>
+            <div className="flex gap-2">
               {(hasEscalateButton || selectedRes?.checkup_description || selectedRes?.customer_checkup_response === 'Lanjut Reparasi') && (
                 <Button variant="destructive" onClick={() => setShowEscalatePopup(true)} className="bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/20">
                   Escalate
                 </Button>
               )}
+              <Button
+                variant="outline"
+                onClick={() => { setCancelReason(""); setShowCancelModal(true); }}
+                className="bg-transparent border-rose-500/50 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 hover:border-rose-500 flex items-center gap-1.5"
+              >
+                <X className="w-3.5 h-3.5" />
+                Batalkan Servis
+              </Button>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="outline" onClick={handleCloseDetail} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
@@ -1171,6 +1453,17 @@ export default function OngoingPage() {
                 </Button>
               )}
 
+              {/* Tombol Tunggu Part khusus untuk Part Inden */}
+              {selectedRes?.dp_status === 'verified' && invoiceItems.some(i => i.type === "Part-Inden") && (
+                <Button
+                  onClick={handleTungguPart}
+                  disabled={actionLoading}
+                  className="bg-blue-600 hover:bg-blue-500 text-white"
+                >
+                  Tunggu Part
+                </Button>
+              )}
+
               <Button
                 onClick={openInvoice}
                 disabled={!(isLastPhase || (isCheckup && selectedRes?.customer_checkup_response === 'Selesai / Tanpa Perbaikan')) || actionLoading}
@@ -1179,6 +1472,57 @@ export default function OngoingPage() {
                 Selesaikan Servis
               </Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL LANJUT PART DATANG ================= */}
+      <Dialog open={showLanjutModal} onOpenChange={setShowLanjutModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-emerald-500 text-xl border-b border-slate-700 pb-3">
+              Part Telah Datang
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-slate-300 text-sm">
+              Tentukan langkah selanjutnya untuk kendaraan atas nama <strong>{selectedPendingRes?.customer_name}</strong>.
+            </p>
+            <div className="grid gap-3">
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-start gap-2 bg-slate-800 border-emerald-700 hover:bg-slate-700 hover:border-emerald-500 text-left"
+                onClick={() => handleLanjutPartOption('A')}
+                disabled={lanjutActionLoading}
+              >
+                <div className="flex items-center gap-2 text-emerald-400 font-bold">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                  Opsi A: Kirim Email Lanjutan
+                </div>
+                <p className="text-xs text-slate-400 font-normal">
+                  Sistem akan mengirimkan email dengan Magic Link agar pelanggan dapat mengatur ulang jadwal kedatangan ke bengkel.
+                </p>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto p-4 flex flex-col items-start gap-2 bg-slate-800 border-blue-700 hover:bg-slate-700 hover:border-blue-500 text-left"
+                onClick={() => handleLanjutPartOption('B')}
+                disabled={lanjutActionLoading}
+              >
+                <div className="flex items-center gap-2 text-blue-400 font-bold">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  Opsi B: Admin Lanjut Perbaikan
+                </div>
+                <p className="text-xs text-slate-400 font-normal">
+                  Pilih opsi ini jika pelanggan meninggalkan mobilnya di bengkel. Data akan langsung dikembalikan ke halaman Ongoing.
+                </p>
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLanjutModal(false)} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
+              Batal
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2005,6 +2349,81 @@ export default function OngoingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ================= MODAL KONFIRMASI PEMBATALAN ================= */}
+      <AlertDialog open={showCancelModal}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-md">
+          <button
+            onClick={() => { setShowCancelModal(false); setCancelReason(""); }}
+            disabled={cancelLoading}
+            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-slate-400 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </button>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg text-rose-400 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+              Batalkan Servis
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              Apakah Anda yakin ingin membatalkan servis ini? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Info singkat pelanggan */}
+            <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 text-sm space-y-1">
+              <p className="text-slate-300"><strong>Pelanggan:</strong> {selectedRes?.customer_name}</p>
+              <p className="text-slate-400"><strong>Kendaraan:</strong> {selectedRes?.vehicle_info}</p>
+              <p className="text-slate-400"><strong>Fase:</strong> <span className="text-emerald-400">{phases[currentPhaseIndex]}</span></p>
+            </div>
+
+            {/* Input alasan pembatalan */}
+            <div>
+              <label className="text-xs font-semibold text-slate-400 mb-1.5 block">
+                Alasan Pembatalan <span className="text-rose-400">*</span>
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500/30 rounded-lg p-3 text-sm text-white min-h-[120px] resize-none placeholder:text-slate-600 transition-colors"
+                placeholder="Tuliskan alasan pembatalan servis ini... (wajib diisi)"
+              />
+              {cancelReason.trim().length === 0 && (
+                <p className="text-xs text-slate-600 mt-1">Alasan pembatalan wajib diisi sebelum konfirmasi.</p>
+              )}
+            </div>
+          </div>
+
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-2">
+            <AlertDialogCancel
+              onClick={() => { setShowCancelModal(false); setCancelReason(""); }}
+              disabled={cancelLoading}
+              className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
+            >
+              Kembali
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleCancelService(cancelReason.trim())}
+              disabled={cancelLoading || cancelReason.trim().length === 0}
+              className="bg-rose-600 hover:bg-rose-500 text-white disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {cancelLoading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                  Memproses...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Konfirmasi Batalkan
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   );
