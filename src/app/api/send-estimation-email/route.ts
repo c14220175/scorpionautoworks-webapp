@@ -12,10 +12,12 @@ export async function POST(request: Request) {
       vehicleInfo,
       vehicleYear,
       serviceType,
-      estimationItems,
-      estimationTotal,
+      estimationMessage,
       bookingId,
       trackingCode,
+      // Legacy support for old format
+      estimationItems,
+      estimationTotal,
       estimationNotes,
     } = body;
 
@@ -23,22 +25,82 @@ export async function POST(request: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scorpionautoworks.my.id';
 
-    // Build estimation items table
-    let itemsHtml = '';
-    (estimationItems || []).forEach((item: any, index: number) => {
-      itemsHtml += `
-        <tr style="border-bottom: 1px solid #334155;">
-          <td style="padding: 8px 4px; text-align: center; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">${index + 1}</td>
-          <td style="padding: 8px 4px; font-weight: bold; color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important;">${item.name}</td>
-          <td style="padding: 8px 4px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">
-            <span style="font-size: 10px; padding: 2px 6px; background-color: #334155; border-radius: 4px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">${item.type}</span>
-          </td>
-          <td style="padding: 8px 4px; text-align: right; color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-weight: bold;">
-            Rp ${(item.price || 0).toLocaleString("id-ID")}
-          </td>
-        </tr>
+    // Determine which format to use
+    const isMessageOnly = !!estimationMessage;
+
+    // Build estimation content based on format
+    let estimationContentHtml = '';
+
+    if (isMessageOnly) {
+      // New format: message only
+      estimationContentHtml = `
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+          <tr>
+            <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px;">
+              <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">💰 Penawaran Harga</h3>
+              <p style="color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; font-size: 14px; line-height: 1.8; margin: 0; white-space: pre-wrap;">${estimationMessage}</p>
+            </td>
+          </tr>
+        </table>
       `;
-    });
+    } else {
+      // Legacy format: items table
+      let itemsHtml = '';
+      (estimationItems || []).forEach((item: any, index: number) => {
+        itemsHtml += `
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding: 8px 4px; text-align: center; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">${index + 1}</td>
+            <td style="padding: 8px 4px; font-weight: bold; color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important;">${item.name}</td>
+            <td style="padding: 8px 4px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">
+              <span style="font-size: 10px; padding: 2px 6px; background-color: #334155; border-radius: 4px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">${item.type}</span>
+            </td>
+            <td style="padding: 8px 4px; text-align: right; color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-weight: bold;">
+              Rp ${(item.price || 0).toLocaleString("id-ID")}
+            </td>
+          </tr>
+        `;
+      });
+
+      estimationContentHtml = `
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+          <tr>
+            <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px;">
+              <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">💰 Penawaran Harga</h3>
+              
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 12px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; border-collapse: collapse;">
+                <thead style="background-color: #0f172a; text-transform: uppercase; font-size: 10px; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">
+                  <tr>
+                    <th style="padding: 8px 4px; text-align: center;">No.</th>
+                    <th style="padding: 8px 4px; text-align: left;">Nama</th>
+                    <th style="padding: 8px 4px; text-align: left;">Jenis</th>
+                    <th style="padding: 8px 4px; text-align: right;">Harga</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                </tbody>
+              </table>
+
+              <div style="margin-top: 16px; text-align: right; background-color: #0f172a; padding: 12px; border-radius: 4px; border: 1px solid #334155;">
+                <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">Total Penawaran:</span>
+                <span style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-weight: bold; font-size: 18px;">Rp ${(estimationTotal || 0).toLocaleString("id-ID")}</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        ${estimationNotes ? `
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+          <tr>
+            <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px;">
+              <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">📝 Keterangan</h3>
+              <p style="color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; font-size: 14px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${estimationNotes}</p>
+            </td>
+          </tr>
+        </table>
+        ` : ''}
+      `;
+    }
 
     const emailSubject = `Penawaran Harga Servis - ${customerName}`;
 
@@ -116,50 +178,14 @@ export async function POST(request: Request) {
                       </table>
                       ` : ''}
 
-                      <!-- Estimation Table Card -->
-                      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
-                        <tr>
-                          <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px;">
-                            <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">💰 Penawaran Harga</h3>
-                            
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 12px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; border-collapse: collapse;">
-                              <thead style="background-color: #0f172a; text-transform: uppercase; font-size: 10px; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">
-                                <tr>
-                                  <th style="padding: 8px 4px; text-align: center;">No.</th>
-                                  <th style="padding: 8px 4px; text-align: left;">Nama</th>
-                                  <th style="padding: 8px 4px; text-align: left;">Jenis</th>
-                                  <th style="padding: 8px 4px; text-align: right;">Harga</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                ${itemsHtml}
-                              </tbody>
-                            </table>
-
-                            <div style="margin-top: 16px; text-align: right; background-color: #0f172a; padding: 12px; border-radius: 4px; border: 1px solid #334155;">
-                              <span style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">Total Penawaran:</span>
-                              <span style="color: #10b981 !important; -webkit-text-fill-color: #10b981 !important; font-weight: bold; font-size: 18px;">Rp ${(estimationTotal || 0).toLocaleString("id-ID")}</span>
-                            </div>
-                          </td>
-                        </tr>
-                      </table>
-
-                      ${estimationNotes ? `
-                      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
-                        <tr>
-                          <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px;">
-                            <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">📝 Keterangan</h3>
-                            <p style="color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important; font-size: 14px; line-height: 1.6; margin: 0; white-space: pre-wrap;">${estimationNotes}</p>
-                          </td>
-                        </tr>
-                      </table>
-                      ` : ''}
+                      <!-- Estimation Content -->
+                      ${estimationContentHtml}
 
                       <!-- Approval Buttons -->
                       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 24px; border-top: 1px solid #334155;">
                         <tr>
                           <td style="padding-top: 24px; text-align: center;">
-                            <p style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-weight: bold; font-size: 16px; margin: 0 0 8px 0;">Apakah Anda menyetujui penawaran harga di atas?</p>
+                            <p style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; font-weight: bold; font-size: 16px; margin: 0 0 8px 0;">Apakah Anda menyetujui penawaran di atas?</p>
                             <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 13px; margin: 0 0 20px 0;">Klik salah satu tombol di bawah untuk memberikan respon Anda.</p>
                             
                             <table border="0" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
