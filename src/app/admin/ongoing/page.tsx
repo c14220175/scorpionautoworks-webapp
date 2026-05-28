@@ -326,38 +326,71 @@ export default function OngoingPage() {
 
   const submitEstimasiForm = async () => {
     if (!selectedRes) return;
-    if (!estimasiNotes.trim()) {
-      toast.error("Mohon isi pesan penawaran.");
+    
+    // Minimal: harus ada setidaknya harga barang atau jasa, atau pesan
+    const partPrice = Number(estimasiPart) || 0;
+    const jasaPrice = Number(estimasiJasa) || 0;
+    const totalEstimasi = partPrice + jasaPrice;
+
+    if (totalEstimasi <= 0 && !estimasiNotes.trim()) {
+      toast.error("Mohon isi penawaran harga atau pesan penawaran.");
       return;
     }
 
     setEstimationEmailLoading(true);
     try {
-      // Save estimation message to DB (no items, just message)
+      // Build estimation items for structured display
+      const items: any[] = [];
+      if (partPrice > 0) {
+        items.push({ name: "Penawaran Harga Barang", type: "Part", price: partPrice, qty: 1 });
+      }
+      if (jasaPrice > 0) {
+        items.push({ name: "Penawaran Harga Jasa", type: "Jasa", price: jasaPrice, qty: 1 });
+      }
+
+      // Save estimation to DB
+      const estimationData: any = { items, total: totalEstimasi };
+      if (estimasiNotes.trim()) {
+        estimationData.message = estimasiNotes.trim();
+      }
+
       const { error: dbError } = await supabase
         .from("bookings")
         .update({
-          estimation_data: { message: estimasiNotes.trim() },
+          estimation_data: estimationData,
           estimation_status: "pending"
         })
         .eq("id", selectedRes.id);
 
       if (dbError) throw dbError;
 
-      // Send Email with message only
+      // Send Email — use items format if prices exist, message-only if only notes
+      const emailBody: any = {
+        customerName: selectedRes.customer_name,
+        customerEmail: selectedRes.customer_email,
+        vehicleInfo: selectedRes.vehicle_info,
+        vehicleYear: selectedRes.vehicle_year || '-',
+        serviceType: selectedRes.service_type,
+        bookingId: selectedRes.id,
+        trackingCode: selectedRes.tracking_code,
+      };
+
+      if (items.length > 0) {
+        // Use structured items format
+        emailBody.estimationItems = items;
+        emailBody.estimationTotal = totalEstimasi;
+        if (estimasiNotes.trim()) {
+          emailBody.estimationNotes = estimasiNotes.trim();
+        }
+      } else {
+        // Message-only format
+        emailBody.estimationMessage = estimasiNotes.trim();
+      }
+
       const emailRes = await fetch('/api/send-estimation-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customerName: selectedRes.customer_name,
-          customerEmail: selectedRes.customer_email,
-          vehicleInfo: selectedRes.vehicle_info,
-          vehicleYear: selectedRes.vehicle_year || '-',
-          serviceType: selectedRes.service_type,
-          estimationMessage: estimasiNotes.trim(),
-          bookingId: selectedRes.id,
-          trackingCode: selectedRes.tracking_code,
-        }),
+        body: JSON.stringify(emailBody),
       });
 
       if (!emailRes.ok) throw new Error("Gagal mengirim email penawaran");
@@ -370,7 +403,7 @@ export default function OngoingPage() {
       setSelectedRes({
         ...selectedRes,
         estimation_status: "pending",
-        estimation_data: { message: estimasiNotes.trim() }
+        estimation_data: estimationData
       });
       fetchBookings();
     } catch (err: any) {
@@ -1512,7 +1545,7 @@ export default function OngoingPage() {
 
       {/* ================= MODAL LANJUT PART DATANG ================= */}
       <Dialog open={showLanjutModal} onOpenChange={setShowLanjutModal}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-md">
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-xl" style={{ zIndex: 100 }}>
           <DialogHeader>
             <DialogTitle className="text-emerald-500 text-xl border-b border-slate-700 pb-3">
               Part Telah Datang
@@ -1533,9 +1566,6 @@ export default function OngoingPage() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                   Opsi A: Kirim Email Lanjutan
                 </div>
-                <p className="text-xs text-slate-400 font-normal">
-                  Sistem akan mengirimkan email dengan Magic Link agar pelanggan dapat mengatur ulang jadwal kedatangan ke bengkel.
-                </p>
               </Button>
               <Button
                 variant="outline"
@@ -1547,9 +1577,6 @@ export default function OngoingPage() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   Opsi B: Admin Lanjut Perbaikan
                 </div>
-                <p className="text-xs text-slate-400 font-normal">
-                  Pilih opsi ini jika pelanggan meninggalkan mobilnya di bengkel. Data akan langsung dikembalikan ke halaman Ongoing.
-                </p>
               </Button>
             </div>
           </div>
@@ -2292,25 +2319,64 @@ export default function OngoingPage() {
         </AlertDialogContent>
       </AlertDialog>
       {/* DIALOG FORM ESTIMASI */}
-      <Dialog open={showEstimasiFormModal} onOpenChange={setShowEstimasiFormModal}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200">
+      <Dialog open={showEstimasiFormModal} onOpenChange={(open) => {
+        if (!open) {
+          setShowEstimasiFormModal(false);
+          setEstimasiPart("");
+          setEstimasiJasa("");
+          setEstimasiNotes("");
+        }
+      }}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-emerald-500">Form Penawaran</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {/* Penawaran Harga Barang */}
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Pesan Penawaran untuk Pelanggan</label>
+              <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Barang (Rp)</label>
+              <input
+                type="number"
+                value={estimasiPart}
+                onChange={(e) => setEstimasiPart(e.target.value ? Number(e.target.value) : "")}
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white"
+                placeholder="Contoh: 500000"
+                min={0}
+              />
+            </div>
+            {/* Penawaran Harga Jasa */}
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Jasa (Rp)</label>
+              <input
+                type="number"
+                value={estimasiJasa}
+                onChange={(e) => setEstimasiJasa(e.target.value ? Number(e.target.value) : "")}
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white"
+                placeholder="Contoh: 200000"
+                min={0}
+              />
+            </div>
+            {/* Total Preview */}
+            {(Number(estimasiPart) > 0 || Number(estimasiJasa) > 0) && (
+              <div className="bg-slate-950 border border-slate-700 rounded-lg p-3 flex justify-between items-center">
+                <span className="text-xs text-slate-400 font-semibold">Total Penawaran:</span>
+                <span className="text-emerald-400 font-bold text-sm">Rp {((Number(estimasiPart) || 0) + (Number(estimasiJasa) || 0)).toLocaleString("id-ID")}</span>
+              </div>
+            )}
+            {/* Keterangan / Pesan */}
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Keterangan / Pesan untuk Pelanggan <span className="text-slate-600">(opsional)</span></label>
               <textarea
                 value={estimasiNotes}
                 onChange={(e) => setEstimasiNotes(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm text-white min-h-[150px]"
-                placeholder="Tuliskan detail penawaran, estimasi harga, dan keterangan lainnya untuk pelanggan..."
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white min-h-[80px] resize-none"
+                placeholder="Contoh: Harga bisa berubah tergantung kondisi komponen..."
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEstimasiFormModal(false)} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
-            <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading || !estimasiNotes.trim()} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+            <Button variant="outline" onClick={() => { setShowEstimasiFormModal(false); setEstimasiPart(""); setEstimasiJasa(""); setEstimasiNotes(""); }} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
+            <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading || ((Number(estimasiPart) || 0) + (Number(estimasiJasa) || 0) <= 0 && !estimasiNotes.trim())} className="bg-emerald-600 hover:bg-emerald-500 text-white">
               {estimationEmailLoading ? "Mengirim..." : "Kirim Penawaran"}
             </Button>
           </DialogFooter>

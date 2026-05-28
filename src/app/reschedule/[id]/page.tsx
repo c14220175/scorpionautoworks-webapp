@@ -158,6 +158,7 @@ export default function ReschedulePage() {
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
                   className="bg-slate-900 border-slate-700 text-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
 
@@ -174,6 +175,7 @@ export default function ReschedulePage() {
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
                   className="bg-slate-900 border-slate-700 text-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
             </div>
