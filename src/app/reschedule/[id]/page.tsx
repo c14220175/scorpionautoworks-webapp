@@ -50,6 +50,15 @@ export default function ReschedulePage() {
       return;
     }
 
+    // Validasi: tanggal tidak boleh lebih dari 6 bulan ke depan
+    const maxAllowed = new Date();
+    maxAllowed.setMonth(maxAllowed.getMonth() + 6);
+    const maxAllowedStr = maxAllowed.toISOString().split('T')[0];
+    if (selectedDate > maxAllowedStr) {
+      toast.error("Jadwal maksimal hanya bisa diatur hingga 6 bulan ke depan.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const newBookingDate = new Date(`${selectedDate}T${selectedTime}:00`);
@@ -86,6 +95,11 @@ export default function ReschedulePage() {
 
   // Get today's date in YYYY-MM-DD format for min constraint
   const todayStr = new Date().toISOString().split('T')[0];
+
+  // Hitung tanggal maksimal (6 bulan ke depan)
+  const maxDate = new Date();
+  maxDate.setMonth(maxDate.getMonth() + 6);
+  const maxDateStr = maxDate.toISOString().split('T')[0];
 
   if (loading) {
     return (
@@ -154,6 +168,7 @@ export default function ReschedulePage() {
                 <Input
                   type="date"
                   min={todayStr}
+                  max={maxDateStr}
                   required
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}

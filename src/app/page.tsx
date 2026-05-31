@@ -25,6 +25,7 @@ export default function BookingPage() {
   const [isDateFullyBooked, setIsDateFullyBooked] = useState<boolean>(false)
   const [isCheckingTime, setIsCheckingTime] = useState<boolean>(false)
   const [todayString, setTodayString] = useState<string>('')
+  const [maxDateString, setMaxDateString] = useState<string>('')
   const [isHolidayError, setIsHolidayError] = useState<string | null>(null)
 
   const [holidaysMap, setHolidaysMap] = useState<Record<string, string>>({})
@@ -138,6 +139,14 @@ export default function BookingPage() {
     const mm = String(today.getMonth() + 1).padStart(2, '0')
     const dd = String(today.getDate()).padStart(2, '0')
     setTodayString(`${yyyy}-${mm}-${dd}`)
+
+    // Hitung tanggal maksimal (6 bulan ke depan)
+    const maxDate = new Date(today)
+    maxDate.setMonth(maxDate.getMonth() + 6)
+    const maxYyyy = maxDate.getFullYear()
+    const maxMm = String(maxDate.getMonth() + 1).padStart(2, '0')
+    const maxDd = String(maxDate.getDate()).padStart(2, '0')
+    setMaxDateString(`${maxYyyy}-${maxMm}-${maxDd}`)
 
     fetch('/data/cars.json')
       .then((res) => res.json())
@@ -311,6 +320,12 @@ export default function BookingPage() {
     e.preventDefault()
     if (!selectedDate || !formData.reservationTime) {
       alert("Pilih tanggal dan jam reservasi terlebih dahulu!")
+      return
+    }
+
+    // Validasi: tanggal tidak boleh lebih dari 6 bulan ke depan
+    if (maxDateString && selectedDate > maxDateString) {
+      alert('❌ Reservasi maksimal hanya bisa dilakukan hingga 6 bulan ke depan dari tanggal hari ini.')
       return
     }
 
@@ -623,10 +638,18 @@ export default function BookingPage() {
                     type="date"
                     required
                     min={todayString || undefined}
+                    max={maxDateString || undefined}
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 focus:ring-2 focus:ring-yellow-500 text-slate-200"
                     value={selectedDate}
                     onChange={(e) => {
                       const date = e.target.value
+                      // Validasi: maksimal 6 bulan ke depan
+                      if (maxDateString && date > maxDateString) {
+                        setIsHolidayError('Reservasi maksimal hanya bisa dilakukan hingga 6 bulan ke depan dari tanggal hari ini.')
+                        setSelectedDate('')
+                        setAvailableTimes([])
+                        return
+                      }
                       const holidayName = isPublicHoliday(date)
                       if (holidayName) {
                         setIsHolidayError(`Tanggal ini adalah hari libur nasional: "${holidayName}". Silakan pilih tanggal lain.`)
