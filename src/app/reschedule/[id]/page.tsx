@@ -50,7 +50,7 @@ export default function ReschedulePage() {
       return;
     }
 
-    // Validasi: tanggal tidak boleh lebih dari 6 bulan ke depan
+    // Max order: 6 bulan dari tgl pesan
     const maxAllowed = new Date();
     maxAllowed.setMonth(maxAllowed.getMonth() + 6);
     const maxAllowedStr = maxAllowed.toISOString().split('T')[0];
@@ -64,7 +64,7 @@ export default function ReschedulePage() {
       const newBookingDate = new Date(`${selectedDate}T${selectedTime}:00`);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       const selectedDay = new Date(newBookingDate);
       selectedDay.setHours(0, 0, 0, 0);
 

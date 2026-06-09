@@ -110,7 +110,32 @@ export default function OngoingPage() {
   // ===================================================
 
   useEffect(() => {
+    // 1. Ambil data awal saat halaman pertama kali dimuat
     fetchBookings();
+
+    // 2. Buat subscription ke Supabase Realtime untuk tabel 'bookings'
+    const channel = supabase
+      .channel('realtime-ongoing-bookings')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Mendengarkan semua event: INSERT, UPDATE, dan DELETE
+          schema: 'public',
+          table: 'bookings'
+        },
+        (payload) => {
+          console.log('Perubahan data terdeteksi:', payload);
+          // 3. Panggil fetchBookings() lagi setiap kali ada perubahan di database
+          // agar UI langsung update dengan data terbaru
+          fetchBookings();
+        }
+      )
+      .subscribe();
+
+    // 4. Cleanup subscription saat pengguna pindah/keluar dari halaman ini
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchBookings = async () => {

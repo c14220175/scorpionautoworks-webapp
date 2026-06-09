@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 
     console.log('[send-email] Request body:', JSON.stringify(body, null, 2));
 
-    // Format tanggal agar mudah dibaca — paksa timezone WIB (Asia/Jakarta)
+    // Format tanggal (Force WIB UTC+7)
     const formattedDate = new Intl.DateTimeFormat('id-ID', {
       weekday: 'long',
       year: 'numeric',
@@ -133,3 +133,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
