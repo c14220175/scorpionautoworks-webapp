@@ -34,13 +34,40 @@ export default function AdminDashboard() {
   const [extraComplaint, setExtraComplaint] = useState('');
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
-  // Menjalankan Timer untuk Jam & Fetch Data
+  // Menjalankan Timer untuk Jam & Fetch Data Real-time
   useEffect(() => {
     fetchDashboardData();
     setCurrentTime(new Date());
-    // Update setiap detik
+    
+    // Update setiap detik untuk jam
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+
+    // Buat subscription ke Supabase Realtime untuk tabel 'bookings' dan 'inventory'
+    const channel = supabase
+      .channel('realtime-dashboard')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        (payload) => {
+          console.log('Perubahan bookings di Dashboard:', payload);
+          fetchDashboardData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'inventory' },
+        (payload) => {
+          console.log('Perubahan inventory di Dashboard:', payload);
+          fetchDashboardData();
+        }
+      )
+      .subscribe();
+
+    // Cleanup interval dan subscription saat komponen di-unmount
+    return () => {
+      clearInterval(timer);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchDashboardData = async () => {

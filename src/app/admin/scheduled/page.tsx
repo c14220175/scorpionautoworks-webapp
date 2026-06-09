@@ -15,7 +15,26 @@ export default function ScheduledPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // 1. Ambil data awal
     fetchScheduledBookings();
+
+    // 2. Buat subscription Realtime untuk tabel 'bookings'
+    const channel = supabase
+      .channel('realtime-scheduled-bookings')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        (payload) => {
+          console.log('Perubahan jadwal terdeteksi:', payload);
+          fetchScheduledBookings();
+        }
+      )
+      .subscribe();
+
+    // 3. Cleanup saat pindah halaman
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchScheduledBookings = async () => {
