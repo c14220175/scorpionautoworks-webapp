@@ -10,10 +10,9 @@ export async function GET(request: Request) {
 
   try {
     const res = await fetch(`https://api-hari-libur.vercel.app/api?year=${year}`, {
-      // Tambahkan cache option sesuai Next.js jika diperlukan, atau biarkan default (biasanya force-cache)
-      next: { revalidate: 86400 } // Cache selama 1 hari (86400 detik)
+      next: { revalidate: 86400 } // Cache 1 hari (86400 detik)
     });
-    
+
     if (!res.ok) {
       // API belum punya data untuk tahun ini (misal tahun depan), return array kosong
       console.warn(`Holiday API returned status ${res.status} for year ${year}, returning empty array`);

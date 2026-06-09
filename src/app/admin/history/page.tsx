@@ -11,8 +11,8 @@ import { ReceiptText, CalendarCheck, ChevronLeft, ChevronRight, Search, Printer,
 import { formatWIB, formatWIBShort } from "@/utils/formatWIB";
 
 const ITEMS_PER_PAGE = 6;
-const WARRANTY_SPAREPART_DAYS = 14; // 2 minggu
-const WARRANTY_JASA_DAYS = 7; // 1 minggu
+const WARRANTY_SPAREPART_DAYS = 14;
+const WARRANTY_JASA_DAYS = 7;
 
 export default function HistoryPage() {
   const supabase = createClient();
@@ -73,7 +73,7 @@ export default function HistoryPage() {
                 newHolidaysMap[h.date] = h.description;
               });
             }
-          } catch {}
+          } catch { }
         })
       );
 
@@ -249,16 +249,16 @@ export default function HistoryPage() {
         const query = searchQuery.toLowerCase().trim();
         const filteredData = query
           ? historyData.filter((res) =>
-              (res.customer_name || "").toLowerCase().includes(query) ||
-              (res.vehicle_info || "").toLowerCase().includes(query) ||
-              (res.license_plate || "").toLowerCase().includes(query) ||
-              (res.service_type || "").toLowerCase().includes(query) ||
-              (res.problem_description || "").toLowerCase().includes(query) ||
-              (res.customer_email || "").toLowerCase().includes(query) ||
-              (res.customer_phone || "").toLowerCase().includes(query) ||
-              String(res.id).includes(query) ||
-              formatWIBShort(res.completed_at).includes(query)
-            )
+            (res.customer_name || "").toLowerCase().includes(query) ||
+            (res.vehicle_info || "").toLowerCase().includes(query) ||
+            (res.license_plate || "").toLowerCase().includes(query) ||
+            (res.service_type || "").toLowerCase().includes(query) ||
+            (res.problem_description || "").toLowerCase().includes(query) ||
+            (res.customer_email || "").toLowerCase().includes(query) ||
+            (res.customer_phone || "").toLowerCase().includes(query) ||
+            String(res.id).includes(query) ||
+            formatWIBShort(res.completed_at).includes(query)
+          )
           : historyData;
 
         const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -277,117 +277,114 @@ export default function HistoryPage() {
                 const anyWarrantyActive = sparepartStatus?.isActive || jasaStatus?.isActive || genericJasaStatus?.isActive;
 
                 return (
-                <Card key={res.id} className={`bg-slate-900 border transition-all shadow-lg flex flex-col justify-between ${
-                  anyWarrantyActive 
-                    ? "border-emerald-500/30 hover:border-emerald-500/50" 
-                    : "border-slate-800 hover:border-slate-600"
-                }`}>
-                  <CardContent className="p-5 flex flex-col gap-3">
-                    <div className="flex justify-between w-full items-start">
-                      <Badge className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border-0">
-                        Selesai
-                      </Badge>
-                      <div className="text-xs text-slate-400 flex items-center gap-1">
-                        <CalendarCheck className="w-3 h-3" />
-                        {formatWIBShort(res.completed_at)}
+                  <Card key={res.id} className={`bg-slate-900 border transition-all shadow-lg flex flex-col justify-between ${anyWarrantyActive
+                      ? "border-emerald-500/30 hover:border-emerald-500/50"
+                      : "border-slate-800 hover:border-slate-600"
+                    }`}>
+                    <CardContent className="p-5 flex flex-col gap-3">
+                      <div className="flex justify-between w-full items-start">
+                        <Badge className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border-0">
+                          Selesai
+                        </Badge>
+                        <div className="text-xs text-slate-400 flex items-center gap-1">
+                          <CalendarCheck className="w-3 h-3" />
+                          {formatWIBShort(res.completed_at)}
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="mt-1">
-                      <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
-                      <p className="text-emerald-500 text-xs mb-2 font-medium">{res.service_type}</p>
-                      <div className="bg-slate-950 p-3 rounded-md border border-slate-800">
-                        <p className="text-slate-400 text-sm mb-1"><strong>Kendaraan:</strong> {res.vehicle_info}</p>
-                        {res.license_plate && (
-                          <p className="text-slate-400 text-sm mb-1 flex items-center gap-1.5">
-                            <strong>Nopol:</strong>
-                            <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
-                          </p>
-                        )}
-                        <p className="text-slate-400 text-sm line-clamp-2"><strong>Keluhan:</strong> {res.problem_description}</p>
+
+                      <div className="mt-1">
+                        <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
+                        <p className="text-emerald-500 text-xs mb-2 font-medium">{res.service_type}</p>
+                        <div className="bg-slate-950 p-3 rounded-md border border-slate-800">
+                          <p className="text-slate-400 text-sm mb-1"><strong>Kendaraan:</strong> {res.vehicle_info}</p>
+                          {res.license_plate && (
+                            <p className="text-slate-400 text-sm mb-1 flex items-center gap-1.5">
+                              <strong>Nopol:</strong>
+                              <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                            </p>
+                          )}
+                          <p className="text-slate-400 text-sm line-clamp-2"><strong>Keluhan:</strong> {res.problem_description}</p>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* ===== INDIKATOR GARANSI ===== */}
-                    {holidaysLoaded && (
-                      <div className="mt-2 space-y-1.5">
-                        {/* Garansi Sparepart */}
-                        {sparepartStatus && (
-                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${
-                            sparepartStatus.isActive
-                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                              : "bg-slate-800/50 border-slate-700/50 text-slate-500"
-                          }`}>
-                            {sparepartStatus.isActive ? (
-                              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                            ) : (
-                              <ShieldX className="w-3.5 h-3.5 shrink-0" />
-                            )}
-                            <span className="flex-1">Garansi Sparepart</span>
-                            {sparepartStatus.isActive ? (
-                              <span className="font-bold text-emerald-300">
-                                {sparepartStatus.diffDays === 0 ? "Hari Terakhir!" : `${sparepartStatus.diffDays} hari lagi`}
-                              </span>
-                            ) : (
-                              <span className="text-slate-600">Berakhir {sparepartStatus.formattedExpiry}</span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Garansi Jasa */}
-                        {(jasaStatus || genericJasaStatus) && (() => {
-                          const status = jasaStatus || genericJasaStatus!;
-                          return (
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${
-                              status.isActive
+                      {/* ===== INDIKATOR GARANSI ===== */}
+                      {holidaysLoaded && (
+                        <div className="mt-2 space-y-1.5">
+                          {/* Garansi Sparepart */}
+                          {sparepartStatus && (
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${sparepartStatus.isActive
                                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
                                 : "bg-slate-800/50 border-slate-700/50 text-slate-500"
-                            }`}>
-                              {status.isActive ? (
+                              }`}>
+                              {sparepartStatus.isActive ? (
                                 <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                               ) : (
                                 <ShieldX className="w-3.5 h-3.5 shrink-0" />
                               )}
-                              <span className="flex-1">Garansi Jasa</span>
-                              {status.isActive ? (
+                              <span className="flex-1">Garansi Sparepart</span>
+                              {sparepartStatus.isActive ? (
                                 <span className="font-bold text-emerald-300">
-                                  {status.diffDays === 0 ? "Hari Terakhir!" : `${status.diffDays} hari lagi`}
+                                  {sparepartStatus.diffDays === 0 ? "Hari Terakhir!" : `${sparepartStatus.diffDays} hari lagi`}
                                 </span>
                               ) : (
-                                <span className="text-slate-600">Berakhir {status.formattedExpiry}</span>
+                                <span className="text-slate-600">Berakhir {sparepartStatus.formattedExpiry}</span>
                               )}
                             </div>
-                          );
-                        })()}
+                          )}
 
-                        {/* Jika tidak ada invoice data sama sekali */}
-                        {!sparepartStatus && !jasaStatus && !genericJasaStatus && (
-                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-slate-800/30 border-slate-700/30 text-xs text-slate-600">
-                            <Shield className="w-3.5 h-3.5 shrink-0" />
-                            <span>Data garansi tidak tersedia</span>
+                          {/* Garansi Jasa */}
+                          {(jasaStatus || genericJasaStatus) && (() => {
+                            const status = jasaStatus || genericJasaStatus!;
+                            return (
+                              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium ${status.isActive
+                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                  : "bg-slate-800/50 border-slate-700/50 text-slate-500"
+                                }`}>
+                                {status.isActive ? (
+                                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                                ) : (
+                                  <ShieldX className="w-3.5 h-3.5 shrink-0" />
+                                )}
+                                <span className="flex-1">Garansi Jasa</span>
+                                {status.isActive ? (
+                                  <span className="font-bold text-emerald-300">
+                                    {status.diffDays === 0 ? "Hari Terakhir!" : `${status.diffDays} hari lagi`}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-600">Berakhir {status.formattedExpiry}</span>
+                                )}
+                              </div>
+                            );
+                          })()}
+
+                          {/* Jika tidak ada invoice data sama sekali */}
+                          {!sparepartStatus && !jasaStatus && !genericJasaStatus && (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-slate-800/30 border-slate-700/30 text-xs text-slate-600">
+                              <Shield className="w-3.5 h-3.5 shrink-0" />
+                              <span>Data garansi tidak tersedia</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Tombol Lihat Invoice muncul jika ada data invoice */}
+                      <div className="mt-4 pt-4 border-t border-slate-800">
+                        {res.invoice_data ? (
+                          <Button
+                            onClick={() => openInvoice(res)}
+                            className="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 flex items-center gap-2"
+                          >
+                            <ReceiptText className="w-4 h-4" />
+                            Lihat Invoice
+                          </Button>
+                        ) : (
+                          <div className="text-center text-xs text-slate-500 py-2 bg-slate-950 rounded border border-slate-800 border-dashed">
+                            Tidak ada data invoice
                           </div>
                         )}
                       </div>
-                    )}
-
-                    {/* Tombol Lihat Invoice muncul jika ada data invoice */}
-                    <div className="mt-4 pt-4 border-t border-slate-800">
-                      {res.invoice_data ? (
-                        <Button 
-                          onClick={() => openInvoice(res)} 
-                          className="w-full bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 flex items-center gap-2"
-                        >
-                          <ReceiptText className="w-4 h-4" />
-                          Lihat Invoice
-                        </Button>
-                      ) : (
-                        <div className="text-center text-xs text-slate-500 py-2 bg-slate-950 rounded border border-slate-800 border-dashed">
-                          Tidak ada data invoice
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
@@ -440,7 +437,7 @@ export default function HistoryPage() {
       })()}
 
       {/* ================= MODAL BACA INVOICE ===========[[[[]]]]====== */}
-      <Dialog open={showInvoiceModal} onOpenChange={(open) => { if(!open) closeInvoice(); }}>
+      <Dialog open={showInvoiceModal} onOpenChange={(open) => { if (!open) closeInvoice(); }}>
         <DialogContent className="bg-slate-900 border-slate-700 w-full !max-w-[95vw] md:!max-w-4xl lg:!max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 print:hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between pb-4 border-b border-slate-800">
@@ -450,7 +447,7 @@ export default function HistoryPage() {
               <span className="text-2xl font-bold text-white text-right">Invoice</span>
             </DialogTitle>
           </DialogHeader>
-          
+
           {selectedBooking && selectedBooking.invoice_data && (
             <div className="py-2 space-y-6 print:py-0">
               {/* Info Pelanggan di Invoice */}
@@ -555,7 +552,7 @@ export default function HistoryPage() {
               }
             }
           `}</style>
-          
+
           <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-4">

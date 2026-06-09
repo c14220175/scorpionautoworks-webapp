@@ -271,6 +271,74 @@ export default function ClosedDaysPage() {
 
       if (error) throw error;
 
+      // === Auto-cancel bookings yang sudah ada di tanggal ini ===
+      // Buat range waktu untuk tanggal yang dipilih (WIB/UTC+7)
+      const startOfDay = `${selectedDate}T00:00:00+07:00`;
+      const endOfDay = `${selectedDate}T23:59:59+07:00`;
+
+      const { data: affectedBookings, error: fetchErr } = await supabase
+        .from("bookings")
+        .select("*")
+        .in("status", ["pending_approval", "scheduled"])
+        .gte("booking_date", startOfDay)
+        .lte("booking_date", endOfDay);
+
+      if (fetchErr) {
+        console.error("Gagal mengambil booking terdampak:", fetchErr.message);
+      }
+
+      if (affectedBookings && affectedBookings.length > 0) {
+        const cancellationReason = reason.trim()
+          ? `Bengkel tutup pada tanggal tersebut. Alasan: ${reason.trim()}`
+          : "Bengkel tutup pada tanggal tersebut.";
+
+        let cancelledCount = 0;
+
+        for (const booking of affectedBookings) {
+          try {
+            // 1. Update status booking menjadi cancelled
+            await supabase
+              .from("bookings")
+              .update({
+                status: "cancelled",
+                cancellation_reason: cancellationReason,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", booking.id);
+
+            // 2. Kirim email pembatalan ke pelanggan
+            if (booking.customer_email) {
+              await fetch("/api/send-cancellation-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  customerName: booking.customer_name,
+                  customerEmail: booking.customer_email,
+                  vehicleInfo: booking.vehicle_info,
+                  vehicleYear: booking.vehicle_year || "-",
+                  serviceType: booking.service_type,
+                  bookingDate: booking.booking_date,
+                  cancellationReason: cancellationReason,
+                }),
+              });
+            }
+
+            cancelledCount++;
+          } catch (cancelErr: any) {
+            console.error(
+              `Gagal membatalkan booking ID ${booking.id}:`,
+              cancelErr.message
+            );
+          }
+        }
+
+        if (cancelledCount > 0) {
+          toast.info(
+            `${cancelledCount} reservasi pada tanggal ini telah otomatis dibatalkan dan email pembatalan dikirim ke pelanggan.`
+          );
+        }
+      }
+
       toast.success("Hari tutup berhasil ditambahkan!");
       setIsAddDialogOpen(false);
       setSelectedDate("");
