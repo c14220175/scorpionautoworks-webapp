@@ -173,6 +173,7 @@ export default function BookingPage() {
         const { data, error } = await supabase
           .from('bookings')
           .select('booking_date')
+          .in('status', ['pending_approval', 'scheduled', 'in_progress', 'pending_part', 'pending_reschedule'])
           .gte('booking_date', startOfDay)
           .lte('booking_date', endOfDay)
 

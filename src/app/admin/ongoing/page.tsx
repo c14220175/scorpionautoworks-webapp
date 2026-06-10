@@ -351,7 +351,7 @@ export default function OngoingPage() {
 
   const submitEstimasiForm = async () => {
     if (!selectedRes) return;
-    
+
     // Minimal: harus ada setidaknya harga barang atau jasa, atau pesan
     const partPrice = Number(estimasiPart) || 0;
     const jasaPrice = Number(estimasiJasa) || 0;
@@ -782,7 +782,6 @@ export default function OngoingPage() {
   // Hitung total sementara
   const runningTotal = invoiceItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
 
-  // ================= DP VERIFICATION HANDLERS =================
   const handleVerifyDp = async () => {
     if (!dpVerificationRes) return;
     setDpActionLoading(true);
@@ -1073,21 +1072,19 @@ export default function OngoingPage() {
       <div className="flex space-x-1 bg-slate-900 border border-slate-800 p-1 rounded-lg w-full max-w-sm">
         <button
           onClick={() => setActiveTab("ongoing")}
-          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${
-            activeTab === "ongoing"
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${activeTab === "ongoing"
               ? "bg-emerald-600 text-white shadow-sm"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-          }`}
+            }`}
         >
           Ongoing
         </button>
         <button
           onClick={() => setActiveTab("pending")}
-          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${
-            activeTab === "pending"
+          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${activeTab === "pending"
               ? "bg-blue-600 text-white shadow-sm"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-          }`}
+            }`}
         >
           Menunggu Part
         </button>
@@ -1096,76 +1093,76 @@ export default function OngoingPage() {
       {activeTab === "ongoing" && (
         <>
           {awaitingDpReservations.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-amber-500 mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Menunggu Verifikasi DP
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {awaitingDpReservations.map((res) => (
-              <Card key={res.id} className="bg-slate-900 border border-amber-900/50 transition-all shadow-lg">
-                <CardContent className="p-5 flex flex-col gap-2">
-                  <div className="flex justify-between w-full">
-                    <Badge className="bg-amber-600 text-white animate-pulse">Menunggu Verifikasi</Badge>
-                  </div>
-                  <div className="mt-2">
-                    <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
-                    <p className="text-amber-500 text-xs mb-1 font-medium">{res.service_type}</p>
-                    <p className="text-slate-400 text-sm mt-1 mb-1">{res.vehicle_info}</p>
-                    {res.license_plate && (
-                      <p className="text-sm mb-3 flex items-center gap-1.5">
-                        <span className="text-slate-500 text-xs">Nopol:</span>
-                        <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
-                      </p>
-                    )}
-                    {!res.license_plate && <div className="mb-4" />}
-                    <Button
-                      onClick={() => {
-                        setDpVerificationRes(res);
-                        setShowDpVerificationModal(true);
-                      }}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white"
-                    >
-                      Cek Bukti Pembayaran
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-amber-500 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Menunggu Verifikasi DP
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {awaitingDpReservations.map((res) => (
+                  <Card key={res.id} className="bg-slate-900 border border-amber-900/50 transition-all shadow-lg">
+                    <CardContent className="p-5 flex flex-col gap-2">
+                      <div className="flex justify-between w-full">
+                        <Badge className="bg-amber-600 text-white animate-pulse">Menunggu Verifikasi</Badge>
+                      </div>
+                      <div className="mt-2">
+                        <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
+                        <p className="text-amber-500 text-xs mb-1 font-medium">{res.service_type}</p>
+                        <p className="text-slate-400 text-sm mt-1 mb-1">{res.vehicle_info}</p>
+                        {res.license_plate && (
+                          <p className="text-sm mb-3 flex items-center gap-1.5">
+                            <span className="text-slate-500 text-xs">Nopol:</span>
+                            <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                          </p>
+                        )}
+                        {!res.license_plate && <div className="mb-4" />}
+                        <Button
+                          onClick={() => {
+                            setDpVerificationRes(res);
+                            setShowDpVerificationModal(true);
+                          }}
+                          className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+                        >
+                          Cek Bukti Pembayaran
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {loading ? (
-        <div className="text-center py-20 text-slate-500 animate-pulse">Memuat data...</div>
-      ) : ongoingReservations.length === 0 ? (
-        <Card className="bg-slate-900 border-slate-800"><CardContent className="text-center py-20 text-slate-500">Tidak ada kendaraan yang sedang dikerjakan.</CardContent></Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ongoingReservations.map((res) => (
-            <Card key={res.id} onClick={() => handleOpenDetail(res)} className="bg-slate-900 border border-emerald-900/50 hover:border-emerald-500/50 cursor-pointer transition-all group shadow-lg">
-              <CardContent className="p-5 flex flex-col gap-2">
-                <div className="flex justify-between w-full">
-                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 animate-pulse">
-                    In Progress
-                  </Badge>
-                </div>
-                <div className="mt-2">
-                  <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
-                  <p className="text-emerald-500 text-xs mb-1 font-medium">{res.service_type}</p>
-                  <p className="text-slate-400 text-sm mt-1">{res.vehicle_info}</p>
-                  {res.license_plate && (
-                    <p className="text-sm mt-1 flex items-center gap-1.5">
-                      <span className="text-slate-500 text-xs">Nopol:</span>
-                      <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+          {loading ? (
+            <div className="text-center py-20 text-slate-500 animate-pulse">Memuat data...</div>
+          ) : ongoingReservations.length === 0 ? (
+            <Card className="bg-slate-900 border-slate-800"><CardContent className="text-center py-20 text-slate-500">Tidak ada kendaraan yang sedang dikerjakan.</CardContent></Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ongoingReservations.map((res) => (
+                <Card key={res.id} onClick={() => handleOpenDetail(res)} className="bg-slate-900 border border-emerald-900/50 hover:border-emerald-500/50 cursor-pointer transition-all group shadow-lg">
+                  <CardContent className="p-5 flex flex-col gap-2">
+                    <div className="flex justify-between w-full">
+                      <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 animate-pulse">
+                        In Progress
+                      </Badge>
+                    </div>
+                    <div className="mt-2">
+                      <h3 className="text-lg font-bold text-slate-200">{res.customer_name}</h3>
+                      <p className="text-emerald-500 text-xs mb-1 font-medium">{res.service_type}</p>
+                      <p className="text-slate-400 text-sm mt-1">{res.vehicle_info}</p>
+                      {res.license_plate && (
+                        <p className="text-sm mt-1 flex items-center gap-1.5">
+                          <span className="text-slate-500 text-xs">Nopol:</span>
+                          <span className="bg-slate-800 text-yellow-500 font-mono font-bold px-2 py-0.5 rounded text-xs tracking-wider border border-slate-700">{res.license_plate}</span>
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </>
       )}
 
@@ -1175,7 +1172,7 @@ export default function OngoingPage() {
             <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <h2 className="text-xl font-bold text-slate-200">Menunggu Part Datang</h2>
           </div>
-          
+
           {loading ? (
             <div className="text-center py-20 text-slate-500 animate-pulse">Memuat data...</div>
           ) : pendingPartReservations.length === 0 ? (
@@ -1554,9 +1551,9 @@ export default function OngoingPage() {
                 <Button variant="outline" onClick={() => setShowManualRejectModal(false)} className="bg-transparent border-slate-700 text-slate-300 hover:bg-slate-800">
                   Batal
                 </Button>
-                <Button 
-                  onClick={() => handleManualRejectEstimation(manualRejectReason)} 
-                  disabled={actionLoading || !manualRejectReason.trim()} 
+                <Button
+                  onClick={() => handleManualRejectEstimation(manualRejectReason)}
+                  disabled={actionLoading || !manualRejectReason.trim()}
                   className="bg-rose-600 hover:bg-rose-500 text-white"
                 >
                   Simpan Tolak
