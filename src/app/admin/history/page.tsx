@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ReceiptText, CalendarCheck, ChevronLeft, ChevronRight, Search, Printer, ShieldCheck, ShieldX, Shield } from "lucide-react";
-import { formatWIB, formatWIBShort } from "@/utils/formatWIB";
+import { formatWIBShort } from "@/utils/formatWIB";
 
 const ITEMS_PER_PAGE = 6;
 const WARRANTY_SPAREPART_DAYS = 14;
@@ -438,40 +438,60 @@ export default function HistoryPage() {
 
       {/* ================= MODAL BACA INVOICE ===========[[[[]]]]====== */}
       <Dialog open={showInvoiceModal} onOpenChange={(open) => { if (!open) closeInvoice(); }}>
-        <DialogContent className="bg-slate-900 border-slate-700 w-full !max-w-[95vw] md:!max-w-4xl lg:!max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 print:hidden">
+        <DialogContent className="bg-white border-slate-200 w-full !max-w-[95vw] md:!max-w-4xl lg:!max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 print:hidden">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-4">
-                <img src="/scorpionlogo.png" alt="Scorpion Autoworks Logo" className="h-12 w-auto object-contain" />
+            <DialogTitle asChild>
+              <div className="space-y-0">
+                {/* ===== ROW 1: Logo + Company Address (left) | Date Badge + Invoice (right) ===== */}
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4">
+                  {/* Left: Logo + Address */}
+                  <div>
+                    <img src="/scorpionlogolight.png" alt="Scorpion Autoworks Logo" className="h-12 w-auto object-contain mb-3" />
+                    <div className="text-xs text-slate-500 leading-relaxed font-normal">
+                      <p className="font-semibold text-slate-700">Scorpion Autoworks</p>
+                      <p>Jl. Galaksi Bumi Permai, L2-55, Surabaya</p>
+                      <p>+62 822-3171-6366</p>
+                      <p>ScorpionAutoworks@gmail.com</p>
+                    </div>
+                  </div>
+                  {/* Right: Date badge + Invoice title */}
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    {selectedBooking && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-right">
+                        <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">Tanggal Selesai:</p>
+                        <p className="text-xs text-slate-700 font-medium mt-0.5">
+                          {(() => {
+                            const d = new Date(selectedBooking.completed_at || new Date());
+                            const day = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
+                            const time = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+                            return `${day} pukul ${time}`;
+                          })()}
+                        </p>
+                      </div>
+                    )}
+                    <span className="text-2xl font-bold text-slate-900 whitespace-nowrap pt-1">Invoice</span>
+                  </div>
+                </div>
+
+                {/* ===== ROW 2: Customer Name + Phone (right-aligned box) ===== */}
+                {selectedBooking && (
+                  <div className="flex justify-end">
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700 font-normal">
+                      <p className="mb-0.5"><strong className="text-slate-800">Nama Pelanggan:</strong> {selectedBooking.customer_name}</p>
+                      <p><strong className="text-slate-800">Telepon:</strong> <span className="text-blue-600">{selectedBooking.customer_phone || '-'}</span></p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <span className="text-2xl font-bold text-white text-right">Invoice</span>
             </DialogTitle>
           </DialogHeader>
 
           {selectedBooking && selectedBooking.invoice_data && (
-            <div className="py-2 space-y-6 print:py-0">
-              {/* Info Pelanggan di Invoice */}
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-3 bg-slate-950 p-4 rounded-lg border border-slate-800 text-sm text-slate-300 print:bg-transparent print:border-none print:p-0 print:text-black">
-                <div>
-                  <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedBooking.customer_name}</p>
-                  <p className="mb-1 text-slate-400"><strong>Email:</strong> {selectedBooking.customer_email || '-'}</p>
-                  <p className="mb-1 text-slate-400"><strong>Telepon:</strong> {selectedBooking.customer_phone || '-'}</p>
-                  <p className="mb-1"><strong>Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
-                  {selectedBooking.license_plate && (
-                    <p className="mb-1 text-slate-400"><strong>Nopol:</strong> <span className="text-yellow-500 font-mono font-bold tracking-wider">{selectedBooking.license_plate}</span></p>
-                  )}
-                  <p><strong>Jenis Servis:</strong> <span className="text-emerald-400">{selectedBooking.service_type}</span></p>
-                </div>
-                <div className="sm:text-right">
-                  <p className="mb-1"><strong>Tanggal Selesai:</strong></p>
-                  <p className="text-slate-400">{formatWIB(selectedBooking.completed_at)}</p>
-                </div>
-              </div>
-
+            <div className="py-2 space-y-5 print:py-0">
               {/* Tabel Item Invoice */}
-              <div className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-950">
-                <table className="w-full text-sm text-left text-slate-300 min-w-[600px]">
-                  <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+              <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+                <table className="w-full text-sm text-left text-slate-700 min-w-[600px]">
+                  <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                     <tr>
                       <th className="px-4 py-3 text-center whitespace-nowrap">No.</th>
                       <th className="px-4 py-3 whitespace-nowrap">Nama</th>
@@ -483,20 +503,20 @@ export default function HistoryPage() {
                   </thead>
                   <tbody>
                     {selectedBooking.invoice_data.items?.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center py-6 text-slate-500">Tidak ada item dalam invoice ini</td></tr>
+                      <tr><td colSpan={6} className="text-center py-6 text-slate-400">Tidak ada item dalam invoice ini</td></tr>
                     ) : (
                       selectedBooking.invoice_data.items?.map((item: any, index: number) => (
-                        <tr key={index} className="border-b border-slate-800 hover:bg-slate-800/50">
+                        <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
                           <td className="px-4 py-3 text-center whitespace-nowrap">{index + 1}</td>
-                          <td className="px-4 py-3 font-medium text-slate-200">{item.name}</td>
+                          <td className="px-4 py-3 font-medium text-slate-900">{item.name}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
-                            <Badge variant="outline" className="text-slate-400 border-slate-600 bg-slate-900">
+                            <Badge variant="outline" className="text-slate-500 border-slate-200 bg-slate-50">
                               {item.type}
                             </Badge>
                           </td>
                           <td className="px-4 py-3 text-center whitespace-nowrap">{item.qty}</td>
                           <td className="px-4 py-3 text-right whitespace-nowrap">Rp {item.price.toLocaleString("id-ID")}</td>
-                          <td className="px-4 py-3 text-right text-slate-200 font-medium whitespace-nowrap">
+                          <td className="px-4 py-3 text-right text-emerald-600 font-semibold whitespace-nowrap">
                             Rp {(item.price * item.qty).toLocaleString("id-ID")}
                           </td>
                         </tr>
@@ -506,23 +526,40 @@ export default function HistoryPage() {
                 </table>
               </div>
 
-              {/* Total Keseluruhan */}
-              <div className="flex justify-end items-center mt-4">
-                <div className="bg-slate-800 px-4 sm:px-6 py-3 rounded-lg border border-slate-700 flex gap-2 sm:gap-4 items-center flex-wrap sm:flex-nowrap justify-end">
-                  <span className="text-slate-400 font-medium whitespace-nowrap">Total Keseluruhan:</span>
-                  <span className="text-xl sm:text-2xl text-emerald-400 font-bold whitespace-nowrap">
+              {/* ===== Below table: Vehicle info (left) + Total (right) ===== */}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                {/* Left: Email, Kendaraan, Nopol, Jenis Servis */}
+                <div className="border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 space-y-1 max-w-md">
+                  <p><strong className="text-slate-800">Email:</strong> <span className="text-blue-600">{selectedBooking.customer_email || '-'}</span></p>
+                  <p><strong className="text-slate-800">Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
+                  {selectedBooking.license_plate && (
+                    <p><strong className="text-slate-800">Nopol:</strong> <span className="text-amber-600 font-mono font-bold tracking-wider">{selectedBooking.license_plate}</span></p>
+                  )}
+                  <p><strong className="text-slate-800">Jenis Servis:</strong> <span className="text-emerald-600">{selectedBooking.service_type}</span></p>
+                </div>
+
+                {/* Right: Total Keseluruhan */}
+                <div className="bg-slate-50 px-4 sm:px-6 py-3 rounded-lg border border-slate-200 flex gap-2 sm:gap-4 items-center flex-wrap sm:flex-nowrap justify-end self-start sm:self-center">
+                  <span className="text-slate-500 font-medium whitespace-nowrap">Total Keseluruhan:</span>
+                  <span className="text-xl sm:text-2xl text-emerald-600 font-bold whitespace-nowrap">
                     Rp {selectedBooking.invoice_data.total?.toLocaleString("id-ID") || 0}
                   </span>
                 </div>
               </div>
+
+              {/* ===== Rekening Info ===== */}
+              <div className="border border-slate-200 rounded-lg px-4 py-3 max-w-md">
+                <p className="text-sm font-bold text-slate-900 mb-1">Rekening:</p>
+                <p className="text-sm text-slate-700">BCA - 8725110070 a/n WILLIAM</p>
+              </div>
             </div>
           )}
 
-          <DialogFooter className="border-t border-slate-800 pt-4 mt-2">
-            <Button onClick={() => window.print()} className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 mr-auto flex gap-2">
+          <DialogFooter className="border-t border-slate-200 pt-4 mt-2">
+            <Button onClick={() => window.print()} className="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 mr-auto flex gap-2">
               <Printer className="w-4 h-4" /> Print
             </Button>
-            <Button onClick={closeInvoice} className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-600">
+            <Button onClick={closeInvoice} className="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200">
               Tutup
             </Button>
           </DialogFooter>
@@ -531,7 +568,7 @@ export default function HistoryPage() {
 
       {/* ================= PRINT ONLY INVOICE ================= */}
       {showInvoiceModal && selectedBooking && (
-        <div id="print-invoice-container" className="hidden print:block absolute top-0 left-0 w-full text-slate-300 z-[999999] bg-slate-900 min-h-screen">
+        <div id="print-invoice-container" className="hidden print:block absolute top-0 left-0 w-full text-slate-700 z-[999999] bg-white min-h-screen">
           <style>{`
             @media print {
               @page { margin: 0; size: auto; }
@@ -540,7 +577,7 @@ export default function HistoryPage() {
                 print-color-adjust: exact !important; 
                 overflow: visible !important;
                 height: auto !important;
-                background-color: #0f172a !important;
+                background-color: #ffffff !important;
               }
               body * { visibility: hidden !important; }
               #print-invoice-container, #print-invoice-container * { visibility: visible !important; }
@@ -548,37 +585,51 @@ export default function HistoryPage() {
                 position: absolute !important; left: 0 !important; top: 0 !important;
                 width: 100% !important; display: block !important;
                 margin: 0 !important; padding: 1.5cm !important;
-                background-color: #0f172a !important; /* bg-slate-900 */
+                background-color: #ffffff !important;
               }
             }
           `}</style>
 
-          <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <div className="flex items-center gap-4">
-                <img src="/scorpionlogo.png" alt="Scorpion Autoworks Logo" className="h-16 w-auto object-contain" />
-              </div>
-              <span className="text-3xl font-bold text-white text-right">Invoice</span>
-            </div>
-
-            <div className="flex justify-between items-start gap-3 bg-slate-950 p-6 rounded-lg border border-slate-800 text-sm">
+          <div className="flex flex-col gap-5 w-full max-w-5xl mx-auto">
+            {/* Header: Logo + Company Address (left) | Date Badge + Invoice (right) */}
+            <div className="flex justify-between items-start pb-4">
               <div>
-                <p className="mb-1"><strong>Nama Pelanggan:</strong> {selectedBooking.customer_name}</p>
-                <p className="mb-1 text-slate-400"><strong>Email:</strong> {selectedBooking.customer_email || '-'}</p>
-                <p className="mb-1"><strong>Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
-                {selectedBooking.license_plate && (
-                  <p className="mb-1 text-slate-400"><strong>Nopol:</strong> <span className="text-yellow-500 font-mono font-bold tracking-wider">{selectedBooking.license_plate}</span></p>
-                )}
-                <p className="mb-1"><strong>Tipe Servis:</strong> <span className="text-emerald-400">{selectedBooking.service_type}</span></p>
+                <img src="/scorpionlogolight.png" alt="Scorpion Autoworks Logo" className="h-16 w-auto object-contain mb-3" />
+                <div className="text-xs text-slate-500 leading-relaxed">
+                  <p className="font-semibold text-slate-700">Scorpion Autoworks</p>
+                  <p>Jl. Galaksi Bumi Permai, L2-55, Surabaya</p>
+                  <p>+62 822-3171-6366</p>
+                  <p>ScorpionAutoworks@gmail.com</p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="mb-1"><strong>Diselesaikan Pada:</strong> {new Date(selectedBooking.completed_at || new Date()).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <div className="flex items-start gap-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-right">
+                  <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">Tanggal Selesai:</p>
+                  <p className="text-xs text-slate-700 font-medium mt-0.5">
+                    {(() => {
+                      const d = new Date(selectedBooking.completed_at || new Date());
+                      const day = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
+                      const time = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' });
+                      return `${day} pukul ${time}`;
+                    })()}
+                  </p>
+                </div>
+                <span className="text-3xl font-bold text-slate-900 pt-1">Invoice</span>
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-700 bg-slate-950 overflow-hidden">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+            {/* Customer Name + Phone box (right-aligned) */}
+            <div className="flex justify-end">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-sm text-slate-700">
+                <p className="mb-0.5"><strong className="text-slate-800">Nama Pelanggan:</strong> {selectedBooking.customer_name}</p>
+                <p><strong className="text-slate-800">Telepon:</strong> <span className="text-blue-600">{selectedBooking.customer_phone || '-'}</span></p>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+              <table className="w-full text-sm text-left text-slate-700">
+                <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="px-4 py-3 text-center w-16">No.</th>
                     <th className="px-4 py-3">Nama</th>
@@ -590,16 +641,16 @@ export default function HistoryPage() {
                 </thead>
                 <tbody>
                   {!selectedBooking.invoice_data?.items || selectedBooking.invoice_data.items.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center py-6 text-slate-500">Tidak ada item dalam invoice ini</td></tr>
+                    <tr><td colSpan={6} className="text-center py-6 text-slate-400">Tidak ada item dalam invoice ini</td></tr>
                   ) : (
                     selectedBooking.invoice_data.items.map((item: any, index: number) => (
-                      <tr key={index} className="border-b border-slate-800">
+                      <tr key={index} className="border-b border-slate-100">
                         <td className="px-4 py-3 text-center">{index + 1}</td>
-                        <td className="px-4 py-3 font-medium text-slate-200">{item.name}</td>
-                        <td className="px-4 py-3"><Badge className="bg-slate-700 text-slate-300">{item.type}</Badge></td>
+                        <td className="px-4 py-3 font-medium text-slate-900">{item.name}</td>
+                        <td className="px-4 py-3"><Badge className="bg-slate-100 text-slate-600 border border-slate-200">{item.type}</Badge></td>
                         <td className="px-4 py-3 text-center">{item.qty}</td>
                         <td className="px-4 py-3 text-right whitespace-nowrap">Rp {item.price.toLocaleString("id-ID")}</td>
-                        <td className="px-4 py-3 text-right text-slate-200 font-medium whitespace-nowrap">
+                        <td className="px-4 py-3 text-right text-emerald-600 font-semibold whitespace-nowrap">
                           Rp {(item.price * item.qty).toLocaleString("id-ID")}
                         </td>
                       </tr>
@@ -609,13 +660,29 @@ export default function HistoryPage() {
               </table>
             </div>
 
-            <div className="flex justify-end items-center mt-4">
-              <div className="bg-slate-800 px-6 py-4 rounded-lg border border-slate-700 flex gap-4 items-center justify-end">
-                <span className="text-slate-400 font-medium">Total Keseluruhan:</span>
-                <span className="text-2xl text-emerald-400 font-bold">
+            {/* Below table: Vehicle info (left) + Total (right) */}
+            <div className="flex justify-between items-start gap-4">
+              <div className="border border-slate-200 rounded-lg px-4 py-3 text-sm text-slate-700 space-y-1 max-w-md">
+                <p><strong className="text-slate-800">Email:</strong> <span className="text-blue-600">{selectedBooking.customer_email || '-'}</span></p>
+                <p><strong className="text-slate-800">Kendaraan:</strong> {selectedBooking.vehicle_info}</p>
+                {selectedBooking.license_plate && (
+                  <p><strong className="text-slate-800">Nopol:</strong> <span className="text-amber-600 font-mono font-bold tracking-wider">{selectedBooking.license_plate}</span></p>
+                )}
+                <p><strong className="text-slate-800">Jenis Servis:</strong> <span className="text-emerald-600">{selectedBooking.service_type}</span></p>
+              </div>
+
+              <div className="bg-slate-50 px-6 py-4 rounded-lg border border-slate-200 flex gap-4 items-center justify-end">
+                <span className="text-slate-500 font-medium">Total Keseluruhan:</span>
+                <span className="text-2xl text-emerald-600 font-bold">
                   Rp {selectedBooking.invoice_data?.total?.toLocaleString("id-ID") || 0}
                 </span>
               </div>
+            </div>
+
+            {/* Rekening Info */}
+            <div className="border border-slate-200 rounded-lg px-4 py-3 max-w-md">
+              <p className="text-sm font-bold text-slate-900 mb-1">Rekening:</p>
+              <p className="text-sm text-slate-700">BCA - 8725110070 a/n WILLIAM</p>
             </div>
           </div>
         </div>

@@ -31,8 +31,8 @@ export async function POST(request: Request) {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta name="color-scheme" content="dark">
-          <meta name="supported-color-schemes" content="dark">
+          <meta name="color-scheme" content="light">
+          <meta name="supported-color-schemes" content="light">
           <title>Konfirmasi Reservasi Servis</title>
           <!--[if mso]>
           <noscript>
@@ -45,13 +45,13 @@ export async function POST(request: Request) {
           <![endif]-->
           <style>
             :root {
-              color-scheme: dark;
-              supported-color-schemes: dark;
+              color-scheme: light;
+              supported-color-schemes: light;
             }
           </style>
         </head>
-        <body style="margin: 0; padding: 0; background-color: #0f172a; color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; -webkit-font-smoothing: antialiased;">
-          <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#0f172a" style="background-color: #0f172a; background-image: linear-gradient(#0f172a, #0f172a);">
+        <body style="margin: 0; padding: 0; background-color: #f1f5f9; color: #1e293b !important; -webkit-text-fill-color: #1e293b !important; -webkit-font-smoothing: antialiased;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f1f5f9" style="background-color: #f1f5f9; background-image: linear-gradient(#f1f5f9, #f1f5f9);">
             <tr>
               <td align="center" style="padding: 20px 0;">
                 <table width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; font-family: Arial, Helvetica, sans-serif; border-collapse: collapse;">
@@ -64,18 +64,18 @@ export async function POST(request: Request) {
 
                   <!-- Body -->
                   <tr>
-                    <td bgcolor="#0f172a" style="background-color: #0f172a; background-image: linear-gradient(#0f172a, #0f172a); padding: 32px 24px;">
-                      <h1 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 22px; margin: 0 0 12px 0;">Halo, ${customerName}!</h1>
-                      <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">Terima kasih telah melakukan reservasi di <strong style="color: #eab308 !important; -webkit-text-fill-color: #eab308 !important;">Scorpion Autoworks</strong>. Berikut adalah detail pesanan Anda:</p>
+                    <td bgcolor="#ffffff" style="background-color: #ffffff; padding: 32px 24px;">
+                      <h1 style="color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-size: 22px; margin: 0 0 12px 0;">Halo, ${customerName}!</h1>
+                      <p style="color: #475569 !important; -webkit-text-fill-color: #475569 !important; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">Terima kasih telah melakukan reservasi di <strong style="color: #b45309 !important; -webkit-text-fill-color: #b45309 !important;">Scorpion Autoworks</strong>. Berikut adalah detail pesanan Anda:</p>
                       
                       <!-- Data Kendaraan Card -->
                       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 20px;">
                         <tr>
-                          <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #eab308; padding: 16px; border-radius: 4px;">
-                            <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">🚗 Data Kendaraan</h3>
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 14px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">
-                              <tr><td style="padding: 4px 0; font-weight: bold; width: 120px; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">Kendaraan</td><td style="padding: 4px 0;">: ${vehicleInfo}</td></tr>
-                              <tr><td style="padding: 4px 0; font-weight: bold; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">Tahun</td><td style="padding: 4px 0;">: ${vehicleYear}</td></tr>
+                          <td bgcolor="#ffffff" style="background-color: #ffffff; border-left: 4px solid #b45309; padding: 16px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            <h3 style="color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-size: 16px; margin: 0 0 12px 0;">🚗 Data Kendaraan</h3>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 14px; color: #334155 !important; -webkit-text-fill-color: #334155 !important;">
+                              <tr><td style="padding: 4px 0; font-weight: bold; width: 120px; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Kendaraan</td><td style="padding: 4px 0;">: ${vehicleInfo}</td></tr>
+                              <tr><td style="padding: 4px 0; font-weight: bold; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Tahun</td><td style="padding: 4px 0;">: ${vehicleYear}</td></tr>
                             </table>
                           </td>
                         </tr>
@@ -84,32 +84,32 @@ export async function POST(request: Request) {
                       <!-- Detail Layanan Card -->
                       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
                         <tr>
-                          <td bgcolor="#1e293b" style="background-color: #1e293b; background-image: linear-gradient(#1e293b, #1e293b); border-left: 4px solid #eab308; padding: 16px; border-radius: 4px;">
-                            <h3 style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 16px; margin: 0 0 12px 0;">🔧 Detail Layanan</h3>
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 14px; color: #cbd5e1 !important; -webkit-text-fill-color: #cbd5e1 !important;">
-                              <tr><td style="padding: 4px 0; font-weight: bold; width: 120px; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">Jenis Layanan</td><td style="padding: 4px 0;">: ${serviceType}</td></tr>
-                              <tr><td style="padding: 4px 0; font-weight: bold; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">Jadwal</td><td style="padding: 4px 0;">: ${formattedDate} WIB</td></tr>
-                              <tr><td style="padding: 4px 0; font-weight: bold; vertical-align: top; color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important;">Keluhan</td><td style="padding: 4px 0;">: ${description}</td></tr>
+                          <td bgcolor="#ffffff" style="background-color: #ffffff; border-left: 4px solid #b45309; padding: 16px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            <h3 style="color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-size: 16px; margin: 0 0 12px 0;">🔧 Detail Layanan</h3>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 14px; color: #334155 !important; -webkit-text-fill-color: #334155 !important;">
+                              <tr><td style="padding: 4px 0; font-weight: bold; width: 120px; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Jenis Layanan</td><td style="padding: 4px 0;">: ${serviceType}</td></tr>
+                              <tr><td style="padding: 4px 0; font-weight: bold; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Jadwal</td><td style="padding: 4px 0;">: ${formattedDate} WIB</td></tr>
+                              <tr><td style="padding: 4px 0; font-weight: bold; vertical-align: top; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Keluhan</td><td style="padding: 4px 0;">: ${description}</td></tr>
                             </table>
                           </td>
                         </tr>
                       </table>
 
-                      <hr style="border: none; border-top: 1px solid #334155; margin: 24px 0;" />
+                      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
 
-                      <p style="color: #f87171 !important; -webkit-text-fill-color: #f87171 !important; font-size: 14px; font-weight: bold; margin: 0 0 16px 0;">⚠️ Tolong harap datang lebih awal 15 menit sebelum jadwal yang ditentukan.</p>
+                      <p style="color: #dc2626 !important; -webkit-text-fill-color: #dc2626 !important; font-size: 14px; font-weight: bold; margin: 0 0 16px 0;">⚠️ Tolong harap datang lebih awal 15 menit sebelum jadwal yang ditentukan.</p>
                       
-                      <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 14px; margin: 0 0 8px 0;">Berikut adalah alamat bengkel:</p>
-                      <p style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important; font-size: 14px; font-weight: bold; margin: 0 0 4px 0;">Scorpion Autoworks</p>
-                      <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 13px; line-height: 1.5; margin: 0 0 8px 0;">Jl. Galaksi Klampis Asri Selatan II Blok L2 No. 55, RT.O/ RW.O, Medokan Semampir, SUKOLILO, KOTA SURABAYA, JAWA TIMUR</p>
-                      <a href="https://maps.app.goo.gl/WaNjjFnWs564HRX98?g_st=ipc" style="color: #60a5fa !important; -webkit-text-fill-color: #60a5fa !important; font-size: 13px; text-decoration: underline;">📍 Buka di Google Maps</a>
+                      <p style="color: #475569 !important; -webkit-text-fill-color: #475569 !important; font-size: 14px; margin: 0 0 8px 0;">Berikut adalah alamat bengkel:</p>
+                      <p style="color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-size: 14px; font-weight: bold; margin: 0 0 4px 0;">Scorpion Autoworks</p>
+                      <p style="color: #475569 !important; -webkit-text-fill-color: #475569 !important; font-size: 13px; line-height: 1.5; margin: 0 0 8px 0;">Jl. Galaksi Klampis Asri Selatan II Blok L2 No. 55, RT.O/ RW.O, Medokan Semampir, SUKOLILO, KOTA SURABAYA, JAWA TIMUR</p>
+                      <a href="https://maps.app.goo.gl/WaNjjFnWs564HRX98?g_st=ipc" style="color: #2563eb !important; -webkit-text-fill-color: #2563eb !important; font-size: 13px; text-decoration: underline;">📍 Buka di Google Maps</a>
                     </td>
                   </tr>
 
                   <!-- Footer -->
                   <tr>
-                    <td align="center" bgcolor="#000000" style="background-color: #000000; background-image: linear-gradient(#000000, #000000); padding: 20px 24px; border-radius: 0 0 8px 8px;">
-                      <p style="color: #64748b !important; -webkit-text-fill-color: #64748b !important; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Scorpion Autoworks. All rights reserved.</p>
+                    <td align="center" bgcolor="#1e293b" style="background-color: #1e293b; padding: 20px 24px; border-radius: 0 0 8px 8px;">
+                      <p style="color: #94a3b8 !important; -webkit-text-fill-color: #94a3b8 !important; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} Scorpion Autoworks. All rights reserved.</p>
                     </td>
                   </tr>
                 </table>
