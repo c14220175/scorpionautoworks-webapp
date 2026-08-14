@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,8 @@ export default function SparepartPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState<"all" | "Fast Moving Parts" | "Sparepart Components">("all");
-  const [filterItemType, setFilterItemType] = useState<"all" | "Engine Component" | "Understeel (Suspension)" | "Understeel (Brakes)" | "Lainnya">("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [filterItemType, setFilterItemType] = useState<string>("all");
   const [filterStock, setFilterStock] = useState<"all" | "available" | "low">("all");
 
   // State Pop-up
@@ -29,8 +29,10 @@ export default function SparepartPage() {
 
   // Form State: Tambah Produk Baru
   const [newItemName, setNewItemName] = useState("");
-  const [newItemType, setNewItemType] = useState<"Engine Component" | "Understeel (Suspension)" | "Understeel (Brakes)" | "Lainnya" | "">("");
-  const [newItemCategory, setNewItemCategory] = useState<"Fast Moving Parts" | "Sparepart Components" | "">("");
+  const [newItemType, setNewItemType] = useState<string>("");
+  const [newItemCategory, setNewItemCategory] = useState<string>("");
+  const [customItemType, setCustomItemType] = useState("");
+  const [customItemCategory, setCustomItemCategory] = useState("");
   const [newItemVendor, setNewItemVendor] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
   const [newItemStock, setNewItemStock] = useState("");
@@ -51,6 +53,26 @@ export default function SparepartPage() {
       setLoading(false);
     }
   };
+
+  // Derive unique filter options dynamically from data
+  const uniqueCategories = useMemo(() => {
+    const cats = [...new Set(items.map((i) => i.category).filter(Boolean))];
+    return ["all", ...cats.sort()];
+  }, [items]);
+
+  const uniqueItemTypes = useMemo(() => {
+    const types = [...new Set(items.map((i) => i.item_type).filter(Boolean))];
+    return ["all", ...types.sort()];
+  }, [items]);
+
+  // Derive unique options for form dropdowns (existing values in DB)
+  const formItemTypeOptions = useMemo(() => {
+    return [...new Set(items.map((i) => i.item_type).filter(Boolean))].sort();
+  }, [items]);
+
+  const formCategoryOptions = useMemo(() => {
+    return [...new Set(items.map((i) => i.category).filter(Boolean))].sort();
+  }, [items]);
 
   const filteredItems = items.filter((item) => {
     // Search filter
@@ -103,7 +125,10 @@ export default function SparepartPage() {
   };
 
   const handleAddNewItem = async () => {
-    if (!newItemName || !newItemType || !newItemCategory || !newItemVendor || !newItemPrice || !newItemStock) {
+    const finalItemType = newItemType === "__other__" ? customItemType.trim() : newItemType;
+    const finalCategory = newItemCategory === "__other__" ? customItemCategory.trim() : newItemCategory;
+
+    if (!newItemName || !finalItemType || !finalCategory || !newItemVendor || !newItemPrice || !newItemStock) {
       toast.error("Semua field wajib diisi!");
       return;
     }
@@ -111,8 +136,8 @@ export default function SparepartPage() {
     try {
       const { error } = await supabase.from("inventory").insert([{
         name: newItemName,
-        item_type: newItemType,
-        category: newItemCategory,
+        item_type: finalItemType,
+        category: finalCategory,
         vendor: newItemVendor,
         price: parseFloat(newItemPrice),
         stock_count: parseInt(newItemStock)
@@ -121,8 +146,9 @@ export default function SparepartPage() {
 
       toast.success("Barang baru berhasil ditambahkan!");
       setIsAddNewOpen(false);
-      
+
       setNewItemName(""); setNewItemType(""); setNewItemCategory(""); setNewItemVendor(""); setNewItemPrice(""); setNewItemStock("");
+      setCustomItemType(""); setCustomItemCategory("");
       fetchInventory();
     } catch (error: any) {
       toast.error("Gagal menambah produk: " + error.message);
@@ -139,7 +165,7 @@ export default function SparepartPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-slate-100">Inventory Sparepart</h1>
-        
+
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           {/* Search Bar */}
           <div className="relative min-w-[220px]">
@@ -171,51 +197,39 @@ export default function SparepartPage() {
 
       {/* Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-        {/* Category Filter */}
+        {/* Category Filter (Dynamic) */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Kategori:</span>
-          <div className="flex gap-1.5">
-            {([
-              { value: "all", label: "Semua" },
-              { value: "Fast Moving Parts", label: "Fast Moving" },
-              { value: "Sparepart Components", label: "Components" },
-            ] as const).map((opt) => (
+          <div className="flex gap-1.5 flex-wrap">
+            {uniqueCategories.map((cat) => (
               <button
-                key={opt.value}
-                onClick={() => setFilterCategory(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  filterCategory === opt.value
+                key={cat}
+                onClick={() => setFilterCategory(cat)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterCategory === cat
                     ? "bg-yellow-500/15 border-yellow-500/50 text-yellow-500"
                     : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                }`}
+                  }`}
               >
-                {opt.label}
+                {cat === "all" ? "Semua" : cat}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Item Type Filter */}
+        {/* Item Type Filter (Dynamic) */}
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Jenis:</span>
-          <div className="flex gap-1.5">
-            {([
-              { value: "all", label: "Semua" },
-              { value: "Engine Component", label: "Engine" },
-              { value: "Understeel (Suspension)", label: "Suspension" },
-              { value: "Understeel (Brakes)", label: "Brakes" },
-              { value: "Lainnya", label: "Lainnya" },
-            ] as const).map((opt) => (
+          <div className="flex gap-1.5 flex-wrap">
+            {uniqueItemTypes.map((type) => (
               <button
-                key={opt.value}
-                onClick={() => setFilterItemType(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  filterItemType === opt.value
+                key={type}
+                onClick={() => setFilterItemType(type)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterItemType === type
                     ? "bg-sky-500/15 border-sky-500/50 text-sky-400"
                     : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                }`}
+                  }`}
               >
-                {opt.label}
+                {type === "all" ? "Semua" : type}
               </button>
             ))}
           </div>
@@ -233,12 +247,11 @@ export default function SparepartPage() {
               <button
                 key={opt.value}
                 onClick={() => setFilterStock(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  filterStock === opt.value
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${filterStock === opt.value
                     ? opt.value === "low" ? "bg-orange-500/15 border-orange-500/50 text-orange-400"
-                    : "bg-yellow-500/15 border-yellow-500/50 text-yellow-500"
+                      : "bg-yellow-500/15 border-yellow-500/50 text-yellow-500"
                     : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-                }`}
+                  }`}
               >
                 {opt.label}
               </button>
@@ -338,21 +351,41 @@ export default function SparepartPage() {
             </div>
             <div>
               <label className="block text-sm text-slate-400 mb-1">Jenis Item</label>
-              <select value={newItemType} onChange={(e) => setNewItemType(e.target.value as any)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-yellow-500">
+              <select value={newItemType} onChange={(e) => { setNewItemType(e.target.value); if (e.target.value !== "__other__") setCustomItemType(""); }} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-yellow-500">
                 <option value="">-- Pilih Jenis Item --</option>
-                <option value="Engine Component">Engine Component</option>
-                <option value="Understeel (Suspension)">Understeel (Suspension)</option>
-                <option value="Understeel (Brakes)">Understeel (Brakes)</option>
-                <option value="Lainnya">Lainnya</option>
+                {formItemTypeOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+                <option value="__other__">Lainnya (Ketik Manual)</option>
               </select>
+              {newItemType === "__other__" && (
+                <input
+                  type="text"
+                  value={customItemType}
+                  onChange={(e) => setCustomItemType(e.target.value)}
+                  placeholder="Ketik jenis item baru..."
+                  className="w-full mt-2 bg-slate-950 border border-yellow-500/50 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-yellow-500"
+                />
+              )}
             </div>
             <div>
               <label className="block text-sm text-slate-400 mb-1">Kategori Item</label>
-              <select value={newItemCategory} onChange={(e) => setNewItemCategory(e.target.value as any)} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-yellow-500">
+              <select value={newItemCategory} onChange={(e) => { setNewItemCategory(e.target.value); if (e.target.value !== "__other__") setCustomItemCategory(""); }} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-yellow-500">
                 <option value="">-- Pilih Kategori Item --</option>
-                <option value="Fast Moving Parts">Fast Moving Parts</option>
-                <option value="Sparepart Components">Sparepart Components</option>
+                {formCategoryOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+                <option value="__other__">Lainnya (Ketik Manual)</option>
               </select>
+              {newItemCategory === "__other__" && (
+                <input
+                  type="text"
+                  value={customItemCategory}
+                  onChange={(e) => setCustomItemCategory(e.target.value)}
+                  placeholder="Ketik kategori item baru..."
+                  className="w-full mt-2 bg-slate-950 border border-yellow-500/50 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-yellow-500"
+                />
+              )}
             </div>
             <div>
               <label className="block text-sm text-slate-400 mb-1">Tempat Beli</label>

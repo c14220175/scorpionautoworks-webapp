@@ -7,7 +7,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ReceiptText, CalendarCheck, ChevronLeft, ChevronRight, Search, Printer, ShieldCheck, ShieldX, Shield } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { ReceiptText, CalendarCheck, ChevronLeft, ChevronRight, Search, Printer, ShieldCheck, ShieldX, Shield, Trash2, X } from "lucide-react";
 import { formatWIBShort } from "@/utils/formatWIB";
 
 const ITEMS_PER_PAGE = 6;
@@ -24,6 +34,10 @@ export default function HistoryPage() {
   // State untuk Pop-up Invoice
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+
+  // State untuk Delete Confirmation
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // State untuk data hari libur (garansi)
   const [holidaysMap, setHolidaysMap] = useState<Record<string, string>>({});
@@ -206,6 +220,26 @@ export default function HistoryPage() {
     setTimeout(() => setSelectedBooking(null), 300);
   };
 
+  const handleDeleteHistory = async () => {
+    if (!deleteTarget) return;
+    setDeleteLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .delete()
+        .eq("id", deleteTarget.id);
+      if (error) throw error;
+
+      toast.success(`Riwayat servis ${deleteTarget.customer_name} berhasil dihapus.`);
+      setDeleteTarget(null);
+      fetchHistory();
+    } catch (error: any) {
+      toast.error("Gagal menghapus riwayat: " + error.message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -286,9 +320,18 @@ export default function HistoryPage() {
                         <Badge className="bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border-0">
                           Selesai
                         </Badge>
-                        <div className="text-xs text-slate-400 flex items-center gap-1">
-                          <CalendarCheck className="w-3 h-3" />
-                          {formatWIBShort(res.completed_at)}
+                        <div className="flex items-center gap-2">
+                          <div className="text-xs text-slate-400 flex items-center gap-1">
+                            <CalendarCheck className="w-3 h-3" />
+                            {formatWIBShort(res.completed_at)}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDeleteTarget(res); }}
+                            className="p-1.5 rounded-md text-red-500/60 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                            title="Hapus riwayat"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
 
@@ -687,6 +730,46 @@ export default function HistoryPage() {
           </div>
         </div>
       )}
+
+      {/* ================= ALERT DIALOG: Konfirmasi Hapus ================= */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+          {/* Custom X close button */}
+          <button
+            onClick={() => setDeleteTarget(null)}
+            className="absolute right-4 top-4 p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-400 flex items-center gap-2 text-lg">
+              <Trash2 className="w-5 h-5" />
+              Hapus Riwayat Servis?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400 leading-relaxed">
+              Anda akan menghapus riwayat servis <strong className="text-slate-200">{deleteTarget?.customer_name}</strong> ({deleteTarget?.vehicle_info}).
+              <br />
+              <span className="text-red-400/80 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4 gap-2 sm:gap-2">
+            <AlertDialogCancel
+              onClick={() => setDeleteTarget(null)}
+              className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
+            >
+              Tidak
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteHistory}
+              disabled={deleteLoading}
+              className="bg-red-600 hover:bg-red-500 text-white font-bold"
+            >
+              {deleteLoading ? "Menghapus..." : "Ya, Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
