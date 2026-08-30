@@ -170,14 +170,87 @@ export default function PaymentPage() {
               <span className="font-semibold text-right text-emerald-400">{booking.service_type}</span>
               <span className="text-slate-400">Kendaraan:</span>
               <span className="font-semibold text-right text-slate-200">{booking.vehicle_info}</span>
-              {dpAmount > 0 && (
-                <>
-                  <span className="text-slate-400 mt-2">Total DP:</span>
-                  <span className="font-bold text-right text-lg text-emerald-500 mt-2">Rp {dpAmount.toLocaleString('id-ID')}</span>
-                </>
-              )}
             </div>
           </div>
+
+          {/* Estimation Details Table */}
+          {(() => {
+            const estItems = booking.estimation_data?.items || [];
+            if (estItems.length === 0) return null;
+
+            const jasaItems = estItems.filter((i: any) => i.type === 'Jasa');
+            const partItems = estItems.filter((i: any) => i.type === 'Part');
+            const subtotalJasa = jasaItems.reduce((sum: number, i: any) => sum + ((i.price || 0) * (i.qty || 1)), 0);
+            const subtotalPart = partItems.reduce((sum: number, i: any) => sum + ((i.price || 0) * (i.qty || 1)), 0);
+            const grandTotal = booking.estimation_data?.total || (subtotalJasa + subtotalPart);
+
+            return (
+              <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    Rincian Penawaran
+                  </h3>
+                </div>
+                <table className="w-full text-xs text-left text-slate-300">
+                  <thead className="text-[10px] text-slate-400 uppercase bg-slate-900 border-b border-slate-800">
+                    <tr>
+                      <th className="px-3 py-2 text-center">No</th>
+                      <th className="px-3 py-2">Nama Item</th>
+                      <th className="px-3 py-2">Jenis</th>
+                      <th className="px-3 py-2 text-center">Qty</th>
+                      <th className="px-3 py-2 text-right">Harga</th>
+                      <th className="px-3 py-2 text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {estItems.map((item: any, index: number) => (
+                      <tr key={item.id || index} className="border-b border-slate-800/50 hover:bg-slate-900/50">
+                        <td className="px-3 py-2 text-center">{index + 1}</td>
+                        <td className="px-3 py-2 font-medium text-slate-200">{item.name}</td>
+                        <td className="px-3 py-2">
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${item.type === 'Jasa' ? 'bg-blue-900/30 text-blue-400' : 'bg-amber-900/30 text-amber-400'}`}>
+                            {item.type}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-center">{item.qty || 1}</td>
+                        <td className="px-3 py-2 text-right">Rp {(item.price || 0).toLocaleString('id-ID')}</td>
+                        <td className="px-3 py-2 text-right font-medium text-slate-200">Rp {((item.price || 0) * (item.qty || 1)).toLocaleString('id-ID')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="px-4 py-3 border-t border-slate-800 space-y-1">
+                  {jasaItems.length > 0 && partItems.length > 0 && (
+                    <>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-500">Subtotal Jasa:</span>
+                        <span className="text-slate-300">Rp {subtotalJasa.toLocaleString('id-ID')}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-slate-500">Subtotal Barang:</span>
+                        <span className="text-slate-300">Rp {subtotalPart.toLocaleString('id-ID')}</span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between text-sm pt-1 border-t border-slate-800">
+                    <span className="text-emerald-400 font-semibold">Total Penawaran:</span>
+                    <span className="text-emerald-400 font-bold">Rp {grandTotal.toLocaleString('id-ID')}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* DP Amount */}
+          {dpAmount > 0 && (
+            <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm">
+              <div className="grid grid-cols-2 gap-y-2">
+                <span className="text-slate-400">Total DP (50%):</span>
+                <span className="font-bold text-right text-lg text-emerald-500">Rp {dpAmount.toLocaleString('id-ID')}</span>
+              </div>
+            </div>
+          )}
 
           {/* Bank Account Info */}
           <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-xl p-5 text-center space-y-2">

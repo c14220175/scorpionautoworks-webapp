@@ -40,13 +40,30 @@ export async function GET(request: Request) {
   }
 
   if (choice === "yes") {
-    // Approve estimation
+    // Fetch current estimation_data to copy to invoice_data
+    const { data: bookingData } = await supabase
+      .from("bookings")
+      .select("estimation_data")
+      .eq("id", id)
+      .single();
+
+    // Build update payload: approve estimation + copy items to invoice
+    const updatePayload: any = {
+      estimation_status: "approved",
+      updated_at: new Date().toISOString(),
+    };
+
+    // Otomatis copy item penawaran ke invoice_data
+    if (bookingData?.estimation_data?.items && bookingData.estimation_data.items.length > 0) {
+      updatePayload.invoice_data = {
+        items: bookingData.estimation_data.items,
+        total: bookingData.estimation_data.total || 0,
+      };
+    }
+
     const { error } = await supabase
       .from("bookings")
-      .update({
-        estimation_status: "approved",
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", id);
 
     if (error) {

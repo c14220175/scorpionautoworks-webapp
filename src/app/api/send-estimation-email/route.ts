@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         </table>
       `;
     } else {
-      // Legacy format: items table
+      // Structured items format with detailed table
       let itemsHtml = '';
       (estimationItems || []).forEach((item: any, index: number) => {
         itemsHtml += `
@@ -52,34 +52,66 @@ export async function POST(request: Request) {
             <td style="padding: 8px 4px; text-align: center; color: #334155 !important; -webkit-text-fill-color: #334155 !important;">${index + 1}</td>
             <td style="padding: 8px 4px; font-weight: bold; color: #0f172a !important; -webkit-text-fill-color: #0f172a !important;">${item.name}</td>
             <td style="padding: 8px 4px; color: #334155 !important; -webkit-text-fill-color: #334155 !important;">
-              <span style="font-size: 10px; padding: 2px 6px; background-color: #e2e8f0; border-radius: 4px; color: #475569 !important; -webkit-text-fill-color: #475569 !important;">${item.type}</span>
+              <span style="font-size: 10px; padding: 2px 6px; background-color: ${item.type === 'Jasa' ? '#dbeafe' : '#fef3c7'}; border-radius: 4px; color: ${item.type === 'Jasa' ? '#1e40af' : '#92400e'} !important; -webkit-text-fill-color: ${item.type === 'Jasa' ? '#1e40af' : '#92400e'} !important;">${item.type}</span>
+            </td>
+            <td style="padding: 8px 4px; text-align: center; color: #334155 !important; -webkit-text-fill-color: #334155 !important;">${item.qty || 1}</td>
+            <td style="padding: 8px 4px; text-align: right; color: #334155 !important; -webkit-text-fill-color: #334155 !important;">
+              Rp ${(item.price || 0).toLocaleString("id-ID")}
             </td>
             <td style="padding: 8px 4px; text-align: right; color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-weight: bold;">
-              Rp ${(item.price || 0).toLocaleString("id-ID")}
+              Rp ${((item.price || 0) * (item.qty || 1)).toLocaleString("id-ID")}
             </td>
           </tr>
         `;
       });
 
+      // Calculate subtotals by type
+      const jasaItems = (estimationItems || []).filter((i: any) => i.type === 'Jasa');
+      const partItems = (estimationItems || []).filter((i: any) => i.type === 'Part');
+      const subtotalJasa = jasaItems.reduce((sum: number, i: any) => sum + ((i.price || 0) * (i.qty || 1)), 0);
+      const subtotalPart = partItems.reduce((sum: number, i: any) => sum + ((i.price || 0) * (i.qty || 1)), 0);
+
+      let subtotalsHtml = '';
+      if (jasaItems.length > 0 && partItems.length > 0) {
+        subtotalsHtml = `
+          <div style="margin-top: 12px; font-size: 13px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td style="padding: 4px 0; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Subtotal Jasa:</td>
+                <td style="padding: 4px 0; text-align: right; color: #334155 !important; -webkit-text-fill-color: #334155 !important; font-weight: bold;">Rp ${subtotalJasa.toLocaleString("id-ID")}</td>
+              </tr>
+              <tr>
+                <td style="padding: 4px 0; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">Subtotal Barang:</td>
+                <td style="padding: 4px 0; text-align: right; color: #334155 !important; -webkit-text-fill-color: #334155 !important; font-weight: bold;">Rp ${subtotalPart.toLocaleString("id-ID")}</td>
+              </tr>
+            </table>
+          </div>
+        `;
+      }
+
       estimationContentHtml = `
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
           <tr>
             <td bgcolor="#ffffff" style="background-color: #ffffff; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px; border: 1px solid #e2e8f0;">
-              <h3 style="color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-size: 16px; margin: 0 0 12px 0;">💰 Penawaran Harga</h3>
+              <h3 style="color: #0f172a !important; -webkit-text-fill-color: #0f172a !important; font-size: 16px; margin: 0 0 12px 0;">💰 Rincian Penawaran Harga</h3>
               
               <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 12px; color: #334155 !important; -webkit-text-fill-color: #334155 !important; border-collapse: collapse;">
                 <thead style="background-color: #f8fafc; text-transform: uppercase; font-size: 10px; color: #64748b !important; -webkit-text-fill-color: #64748b !important;">
                   <tr>
                     <th style="padding: 8px 4px; text-align: center;">No.</th>
-                    <th style="padding: 8px 4px; text-align: left;">Nama</th>
+                    <th style="padding: 8px 4px; text-align: left;">Nama Item</th>
                     <th style="padding: 8px 4px; text-align: left;">Jenis</th>
-                    <th style="padding: 8px 4px; text-align: right;">Harga</th>
+                    <th style="padding: 8px 4px; text-align: center;">Qty</th>
+                    <th style="padding: 8px 4px; text-align: right;">Harga Satuan</th>
+                    <th style="padding: 8px 4px; text-align: right;">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${itemsHtml}
                 </tbody>
               </table>
+
+              ${subtotalsHtml}
 
               <div style="margin-top: 16px; text-align: right; background-color: #f0fdf4; padding: 12px; border-radius: 4px; border: 1px solid #d1fae5;">
                 <span style="color: #475569 !important; -webkit-text-fill-color: #475569 !important; font-weight: bold; font-size: 14px; margin-right: 12px;">Total Penawaran:</span>

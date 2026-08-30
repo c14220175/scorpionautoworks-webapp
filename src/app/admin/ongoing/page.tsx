@@ -87,9 +87,23 @@ export default function OngoingPage() {
 
   // Modal Form Estimasi
   const [showEstimasiFormModal, setShowEstimasiFormModal] = useState(false);
-  const [estimasiPart, setEstimasiPart] = useState<number | "">("");
-  const [estimasiJasa, setEstimasiJasa] = useState<number | "">("");
   const [estimasiNotes, setEstimasiNotes] = useState("");
+
+  // Dynamic estimation items
+  const [estimasiServices, setEstimasiServices] = useState<{id: number; name: string; qty: number; price: number}[]>([]);
+  const [estimasiParts, setEstimasiParts] = useState<{id: number; name: string; qty: number; price: number; inv_id?: string; item_type?: string}[]>([]);
+
+  // Inventory picker for estimation form
+  const [showEstInvPicker, setShowEstInvPicker] = useState(false);
+  const [estInventoryList, setEstInventoryList] = useState<any[]>([]);
+  const [estInvSearch, setEstInvSearch] = useState("");
+  const [estLoadingInv, setEstLoadingInv] = useState(false);
+
+  // Manual part input for estimation
+  const [showEstManualPartModal, setShowEstManualPartModal] = useState(false);
+  const [estManualPartName, setEstManualPartName] = useState("");
+  const [estManualPartPrice, setEstManualPartPrice] = useState<number | "">("")
+  const [estManualPartQty, setEstManualPartQty] = useState<number | "">(1);
 
   // ================= DP VERIFICATION STATES =================
   const [showDpVerificationModal, setShowDpVerificationModal] = useState(false);
@@ -189,8 +203,18 @@ export default function OngoingPage() {
 
     if (!isCheckup && phase === 0 && estStatus === "approved") {
       // Estimasi sudah disetujui di fase melepas: load invoice_data (fitur lengkap)
-      if (res.invoice_data && res.invoice_data.items) {
+      if (res.invoice_data && res.invoice_data.items && res.invoice_data.items.length > 0) {
         setInvoiceItems(res.invoice_data.items);
+      } else if (res.estimation_data && res.estimation_data.items && res.estimation_data.items.length > 0) {
+        // Fallback: jika invoice_data belum terisi tapi estimation_data sudah ada,
+        // otomatis copy dari estimation_data ke invoice_data
+        setInvoiceItems(res.estimation_data.items);
+        // Juga sync ke database agar invoice_data terisi
+        supabase.from("bookings").update({
+          invoice_data: { items: res.estimation_data.items, total: res.estimation_data.total || 0 }
+        }).eq("id", res.id).then(() => {
+          console.log("Invoice data synced from estimation data");
+        });
       } else {
         setInvoiceItems([]);
       }
@@ -349,32 +373,116 @@ export default function OngoingPage() {
     }
   };
 
+  // ===== Estimation Form Helpers =====
+  const estSubtotalJasa = estimasiServices.reduce((sum, s) => sum + (s.price * s.qty), 0);
+  const estSubtotalPart = estimasiParts.reduce((sum, p) => sum + (p.price * p.qty), 0);
+  const estGrandTotal = estSubtotalJasa + estSubtotalPart;
+
+  const addEstService = () => {
+    setEstimasiServices(prev => [...prev, { id: Date.now(), name: "", qty: 1, price: 0 }]);
+  };
+
+  const updateEstService = (id: number, field: string, value: any) => {
+    setEstimasiServices(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
+  const removeEstService = (id: number) => {
+    setEstimasiServices(prev => prev.filter(s => s.id !== id));
+  };
+
+  const addEstManualPart = () => {
+    if (!estManualPartName.trim()) { toast.error("Nama sparepart tidak boleh kosong"); return; }
+    if (!estManualPartPrice || Number(estManualPartPrice) <= 0) { toast.error("Harga harus lebih dari 0"); return; }
+    if (!estManualPartQty || Number(estManualPartQty) <= 0) { toast.error("Qty harus lebih dari 0"); return; }
+    setEstimasiParts(prev => [...prev, {
+      id: Date.now(),
+      name: estManualPartName.trim(),
+      qty: Number(estManualPartQty),
+      price: Number(estManualPartPrice),
+    }]);
+    setEstManualPartName("");
+    setEstManualPartPrice("");
+    setEstManualPartQty(1);
+    setShowEstManualPartModal(false);
+  };
+
+  const addEstInvPart = (invItem: any) => {
+    setEstimasiParts(prev => [...prev, {
+      id: Date.now(),
+      name: invItem.name,
+      qty: 1,
+      price: invItem.price,
+      inv_id: invItem.id,
+      item_type: invItem.item_type || null,
+    }]);
+    setShowEstInvPicker(false);
+    setEstInvSearch("");
+  };
+
+  const updateEstPart = (id: number, field: string, value: any) => {
+    setEstimasiParts(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+
+  const removeEstPart = (id: number) => {
+    setEstimasiParts(prev => prev.filter(p => p.id !== id));
+  };
+
+  const fetchEstInventory = async () => {
+    setShowEstInvPicker(true);
+    setEstLoadingInv(true);
+    try {
+      const { data, error } = await supabase.from("inventory").select("*").gt("stock_count", 0);
+      if (error) throw error;
+      setEstInventoryList(data || []);
+    } catch (err: any) {
+      toast.error("Gagal memuat inventory: " + err.message);
+      setEstInventoryList([]);
+    } finally {
+      setEstLoadingInv(false);
+    }
+  };
+
+  const filteredEstInventory = estInventoryList.filter(inv =>
+    (inv.name || "").toLowerCase().includes(estInvSearch.toLowerCase())
+  );
+
+  const resetEstimasiForm = () => {
+    setEstimasiServices([]);
+    setEstimasiParts([]);
+    setEstimasiNotes("");
+    setEstManualPartName("");
+    setEstManualPartPrice("");
+    setEstManualPartQty(1);
+  };
+
   const submitEstimasiForm = async () => {
     if (!selectedRes) return;
 
-    // Minimal: harus ada setidaknya harga barang atau jasa, atau pesan
-    const partPrice = Number(estimasiPart) || 0;
-    const jasaPrice = Number(estimasiJasa) || 0;
-    const totalEstimasi = partPrice + jasaPrice;
+    // Build items from dynamic fields
+    const serviceItems = estimasiServices
+      .filter(s => s.name.trim() && s.price > 0)
+      .map(s => ({ id: s.id, name: s.name.trim(), type: "Jasa" as const, qty: s.qty, price: s.price }));
 
-    if (totalEstimasi <= 0 && !estimasiNotes.trim()) {
-      toast.error("Mohon isi penawaran harga atau pesan penawaran.");
+    const partItems = estimasiParts
+      .filter(p => p.name.trim() && p.price > 0)
+      .map(p => ({
+        id: p.id, name: p.name.trim(), type: "Part" as const, qty: p.qty, price: p.price,
+        ...(p.inv_id ? { inv_id: p.inv_id } : {}),
+        ...(p.item_type ? { item_type: p.item_type } : {}),
+      }));
+
+    const allItems = [...serviceItems, ...partItems];
+    const totalEstimasi = allItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+    if (allItems.length === 0 && !estimasiNotes.trim()) {
+      toast.error("Mohon tambahkan minimal 1 item atau pesan penawaran.");
       return;
     }
 
     setEstimationEmailLoading(true);
     try {
-      // Build estimation items for structured display
-      const items: any[] = [];
-      if (partPrice > 0) {
-        items.push({ name: "Penawaran Harga Barang", type: "Part", price: partPrice, qty: 1 });
-      }
-      if (jasaPrice > 0) {
-        items.push({ name: "Penawaran Harga Jasa", type: "Jasa", price: jasaPrice, qty: 1 });
-      }
-
       // Save estimation to DB
-      const estimationData: any = { items, total: totalEstimasi };
+      const estimationData: any = { items: allItems, total: totalEstimasi };
       if (estimasiNotes.trim()) {
         estimationData.message = estimasiNotes.trim();
       }
@@ -389,7 +497,7 @@ export default function OngoingPage() {
 
       if (dbError) throw dbError;
 
-      // Send Email — use items format if prices exist, message-only if only notes
+      // Send Email
       const emailBody: any = {
         customerName: selectedRes.customer_name,
         customerEmail: selectedRes.customer_email,
@@ -400,15 +508,13 @@ export default function OngoingPage() {
         trackingCode: selectedRes.tracking_code,
       };
 
-      if (items.length > 0) {
-        // Use structured items format
-        emailBody.estimationItems = items;
+      if (allItems.length > 0) {
+        emailBody.estimationItems = allItems;
         emailBody.estimationTotal = totalEstimasi;
         if (estimasiNotes.trim()) {
           emailBody.estimationNotes = estimasiNotes.trim();
         }
       } else {
-        // Message-only format
         emailBody.estimationMessage = estimasiNotes.trim();
       }
 
@@ -423,6 +529,7 @@ export default function OngoingPage() {
       toast.success("Penawaran berhasil dikirim ke pelanggan!");
       setEstimationStatus("pending");
       setShowEstimasiFormModal(false);
+      resetEstimasiForm();
 
       // Update local state
       setSelectedRes({
@@ -919,14 +1026,34 @@ export default function OngoingPage() {
     if (!selectedRes) return;
     setActionLoading(true);
     try {
+      // Copy estimation_data items to invoice_data saat disetujui
+      const updatePayload: any = {
+        estimation_status: "approved",
+        updated_at: new Date().toISOString()
+      };
+
+      // Otomatis copy item penawaran ke invoice
+      if (selectedRes.estimation_data && selectedRes.estimation_data.items && selectedRes.estimation_data.items.length > 0) {
+        updatePayload.invoice_data = {
+          items: selectedRes.estimation_data.items,
+          total: selectedRes.estimation_data.total || 0
+        };
+      }
+
       const { error } = await supabase
         .from("bookings")
-        .update({ estimation_status: "approved", updated_at: new Date().toISOString() })
+        .update(updatePayload)
         .eq("id", selectedRes.id);
 
       if (error) throw error;
       setEstimationStatus("approved");
       setEstimationRejectReason(null);
+
+      // Update invoiceItems lokal langsung dari estimation_data
+      if (selectedRes.estimation_data && selectedRes.estimation_data.items) {
+        setInvoiceItems(selectedRes.estimation_data.items);
+      }
+
       toast.success("Estimasi disetujui secara manual!");
       fetchBookings();
     } catch (err: any) {
@@ -2344,64 +2471,275 @@ export default function OngoingPage() {
       <Dialog open={showEstimasiFormModal} onOpenChange={(open) => {
         if (!open) {
           setShowEstimasiFormModal(false);
-          setEstimasiPart("");
-          setEstimasiJasa("");
-          setEstimasiNotes("");
+          resetEstimasiForm();
         }
       }}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-md">
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-emerald-500">Form Penawaran</DialogTitle>
+            <DialogTitle className="text-emerald-500 text-lg">📝 Form Penawaran Harga</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            {/* Penawaran Harga Barang */}
+          <div className="space-y-5 py-2">
+
+            {/* ====== SECTION: Pekerjaan / Jasa ====== */}
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Barang (Rp)</label>
-              <input
-                type="number"
-                value={estimasiPart}
-                onChange={(e) => setEstimasiPart(e.target.value ? Number(e.target.value) : "")}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white"
-                placeholder="Contoh: 500000"
-                min={0}
-              />
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  Pekerjaan / Jasa
+                </h4>
+                <Button size="sm" onClick={addEstService} className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-7 px-3">
+                  + Tambah Pekerjaan
+                </Button>
+              </div>
+
+              {estimasiServices.length === 0 ? (
+                <div className="text-center py-3 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
+                  Belum ada pekerjaan ditambahkan
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {estimasiServices.map((svc, idx) => (
+                    <div key={svc.id} className="flex items-start gap-2 bg-slate-950 border border-slate-800 rounded-lg p-2.5">
+                      <span className="text-xs text-slate-500 font-bold mt-2 min-w-[20px]">{idx + 1}.</span>
+                      <div className="flex-1 space-y-1.5">
+                        <input
+                          type="text"
+                          value={svc.name}
+                          onChange={(e) => updateEstService(svc.id, "name", e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none"
+                          placeholder="Nama pekerjaan (cth: Bongkar/Pasang Shock)"
+                        />
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="text-[10px] text-slate-500 mb-0.5 block">Harga (Rp)</label>
+                            <input
+                              type="number"
+                              min={0}
+                              value={svc.price || ""}
+                              onChange={(e) => updateEstService(svc.id, "price", Number(e.target.value) || 0)}
+                              className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none"
+                              placeholder="150000"
+                            />
+                          </div>
+                          <div className="w-16">
+                            <label className="text-[10px] text-slate-500 mb-0.5 block">Qty</label>
+                            <input
+                              type="number"
+                              min={1}
+                              value={svc.qty}
+                              onChange={(e) => updateEstService(svc.id, "qty", Math.max(1, Number(e.target.value) || 1))}
+                              className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white text-center focus:border-blue-500 outline-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <button onClick={() => removeEstService(svc.id)} className="text-rose-400 hover:text-rose-300 p-1 mt-1 transition-colors">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {estSubtotalJasa > 0 && (
+                    <div className="flex justify-end">
+                      <div className="bg-blue-950/30 border border-blue-800/50 px-3 py-1 rounded text-xs">
+                        <span className="text-slate-400 mr-2">Subtotal Jasa:</span>
+                        <span className="text-blue-400 font-bold">Rp {estSubtotalJasa.toLocaleString("id-ID")}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            {/* Penawaran Harga Jasa */}
+
+            <hr className="border-slate-800" />
+
+            {/* ====== SECTION: Sparepart ====== */}
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Penawaran Harga Jasa (Rp)</label>
-              <input
-                type="number"
-                value={estimasiJasa}
-                onChange={(e) => setEstimasiJasa(e.target.value ? Number(e.target.value) : "")}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white"
-                placeholder="Contoh: 200000"
-                min={0}
-              />
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                  Sparepart / Barang
+                </h4>
+                <div className="flex gap-1.5">
+                  <Button size="sm" onClick={() => setShowEstManualPartModal(true)} className="bg-amber-600 hover:bg-amber-500 text-white text-xs h-7 px-2.5">
+                    + Manual
+                  </Button>
+                  <Button size="sm" onClick={fetchEstInventory} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs h-7 px-2.5">
+                    + Dari Inventory
+                  </Button>
+                </div>
+              </div>
+
+              {estimasiParts.length === 0 ? (
+                <div className="text-center py-3 text-slate-500 text-xs border border-dashed border-slate-700 rounded-lg bg-slate-950">
+                  Belum ada sparepart ditambahkan
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {estimasiParts.map((part, idx) => (
+                    <div key={part.id} className="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-lg p-2.5">
+                      <span className="text-xs text-slate-500 font-bold min-w-[20px]">{idx + 1}.</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-slate-200 truncate">{part.name}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-[10px] text-slate-500">Harga: <span className="text-amber-400">Rp {part.price.toLocaleString("id-ID")}</span></span>
+                          <span className="text-[10px] text-slate-500">×</span>
+                          <input
+                            type="number"
+                            min={1}
+                            value={part.qty}
+                            onChange={(e) => updateEstPart(part.id, "qty", Math.max(1, Number(e.target.value) || 1))}
+                            className="w-12 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-[11px] text-white text-center focus:border-amber-500 outline-none"
+                          />
+                          <span className="text-[10px] text-slate-400">= <span className="text-amber-400 font-bold">Rp {(part.price * part.qty).toLocaleString("id-ID")}</span></span>
+                        </div>
+                      </div>
+                      <button onClick={() => removeEstPart(part.id)} className="text-rose-400 hover:text-rose-300 p-1 transition-colors shrink-0">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {estSubtotalPart > 0 && (
+                    <div className="flex justify-end">
+                      <div className="bg-amber-950/30 border border-amber-800/50 px-3 py-1 rounded text-xs">
+                        <span className="text-slate-400 mr-2">Subtotal Barang:</span>
+                        <span className="text-amber-400 font-bold">Rp {estSubtotalPart.toLocaleString("id-ID")}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            {/* Total Preview */}
-            {(Number(estimasiPart) > 0 || Number(estimasiJasa) > 0) && (
-              <div className="bg-slate-950 border border-slate-700 rounded-lg p-3 flex justify-between items-center">
-                <span className="text-xs text-slate-400 font-semibold">Total Penawaran:</span>
-                <span className="text-emerald-400 font-bold text-sm">Rp {((Number(estimasiPart) || 0) + (Number(estimasiJasa) || 0)).toLocaleString("id-ID")}</span>
+
+            <hr className="border-slate-800" />
+
+            {/* ====== Grand Total ====== */}
+            {estGrandTotal > 0 && (
+              <div className="bg-emerald-950/30 border border-emerald-700/50 rounded-lg p-3 space-y-1.5">
+                {estSubtotalJasa > 0 && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Subtotal Jasa:</span>
+                    <span className="text-slate-300">Rp {estSubtotalJasa.toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                {estSubtotalPart > 0 && (
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-400">Subtotal Barang:</span>
+                    <span className="text-slate-300">Rp {estSubtotalPart.toLocaleString("id-ID")}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm pt-1 border-t border-emerald-700/30">
+                  <span className="text-emerald-400 font-semibold">Grand Total:</span>
+                  <span className="text-emerald-400 font-bold text-base">Rp {estGrandTotal.toLocaleString("id-ID")}</span>
+                </div>
               </div>
             )}
-            {/* Keterangan / Pesan */}
+
+            {/* ====== Keterangan / Pesan ====== */}
             <div>
               <label className="text-xs text-slate-400 mb-1 block">Keterangan / Pesan untuk Pelanggan <span className="text-slate-600">(opsional)</span></label>
               <textarea
                 value={estimasiNotes}
                 onChange={(e) => setEstimasiNotes(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white min-h-[80px] resize-none"
+                className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-sm text-white min-h-[70px] resize-none focus:border-emerald-500 outline-none"
                 placeholder="Contoh: Harga bisa berubah tergantung kondisi komponen..."
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowEstimasiFormModal(false); setEstimasiPart(""); setEstimasiJasa(""); setEstimasiNotes(""); }} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
-            <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading || ((Number(estimasiPart) || 0) + (Number(estimasiJasa) || 0) <= 0 && !estimasiNotes.trim())} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+            <Button variant="outline" onClick={() => { setShowEstimasiFormModal(false); resetEstimasiForm(); }} className="bg-slate-800 text-white hover:bg-slate-700">Batal</Button>
+            <Button onClick={submitEstimasiForm} disabled={estimationEmailLoading || (estimasiServices.length === 0 && estimasiParts.length === 0 && !estimasiNotes.trim())} className="bg-emerald-600 hover:bg-emerald-500 text-white">
               {estimationEmailLoading ? "Mengirim..." : "Kirim Penawaran"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== NESTED: Manual Part Input for Estimation ====== */}
+      <Dialog open={showEstManualPartModal} onOpenChange={setShowEstManualPartModal}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-sm" style={{ zIndex: 100 }}>
+          <DialogHeader>
+            <DialogTitle className="text-amber-500">Tambah Sparepart Manual</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="text-xs text-slate-400 mb-1 block">Nama Sparepart</label>
+              <input
+                type="text"
+                value={estManualPartName}
+                onChange={(e) => setEstManualPartName(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-white focus:border-amber-500 outline-none"
+                placeholder="Contoh: Shock Absorber Depan"
+              />
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="text-xs text-slate-400 mb-1 block">Harga (Rp)</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={estManualPartPrice}
+                  onChange={(e) => setEstManualPartPrice(e.target.value ? Number(e.target.value) : "")}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-white focus:border-amber-500 outline-none"
+                  placeholder="500000"
+                />
+              </div>
+              <div className="w-20">
+                <label className="text-xs text-slate-400 mb-1 block">Qty</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={estManualPartQty}
+                  onChange={(e) => setEstManualPartQty(e.target.value ? Number(e.target.value) : "")}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-white text-center focus:border-amber-500 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={addEstManualPart} className="w-full bg-amber-600 hover:bg-amber-500 text-white">Tambahkan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ====== NESTED: Inventory Picker for Estimation ====== */}
+      <Dialog open={showEstInvPicker} onOpenChange={setShowEstInvPicker}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 sm:max-w-lg" style={{ zIndex: 100 }}>
+          <DialogHeader>
+            <DialogTitle className="text-emerald-500">Pilih dari Inventory</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={estInvSearch}
+                onChange={(e) => setEstInvSearch(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:border-emerald-500 outline-none"
+                placeholder="Cari nama sparepart..."
+              />
+            </div>
+            <div className="max-h-64 overflow-y-auto space-y-2 pr-1">
+              {estLoadingInv ? (
+                <p className="text-slate-500 text-center py-4 animate-pulse text-sm">Memuat inventory...</p>
+              ) : filteredEstInventory.length === 0 ? (
+                <p className="text-slate-500 text-center py-4 text-sm">Tidak ada sparepart ditemukan.</p>
+              ) : (
+                filteredEstInventory.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => addEstInvPart(item)}
+                    className="flex justify-between items-center bg-slate-950 border border-slate-800 p-3 rounded-lg cursor-pointer hover:border-emerald-500 group transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm text-slate-200 font-medium group-hover:text-emerald-400">{item.name}</p>
+                      <p className="text-xs text-slate-500">Stok: <span className="text-slate-300 font-bold">{item.stock_count}</span></p>
+                    </div>
+                    <p className="text-sm text-amber-400 font-medium">Rp {(item.price || 0).toLocaleString("id-ID")}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
