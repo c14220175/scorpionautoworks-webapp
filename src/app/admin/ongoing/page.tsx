@@ -44,6 +44,11 @@ export default function OngoingPage() {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
 
+  // ================= GARANSI STATES =================
+  const [garansiJasa, setGaransiJasa] = useState(false);
+  const [garansiSparepart, setGaransiSparepart] = useState(false);
+  const [showGaransiConfirm, setShowGaransiConfirm] = useState(false);
+
   // Tambah Part Modal
   const [showAddPartModal, setShowAddPartModal] = useState(false);
 
@@ -825,13 +830,27 @@ export default function OngoingPage() {
       const currentTime = new Date().toISOString();
       const totalBayar = invoiceItems.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
 
+      // Kalkulasi tanggal garansi
+      const now = new Date();
+      const garansiJasaEnd = garansiJasa
+        ? new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+      const garansiSparepartEnd = garansiSparepart
+        ? new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()
+        : null;
+
       const { error } = await supabase
         .from("bookings")
         .update({
           status: "completed",
           completed_at: currentTime,
-          invoice_data: { items: invoiceItems, total: totalBayar },
-          tracking_code: null // Set null agar kode bisa dipakai kembali
+          invoice_data: {
+            items: invoiceItems,
+            total: totalBayar,
+            garansi_jasa_end: garansiJasaEnd,
+            garansi_sparepart_end: garansiSparepartEnd,
+          },
+          tracking_code: null, // Set null agar kode bisa dipakai kembali
         })
         .eq("id", selectedRes.id);
 
@@ -872,6 +891,8 @@ export default function OngoingPage() {
       }
 
       setShowInvoiceModal(false);
+      setGaransiJasa(false);
+      setGaransiSparepart(false);
       setSelectedRes(null);
       fetchBookings();
     } catch (error: any) {
@@ -1809,6 +1830,58 @@ export default function OngoingPage() {
             </div>
           </div>
 
+            {/* ================= GARANSI TOGGLES ================= */}
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3 print:!hidden">
+              <p className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Garansi</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Toggle Garansi Jasa */}
+                <label className="flex items-center gap-3 cursor-pointer select-none group">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={garansiJasa}
+                    onClick={() => setGaransiJasa(!garansiJasa)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                      garansiJasa ? 'bg-blue-600' : 'bg-slate-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                        garansiJasa ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                  <div>
+                    <span className="text-sm font-medium text-slate-800 group-hover:text-slate-900">Garansi Jasa</span>
+                    <span className="block text-xs text-slate-500">{garansiJasa ? '7 hari dari hari ini' : 'Tidak aktif'}</span>
+                  </div>
+                </label>
+
+                {/* Toggle Garansi Sparepart */}
+                <label className="flex items-center gap-3 cursor-pointer select-none group">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={garansiSparepart}
+                    onClick={() => setGaransiSparepart(!garansiSparepart)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
+                      garansiSparepart ? 'bg-emerald-600' : 'bg-slate-300'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+                        garansiSparepart ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                  <div>
+                    <span className="text-sm font-medium text-slate-800 group-hover:text-slate-900">Garansi Sparepart</span>
+                    <span className="block text-xs text-slate-500">{garansiSparepart ? '14 hari dari hari ini' : 'Tidak aktif'}</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
           <AlertDialogFooter className="sm:justify-between w-full flex-col sm:flex-row gap-4 mt-4 print:!hidden">
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => window.print()} className="bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 flex gap-2">
@@ -1821,10 +1894,98 @@ export default function OngoingPage() {
               <Button variant="outline" onClick={() => setShowInvoiceModal(false)} className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
                 Tutup
               </Button>
-              <Button onClick={executeFinishInvoice} disabled={actionLoading} className="bg-blue-600 hover:bg-blue-500 text-white">
+              <Button onClick={() => setShowGaransiConfirm(true)} disabled={actionLoading} className="bg-blue-600 hover:bg-blue-500 text-white">
                 {actionLoading ? "Memproses..." : "Selesai"}
               </Button>
             </div>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ================= KONFIRMASI GARANSI SEBELUM SUBMIT ================= */}
+      <AlertDialog open={showGaransiConfirm}>
+        <AlertDialogContent className="bg-white border-slate-200 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-slate-900 text-lg font-bold">
+              Konfirmasi Garansi
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 text-sm">
+              Pastikan data garansi sudah benar sebelum menyelesaikan servis.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="py-3 space-y-3">
+            {/* Garansi Jasa Status */}
+            <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+              garansiJasa
+                ? 'bg-blue-50 border-blue-200'
+                : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className={`w-3 h-3 rounded-full shrink-0 ${
+                garansiJasa ? 'bg-blue-500' : 'bg-slate-300'
+              }`} />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-800">Garansi Jasa</p>
+                <p className={`text-xs ${
+                  garansiJasa ? 'text-blue-600 font-medium' : 'text-slate-400'
+                }`}>
+                  {garansiJasa ? 'Aktif — 7 hari dari hari ini' : 'Tidak aktif'}
+                </p>
+              </div>
+              <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                garansiJasa
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-slate-200 text-slate-500'
+              }`}>
+                {garansiJasa ? 'ON' : 'OFF'}
+              </span>
+            </div>
+
+            {/* Garansi Sparepart Status */}
+            <div className={`flex items-center gap-3 p-3 rounded-lg border ${
+              garansiSparepart
+                ? 'bg-emerald-50 border-emerald-200'
+                : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className={`w-3 h-3 rounded-full shrink-0 ${
+                garansiSparepart ? 'bg-emerald-500' : 'bg-slate-300'
+              }`} />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-800">Garansi Sparepart</p>
+                <p className={`text-xs ${
+                  garansiSparepart ? 'text-emerald-600 font-medium' : 'text-slate-400'
+                }`}>
+                  {garansiSparepart ? 'Aktif — 14 hari dari hari ini' : 'Tidak aktif'}
+                </p>
+              </div>
+              <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                garansiSparepart
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-slate-200 text-slate-500'
+              }`}>
+                {garansiSparepart ? 'ON' : 'OFF'}
+              </span>
+            </div>
+          </div>
+
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowGaransiConfirm(false)}
+              className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              Kembali
+            </Button>
+            <Button
+              onClick={() => {
+                setShowGaransiConfirm(false);
+                executeFinishInvoice();
+              }}
+              disabled={actionLoading}
+              className="bg-blue-600 hover:bg-blue-500 text-white"
+            >
+              {actionLoading ? 'Memproses...' : 'Ya, Selesaikan'}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
