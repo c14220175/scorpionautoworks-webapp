@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 
 export default function SparepartPage() {
   const supabase = createClient();
@@ -22,6 +22,8 @@ export default function SparepartPage() {
   // State Pop-up
   const [isAddStockOpen, setIsAddStockOpen] = useState(false);
   const [isAddNewOpen, setIsAddNewOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   // Form State: Tambah Stok (Barang Lama)
   const [selectedItemId, setSelectedItemId] = useState("");
@@ -157,6 +159,24 @@ export default function SparepartPage() {
     }
   };
 
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
+    setActionLoading(true);
+    try {
+      const { error } = await supabase.from("inventory").delete().eq("id", itemToDelete.id);
+      if (error) throw error;
+
+      toast.success(`${itemToDelete.name} berhasil dihapus dari inventory!`);
+      setIsDeleteConfirmOpen(false);
+      setItemToDelete(null);
+      fetchInventory();
+    } catch (error: any) {
+      toast.error("Gagal menghapus barang: " + error.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(angka);
   };
@@ -283,6 +303,7 @@ export default function SparepartPage() {
                   <th className="px-4 sm:px-6 py-4">Tempat Beli</th>
                   <th className="px-4 sm:px-6 py-4">Harga</th>
                   <th className="px-4 sm:px-6 py-4">Stok</th>
+                  <th className="px-4 sm:px-6 py-4 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -305,6 +326,15 @@ export default function SparepartPage() {
                       <span className={`px-2 py-1 rounded font-bold ${item.stock_count <= 1 && item.category === "Fast Moving Parts" ? "bg-red-500/20 text-red-500" : "text-slate-200"}`}>
                         {item.stock_count}
                       </span>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 text-center">
+                      <button
+                        onClick={() => { setItemToDelete(item); setIsDeleteConfirmOpen(true); }}
+                        className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200"
+                        title="Hapus barang"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -405,6 +435,41 @@ export default function SparepartPage() {
           <DialogFooter className="mt-2">
             <Button variant="outline" onClick={() => setIsAddNewOpen(false)} className="bg-transparent border-slate-700 text-slate-300">Batal</Button>
             <Button onClick={handleAddNewItem} disabled={actionLoading} className="bg-yellow-600 hover:bg-yellow-500 text-slate-900 font-bold">Tambah</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* POP-UP: Konfirmasi Hapus */}
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent className="bg-slate-900 border-slate-700 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-red-400">Konfirmasi Hapus</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-slate-300">
+              Apakah Anda yakin ingin menghapus{" "}
+              <span className="font-bold text-slate-100">{itemToDelete?.name}</span>
+              {" "}dari inventory?
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              Tindakan ini tidak dapat dibatalkan.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { setIsDeleteConfirmOpen(false); setItemToDelete(null); }}
+              className="bg-transparent border-slate-700 text-slate-300"
+            >
+              Batal
+            </Button>
+            <Button
+              onClick={handleDeleteItem}
+              disabled={actionLoading}
+              className="bg-red-600 hover:bg-red-500 text-white font-bold"
+            >
+              {actionLoading ? "Menghapus..." : "Ya, Hapus"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
